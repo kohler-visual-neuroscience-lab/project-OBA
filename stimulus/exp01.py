@@ -41,18 +41,18 @@ except:
 # insert session meta data
 # -------------------------------------------------
 person = 'test'
-session = '01'
 N_BLOCKS = 1
 N_TRIALS = 50  # must be an even number
 screen_num = 0  # 0: primary    1: secondary
-full_screen = True
+full_screen = False
 netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
 # destination file
 # -------------------------------------------------
 date = sup.get_date()
-file_name = f"Exp01_{date}_{person}_S{session}.json"
-data_path = os.path.join('Data/RawData', file_name)
+time = sup.get_time()
+file_name = f"beh_{date}_{time}_{person}.json"
+data_path = os.path.join('data', file_name)
 # -------------------------------------------------
 # initialize netstation at the beginning of the first block
 # -------------------------------------------------
@@ -89,8 +89,8 @@ INSTRUCT_DUR = 30  # duration of the instruction period [frames]
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
-image1_directory = "images/face_orient0.png"
-image2_directory = "images/house_orient0.png"
+image1_directory = "images/face_tilt0.png"
+image2_directory = "images/house_tilt0.png"
 
 # size [deg]
 size_factor = 7
@@ -261,11 +261,15 @@ for itrial in range(N_TRIALS):
     path2_x = np.repeat(path2_x, JITTER_REPETITION)
     path2_y = np.repeat(path2_y, JITTER_REPETITION)
 
+    # randomly decide which tilt to choose
+    tilt_dir = random.choice(['CW', 'CCW'])
+    # calculate what titl angle (magnitude) to use
+    tilt_mag = 15
     # load the changed image
     if change_image == 1:
-        image3_directory = "images/face_orient9.png"
+        image3_directory = f"images/face_tilt{tilt_mag}_{tilt_dir}.png"
     else:
-        image3_directory = "images/house_orient9.png"
+        image3_directory = f"images/house_tilt{tilt_mag}_{tilt_dir}.png"
 
     rel_image3 = visual.ImageStim(win,
                                   image=image3_directory,
