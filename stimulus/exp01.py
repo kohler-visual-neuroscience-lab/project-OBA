@@ -6,7 +6,6 @@ at two different frequencies
 
 Mohammad Shams <m.shams.ahmar@gmail.com>
 initiated on:       2022-11-25
-last modified on:   2022-12-01
 """
 import math
 from psychopy import event, visual, core
@@ -16,8 +15,7 @@ import pandas as pd
 import numpy as np
 import random
 import os
-
-# from egi_pynetstation.NetStation import NetStation
+from egi_pynetstation.NetStation import NetStation
 
 # -------------------------------------------------
 # find out the last recorded block number
@@ -45,9 +43,9 @@ except:
 person = 'test'
 session = '01'
 N_BLOCKS = 1
-N_TRIALS = 4  # must be an even number
+N_TRIALS = 50  # must be an even number
 screen_num = 0  # 0: primary    1: secondary
-full_screen = False
+full_screen = True
 netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
 # destination file
@@ -108,8 +106,8 @@ JITTER_REPETITION = 12  # number of frames where the relevant images keep
 # their positions
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = .03
-REL_IMGPATH_STEP = .03
+REL_IMGPATH_SIGMA = .05
+REL_IMGPATH_STEP = .05
 
 REL_IMAGE_POS0_X = 0
 REL_IMAGE_POS0_Y = 4
@@ -189,6 +187,18 @@ for itrial in range(N_TRIALS):
     # randomly decide on which image to cue (show in the beginning)
     target_image = random.choice([1, 2])
 
+    # for now: make sure the left image is tagged with f1 and the other with f2
+    freq1 = 7.5
+    freq2 = 12
+    if order == 1:
+        IRR_IMAGE1_nFRAMES = REF_RATE / freq1
+        IRR_IMAGE2_nFRAMES = REF_RATE / freq2
+    elif order == 2:
+        IRR_IMAGE1_nFRAMES = REF_RATE / freq2
+        IRR_IMAGE2_nFRAMES = REF_RATE / freq1
+    else:
+        print("no order!")
+
     # define the condition number
     if (order == 1) & (target_image == 1):
         cnd = 1
@@ -253,9 +263,9 @@ for itrial in range(N_TRIALS):
 
     # load the changed image
     if change_image == 1:
-        image3_directory = "images/face_orient6.png"
+        image3_directory = "images/face_orient9.png"
     else:
-        image3_directory = "images/house_orient6.png"
+        image3_directory = "images/house_orient9.png"
 
     rel_image3 = visual.ImageStim(win,
                                   image=image3_directory,
@@ -371,10 +381,6 @@ for itrial in range(N_TRIALS):
         df = pd.read_json(data_path)
         dfnew = pd.concat([df, dfnew], ignore_index=True)
         dfnew.to_json(data_path)
-
-    # clear the window buffer
-    # win.depthMask = True
-    # win.clearBuffer(color=False, depth=True, stencil=False)
 
 if iblock == N_BLOCKS:
     # remove the temorary file
