@@ -297,7 +297,7 @@ for itrial in range(N_TRIALS):
     event.clearEvents()
     if netstation:
         # send a trigger to indicate beginning of each trial
-        ns.send_event(event_type="TRON",
+        ns.send_event(event_type=f"CND{cnd}",
                       label=f"CND{cnd}")
     for iframe in range(TRIAL_DUR):
         # flip frames as long as no response has been given
