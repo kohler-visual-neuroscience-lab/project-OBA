@@ -12,3 +12,5 @@
 *socmodel*
 
 .DS_Store
+
+*.json
