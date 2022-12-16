@@ -42,9 +42,9 @@ except:
 # -------------------------------------------------
 person = 'test'
 N_BLOCKS = 1
-N_TRIALS = 50  # must be an even number
+N_TRIALS = 32  # must be a factor of FOUR
 screen_num = 0  # 0: primary    1: secondary
-full_screen = True
+full_screen = False
 netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
 # destination file
@@ -85,7 +85,7 @@ FIX_OFFSET = 5  # deg
 FIX_X = 0
 FIX_Y = 0
 
-INSTRUCT_DUR = 30  # duration of the instruction period [frames]
+INSTRUCT_DUR = 60  # duration of the instruction period [frames]
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
@@ -110,7 +110,7 @@ REL_IMGPATH_SIGMA = 1
 REL_IMGPATH_STEP = .1
 
 REL_IMAGE_POS0_X = 0
-REL_IMAGE_POS0_Y = 4
+REL_IMAGE_POS0_Y = 4.5
 
 IRR_IMAGE_X = 4
 IRR_IMAGE1_POS_Y = -2.5
@@ -163,6 +163,14 @@ sup.block_msg(win, iblock)
 mouse = event.Mouse(win=win, visible=False)
 # calculate the first trial number of the current block
 acc_trial = (iblock - 1) * N_TRIALS
+
+# create an equal number of trials per condition in current block
+n_trials_per_cnd = int(N_TRIALS / 4)
+cnd_array = np.hstack([np.ones(n_trials_per_cnd, dtype=int),
+                       np.ones(n_trials_per_cnd, dtype=int) * 2,
+                       np.ones(n_trials_per_cnd, dtype=int) * 3,
+                       np.ones(n_trials_per_cnd, dtype=int) * 4])
+np.random.shuffle(cnd_array)
 # #################################################
 #                   TRIAL itrial
 # #################################################
@@ -172,11 +180,16 @@ for itrial in range(N_TRIALS):
     # -------------------------------------------------
     # set up the stimulus behavior in current trial
     # -------------------------------------------------
+    # extract current trial's condition
+    cnd = cnd_array[itrial - 1]
     # find out in which order the images appear
-    if irr_image2_pos_x[itrial] == IRR_IMAGE_X:
+    if cnd == 1 or cnd == 3:
         order = 1  # Face - House
-    else:
+    elif cnd == 2 or cnd == 4:
         order = 2  # House - Face
+    else:
+        order = None
+        print('Invalid condition number!')
 
     # randomly decide on gap duration
     gap_dur = random.choice(gap_dur_list)
@@ -185,7 +198,15 @@ for itrial in range(N_TRIALS):
     change_frame = random.choice(change_frame_list)
 
     # randomly decide on which image to cue (show in the beginning)
-    target_image = random.choice([1, 2])
+    cue_image = random.choice([1, 2])
+    # decide on the cue/target image
+    if cnd == 1 or cnd == 2:
+        cue_image = 1
+    elif cnd == 3 or cnd == 4:
+        cue_image = 2
+    else:
+        cue_image = None
+        print("Invalid condition number!")
 
     # for now: make sure the left image is tagged with f1 and the other with f2
     freq1 = 7.5
@@ -197,29 +218,19 @@ for itrial in range(N_TRIALS):
         IRR_IMAGE1_nFRAMES = REF_RATE / freq2
         IRR_IMAGE2_nFRAMES = REF_RATE / freq1
     else:
-        print("no order!")
-
-    # define the condition number
-    if (order == 1) & (target_image == 1):
-        cnd = 1
-    elif (order == 2) & (target_image == 1):
-        cnd = 2
-    elif (order == 1) & (target_image == 2):
-        cnd = 3
-    elif (order == 2) & (target_image == 2):
-        cnd = 4
-    else:
-        cnd = None
+        IRR_IMAGE1_nFRAMES = None
+        IRR_IMAGE2_nFRAMES = None
+        print("Invalid image order!")
 
     # on a proportion of trials change the non-target image
     if np.random.choice([True, False], p=[p_valid_cue, 1 - p_valid_cue]):
-        change_image = target_image
+        change_image = cue_image
     else:
-        if target_image == 1:
+        if cue_image == 1:
             change_image = 2
         else:
             change_image = 1
-    print(f"CueImg: {target_image}   TarImg: {change_image}   Cnd: {cnd}   ",
+    print(f"CueImg: {cue_image}   ChgImg: {change_image}   Cnd: {cnd}   ",
           end="")
     # ------------------------------------------------- setup end
 
@@ -264,7 +275,7 @@ for itrial in range(N_TRIALS):
     # randomly decide which tilt to choose
     tilt_dir = random.choice(['CW', 'CCW'])
     # calculate what titl angle (magnitude) to use
-    tilt_mag = 13
+    tilt_mag = 20
     # load the changed image
     if change_image == 1:
         image3_directory = f"images/face_tilt{tilt_mag}_{tilt_dir}.png"
@@ -291,18 +302,29 @@ for itrial in range(N_TRIALS):
     # ------------------
     # run gap period
     for igap in range(random.choice(gap_dur_list)):
+        sup.draw_fixdot(win=win, size=FIX_SIZE,
+                        pos=(FIX_X, FIX_Y),
+                        cue=cue_image)
         win.flip()
     # run the cue stimulus
+    # randomly move the cue vertically
+    cue_yoffset = random.choice(range(-5, 5))
     for iframe_instruction in range(INSTRUCT_DUR):
-        if target_image == 1:
-            rel_image1.pos = (0, 0)
+        if cue_image == 1:
+            rel_image1.pos = (0, cue_yoffset)
             rel_image1.draw()
         else:
-            rel_image2.pos = (0, 0)
+            rel_image2.pos = (0, cue_yoffset)
             rel_image2.draw()
+        sup.draw_fixdot(win=win, size=FIX_SIZE,
+                        pos=(FIX_X, FIX_Y),
+                        cue=cue_image)
         win.flip()
     # run gap period
     for igap in range(random.choice(gap_dur_list)):
+        sup.draw_fixdot(win=win, size=FIX_SIZE,
+                        pos=(FIX_X, FIX_Y),
+                        cue=cue_image)
         win.flip()
     # ------------------
     # main period
@@ -314,58 +336,58 @@ for itrial in range(N_TRIALS):
         ns.send_event(event_type=f"CND{cnd}",
                       label=f"CND{cnd}")
     for iframe in range(TRIAL_DUR):
-        # flip frames as long as no response has been given
-        if not response:
-            sup.escape_session()  # force exit with 'escape' button
-            # set the position of each task-relevant image
-            rel_image1.pos = (path1_x[iframe], path1_y[iframe])
-            rel_image2.pos = (path2_x[iframe], path2_y[iframe])
+        sup.escape_session()  # force exit with 'escape' button
+        # set the position of each task-relevant image
+        rel_image1.pos = (path1_x[iframe], path1_y[iframe])
+        rel_image2.pos = (path2_x[iframe], path2_y[iframe])
 
-            # if conditions satisfied change the image
-            if (iframe > change_frame) & (
-                    iframe < change_frame + CHANGE_DUR):
-                if change_image == 1:
-                    rel_image3.pos = (path1_x[iframe], path1_y[iframe])
-                    rel_image2.draw()
-                    rel_image3.draw()
-                elif change_image == 2:
-                    rel_image3.pos = (path2_x[iframe], path2_y[iframe])
-                    rel_image3.draw()
-                    rel_image1.draw()
-            # if not, show the unchanged versions
-            else:
+        # if conditions satisfied change the image
+        if (iframe > change_frame) & (
+                iframe < change_frame + CHANGE_DUR):
+            if change_image == 1:
+                rel_image3.pos = (path1_x[iframe], path1_y[iframe])
                 rel_image2.draw()
+                rel_image3.draw()
+            elif change_image == 2:
+                rel_image3.pos = (path2_x[iframe], path2_y[iframe])
+                rel_image3.draw()
                 rel_image1.draw()
+        # if not, show the unchanged versions
+        else:
+            rel_image2.draw()
+            rel_image1.draw()
 
-            # get the time of change
-            if iframe == change_frame:
-                change_time = timer.getTime()
+        # get the time of change
+        if iframe == change_frame:
+            change_time = timer.getTime()
 
-            # draw irrelevant images conditionally
-            if sup.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                irr_image1.draw()
-            if sup.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                irr_image2.draw()
-            sup.draw_fixdot(win=win, size=FIX_SIZE, pos=(FIX_X, FIX_Y))
-            win.flip()
+        # draw irrelevant images conditionally
+        if sup.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+            irr_image1.draw()
+        if sup.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+            irr_image2.draw()
+        sup.draw_fixdot(win=win, size=FIX_SIZE,
+                        pos=(FIX_X, FIX_Y),
+                        cue=cue_image)
+        win.flip()
 
-            # get response
-            response_key = event.getKeys(keyList=['space'])
-            if 'space' in response_key:
-                response = 1
-                response_time = timer.getTime()
-                # measure reaction time in ms and end trial
-                RT = round((response_time - change_time) * 1000, 0)
-                if math.isnan(RT):
-                    print(f"RT: Early")
-                else:
-                    print(f"RT: {RT} ms")
+        # get response
+        response_key = event.getKeys(keyList=['space'])
+        if 'space' in response_key and not response:
+            response = 1
+            response_time = timer.getTime()
+            # measure reaction time in ms and end trial
+            RT = round((response_time - change_time) * 1000, 0)
+            if math.isnan(RT):
+                print(f"RT: Early   ", end="")
+            else:
+                print(f"RT: {int(RT):03d}ms   ", end="")
     # ------------------ main period ends
     if response == 0:
-        print(f"RT: None")
-    # run the inter-trial period
-    for igap in range(ITI_DUR):
-        win.flip()
+        print(f"RT: None    ", end="")
+    # evaluate the response
+    resp_eval = sup.evaluate_response(cue_image, change_image, RT, response)
+    print(f"RespEval: {int(resp_eval)}   ", end="")
     # -------------------------------------------------
     # create data frame and save
     # -------------------------------------------------
@@ -374,9 +396,10 @@ for itrial in range(N_TRIALS):
                   'condition_num': [cnd],
                   'image_order': [order],
                   'change_image': [change_image],
-                  'target_image': [target_image],
+                  'cue_image': [cue_image],
                   'response_given': [response],
-                  'response_time': [RT]}
+                  'response_time': [RT],
+                  'response_eval': [resp_eval]}
     # convert to data frame
     dfnew = pd.DataFrame(trial_dict)
     # if first trial create a file, else load and add the new data frame
@@ -386,6 +409,19 @@ for itrial in range(N_TRIALS):
         df = pd.read_json(data_path)
         dfnew = pd.concat([df, dfnew], ignore_index=True)
         dfnew.to_json(data_path)
+
+    # calculate the cumulative performance (all recorded trials)
+    eval_series = dfnew.response_eval
+    eval_array = eval_series.values
+    cum_perf = sum(eval_array) / len(eval_array) * 100
+    print(f"CumPerf: {cum_perf:6.2f}%   ", end="")
+    # calculate the running performance (last 10 trials)
+    cum_perf = sum(eval_array[-10:]) / len(eval_array[-10:]) * 100
+    print(f"RunPerf: {cum_perf:6.2f}%")
+
+    # run the inter-trial period
+    for igap in range(ITI_DUR):
+        win.flip()
 
 if iblock == N_BLOCKS:
     # remove the temorary file

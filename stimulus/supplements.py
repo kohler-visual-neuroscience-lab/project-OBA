@@ -52,9 +52,16 @@ def config_win(mon, fullscr, screen):
     return win
 
 
-def draw_fixdot(win, size, pos):
+def draw_fixdot(win, size, pos, cue):
+    if cue == 1:
+        fix_marker = '+'
+    elif cue == 2:
+        fix_marker = 'x'
+    else:
+        fix_marker = None
+        print("Invalid cue!")
     fixdot = visual.TextStim(win=win,
-                             text='+',
+                             text=fix_marker,
                              height=size,
                              pos=pos,
                              color='black')
@@ -122,3 +129,14 @@ def decide_on_show(iframe, nframes):
         return True
     else:
         return False
+
+
+def evaluate_response(cue_image, change_image, rt, response):
+    if (cue_image == change_image) and (rt >= 0):
+        resp = True
+    elif (cue_image != change_image) and (response == 0):
+        resp = True
+    else:
+        resp = False
+    return resp
+
