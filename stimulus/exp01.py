@@ -44,7 +44,7 @@ person = 'test'
 N_BLOCKS = 1
 N_TRIALS = 50  # must be an even number
 screen_num = 0  # 0: primary    1: secondary
-full_screen = False
+full_screen = True
 netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
 # destination file
@@ -106,8 +106,8 @@ JITTER_REPETITION = 12  # number of frames where the relevant images keep
 # their positions
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = .05
-REL_IMGPATH_STEP = .05
+REL_IMGPATH_SIGMA = 1
+REL_IMGPATH_STEP = .1
 
 REL_IMAGE_POS0_X = 0
 REL_IMAGE_POS0_Y = 4
@@ -264,7 +264,7 @@ for itrial in range(N_TRIALS):
     # randomly decide which tilt to choose
     tilt_dir = random.choice(['CW', 'CCW'])
     # calculate what titl angle (magnitude) to use
-    tilt_mag = 15
+    tilt_mag = 13
     # load the changed image
     if change_image == 1:
         image3_directory = f"images/face_tilt{tilt_mag}_{tilt_dir}.png"
@@ -324,11 +324,12 @@ for itrial in range(N_TRIALS):
             # if conditions satisfied change the image
             if (iframe > change_frame) & (
                     iframe < change_frame + CHANGE_DUR):
-                rel_image3.pos = (path2_x[iframe], path2_y[iframe])
                 if change_image == 1:
+                    rel_image3.pos = (path1_x[iframe], path1_y[iframe])
                     rel_image2.draw()
                     rel_image3.draw()
                 elif change_image == 2:
+                    rel_image3.pos = (path2_x[iframe], path2_y[iframe])
                     rel_image3.draw()
                     rel_image1.draw()
             # if not, show the unchanged versions
