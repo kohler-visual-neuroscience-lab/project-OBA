@@ -1,11 +1,21 @@
 """
-Two superimposed images flicker near the fixation cross and subjects task is
-to report a brief change in the contrast of the target image. Simultaneously
-the same two images are shown on each side of the fixation cross and flicker
-at two different frequencies
+***** Object-based attention (OBA) project
+***** Experiment 01
 
-Mohammad Shams <m.shams.ahmar@gmail.com>
-initiated on:       2022-11-25
+    Mohammad Shams <m.shams.ahmar@gmail.com>
+    Initiated on:       2022-11-25
+
+Two superimposed images flicker near the fixation cross and subject's task is
+to report a brief tilt in the one of the images. Simultaneously, a copy of
+the two images appear on each side of the fixation cross and flicker
+at two different frequencies.
+
+There are four conditions:
+    cnd 1: face left, house right, attend face
+    cnd 2: house left, face right, attend face
+    cnd 3: face left, house right, attend house
+    cnd 4: face left, house right, attend house
+
 """
 import math
 from psychopy import event, visual, core
@@ -17,6 +27,15 @@ import random
 import os
 from egi_pynetstation.NetStation import NetStation
 
+# -------------------------------------------------
+# insert session meta data
+# -------------------------------------------------
+person = 'test'
+N_BLOCKS = 1
+N_TRIALS = 32  # must be a factor of FOUR
+screen_num = 0  # 0: primary    1: secondary
+full_screen = False
+netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
 # find out the last recorded block number
 # -------------------------------------------------
@@ -37,15 +56,6 @@ except:
     df = pd.DataFrame(trial_dict)
     # write to file
     df.to_json(temp_data)
-# -------------------------------------------------
-# insert session meta data
-# -------------------------------------------------
-person = 'test'
-N_BLOCKS = 1
-N_TRIALS = 32  # must be a factor of FOUR
-screen_num = 0  # 0: primary    1: secondary
-full_screen = False
-netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
 # destination file
 # -------------------------------------------------
