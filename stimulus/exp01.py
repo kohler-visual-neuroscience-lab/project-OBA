@@ -295,15 +295,15 @@ for itrial in range(N_TRIALS):
     # randomly decide which tilt to choose
     tilt_dir = random.choice(['CW', 'CCW'])
     if acc_trial == 1:
-        tilt_mag = 20
+        tilt_mag = 25
         tilt_change = 0
     else:
         # calculate what titl angle (magnitude) to use
         tilt_change = sup.cal_next_tilt(goal_perf=80, run_perf=prev_run_perf)
         tilt_mag = int(prev_tilt_mag + tilt_change)
         # take care of saturated scenarios
-        if tilt_mag > 29:
-            tilt_mag = 29
+        if tilt_mag > 49:
+            tilt_mag = 49
         elif tilt_mag < 1:
             tilt_mag = 1
     print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ",
