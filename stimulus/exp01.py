@@ -420,7 +420,12 @@ for itrial in range(N_TRIALS):
     print(f"RunPerf: {cum_perf:6.2f}%")
 
     # run the inter-trial period
+    if resp_eval:
+        color = 'limegreen'
+    else:
+        color = 'tomato'
     for igap in range(ITI_DUR):
+        sup.draw_probe(win, color)
         win.flip()
 
 if iblock == N_BLOCKS:

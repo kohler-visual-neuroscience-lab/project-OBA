@@ -68,6 +68,14 @@ def draw_fixdot(win, size, pos, cue):
     fixdot.draw()
 
 
+def draw_probe(win, color, radius=.5, pos=(0, 0)):
+    inner_probe = visual.Circle(win,
+                                radius=radius,
+                                fillColor=color,
+                                pos=pos)
+    inner_probe.draw()
+
+
 def escape_session():
     exit_key = event.getKeys(keyList=['escape'])
     if 'escape' in exit_key:
