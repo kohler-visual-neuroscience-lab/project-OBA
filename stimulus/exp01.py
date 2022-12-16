@@ -77,6 +77,8 @@ if netstation:
     ns.connect(ntp_ip=IP_amp)
     # Begin recording
     ns.begin_rec()
+else:
+    ns = None
 # -------------------------------------------------
 # initialize the display
 # -------------------------------------------------
@@ -99,8 +101,8 @@ INSTRUCT_DUR = 60  # duration of the instruction period [frames]
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
-image1_directory = "images/face_tilt0.png"
-image2_directory = "images/house_tilt0.png"
+image1_directory = os.path.join("images", "face_tilt0.png")
+image2_directory = os.path.join("images", "house_tilt0.png")
 
 # size [deg]
 size_factor = 7
@@ -250,8 +252,7 @@ for itrial in range(N_TRIALS):
             change_image = 2
         else:
             change_image = 1
-    print(f"CueImg: {cue_image}   ChgImg: {change_image}   Cnd: {cnd}   ",
-          end="")
+    print(f"Cnd: {cnd}   ", end="")
     # ------------------------------------------------- setup end
 
     # load irrelevant images
@@ -311,9 +312,11 @@ for itrial in range(N_TRIALS):
 
     # load the changed image
     if change_image == 1:
-        image3_directory = f"images/face_tilt{tilt_mag}_{tilt_dir}.png"
+        image3_directory = os.path.join("images", f"face_tilt{tilt_mag}",
+                                        f"_{tilt_dir}.png")
     else:
-        image3_directory = f"images/house_tilt{tilt_mag}_{tilt_dir}.png"
+        image3_directory = os.path.join("images", f"house_tilt{tilt_mag}",
+                                        f"_{tilt_dir}.png")
 
     rel_image3 = visual.ImageStim(win,
                                   image=image3_directory,
