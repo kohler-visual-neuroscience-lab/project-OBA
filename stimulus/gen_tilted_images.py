@@ -26,11 +26,19 @@ for cat in cats:
     factors = np.arange(min_tilt, max_tilt, step_tilt)
     for count, factor in enumerate(factors):
         im_output = im.rotate(factor)
-        im_output.save(os.path.join(save_path, f'{cat}_tilt{count}_CCW.png'))
+        if count == 0:
+            im_output.save(os.path.join(save_path, f'{cat}_tilt{count}.png'))
+        else:
+            im_output.save(os.path.join(save_path, f'{cat}_tilt'
+                                                   f'{count}_CCW.png'))
     min_tilt = 0
     max_tilt = -5
     step_tilt = -0.1
     factors = np.arange(min_tilt, max_tilt, step_tilt)
     for count, factor in enumerate(factors):
         im_output = im.rotate(factor)
-        im_output.save(os.path.join(save_path, f'{cat}_tilt{count}_CW.png'))
+        if count == 0:
+            im_output.save(os.path.join(save_path, f'{cat}_tilt{count}.png'))
+        else:
+            im_output.save(os.path.join(save_path, f'{cat}_tilt'
+                                                   f'{count}_CW.png'))
