@@ -10,7 +10,7 @@ import numpy as np
 import os
 
 # face or house
-cat = 'house'
+cat = 'face'
 
 # set the source image path
 source_path = os.path.join("images", "source", f"{cat}.png")
