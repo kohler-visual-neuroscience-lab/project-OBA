@@ -177,6 +177,16 @@ np.random.shuffle(cnd_array)
 for itrial in range(N_TRIALS):
     acc_trial += 1
     print(f"[Trial {acc_trial:02d}]   ", end="")
+    if acc_trial > 1:
+        # read current running performance
+        df_temp = pd.read_json(data_path)
+        prev_run_perf = df_temp.loc[acc_trial - 2, 'run_perf']
+        prev_tilt_mag = df_temp.loc[acc_trial - 2, 'tilt_mag']
+        # print(prev_run_perf)
+        # print(prev_tilt_mag)
+    else:
+        prev_run_perf = None
+        prev_tilt_mag = None
     # -------------------------------------------------
     # set up the stimulus behavior in current trial
     # -------------------------------------------------
@@ -274,8 +284,21 @@ for itrial in range(N_TRIALS):
 
     # randomly decide which tilt to choose
     tilt_dir = random.choice(['CW', 'CCW'])
-    # calculate what titl angle (magnitude) to use
-    tilt_mag = 20
+    if acc_trial == 1:
+        tilt_mag = 20
+        tilt_change = 0
+    else:
+        # calculate what titl angle (magnitude) to use
+        tilt_change = sup.cal_next_tilt(goal_perf=80, run_perf=prev_run_perf)
+        tilt_mag = int(prev_tilt_mag + tilt_change)
+        # take care of saturated scenarios
+        if tilt_mag > 29:
+            tilt_mag = 29
+        elif tilt_mag < 1:
+            tilt_mag = 1
+    print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ",
+          end="")
+
     # load the changed image
     if change_image == 1:
         image3_directory = f"images/face_tilt{tilt_mag}_{tilt_dir}.png"
@@ -302,9 +325,6 @@ for itrial in range(N_TRIALS):
     # ------------------
     # run gap period
     for igap in range(random.choice(gap_dur_list)):
-        sup.draw_fixdot(win=win, size=FIX_SIZE,
-                        pos=(FIX_X, FIX_Y),
-                        cue=cue_image)
         win.flip()
     # run the cue stimulus
     # randomly move the cue vertically
@@ -316,9 +336,6 @@ for itrial in range(N_TRIALS):
         else:
             rel_image2.pos = (0, cue_yoffset)
             rel_image2.draw()
-        sup.draw_fixdot(win=win, size=FIX_SIZE,
-                        pos=(FIX_X, FIX_Y),
-                        cue=cue_image)
         win.flip()
     # run gap period
     for igap in range(random.choice(gap_dur_list)):
@@ -399,25 +416,29 @@ for itrial in range(N_TRIALS):
                   'cue_image': [cue_image],
                   'response_given': [response],
                   'response_time': [RT],
-                  'response_eval': [resp_eval]}
+                  'response_eval': [resp_eval],
+                  'cum_perf': [np.nan],
+                  'run_perf': [np.nan],
+                  'tilt_mag': [tilt_mag]}
     # convert to data frame
     dfnew = pd.DataFrame(trial_dict)
-    # if first trial create a file, else load and add the new data frame
-    if acc_trial == 1:
-        dfnew.to_json(data_path)
-    else:
+    # if not first trial, load the existing data frame and concatenate
+    if acc_trial > 1:
         df = pd.read_json(data_path)
         dfnew = pd.concat([df, dfnew], ignore_index=True)
-        dfnew.to_json(data_path)
 
     # calculate the cumulative performance (all recorded trials)
     eval_series = dfnew.response_eval
     eval_array = eval_series.values
-    cum_perf = sum(eval_array) / len(eval_array) * 100
+    cum_perf = round(sum(eval_array) / len(eval_array) * 100, 2)
     print(f"CumPerf: {cum_perf:6.2f}%   ", end="")
     # calculate the running performance (last 10 trials)
-    cum_perf = sum(eval_array[-10:]) / len(eval_array[-10:]) * 100
-    print(f"RunPerf: {cum_perf:6.2f}%")
+    run_perf = round(sum(eval_array[-10:]) / len(eval_array[-10:]) * 100, 2)
+    print(f"RunPerf: {run_perf:6.2f}%")
+    # fill the remaining values in the data frame
+    dfnew.loc[acc_trial - 1, ['cum_perf', 'run_perf']] = [cum_perf, run_perf]
+    # save the data frame
+    dfnew.to_json(data_path)
 
     # run the inter-trial period
     if resp_eval:
