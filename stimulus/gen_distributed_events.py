@@ -2,7 +2,7 @@
 Randomly selects events from a given list (start,stop), keeping a minimum
 distance between each selected item.
 
-Mohammad Shams <m.shams.ahmar@gmail.com?
+Mohammad Shams <m.shams.ahmar@gmail.com>
 initiated on: December 20, 2022
 """
 
