@@ -79,8 +79,8 @@ def draw_probe(win, color, radius=.5, pos=(0, 0)):
 
 
 def escape_session():
-    exit_key = event.getKeys(keyList=['escape', 'space'])
-    if 'escape' in exit_key:
+    exit_key = event.getKeys(keyList=['backspace'])
+    if 'backspace' in exit_key:
         core.quit()
 
 
@@ -96,7 +96,7 @@ def get_time():
     return now.strftime("%H%M%S")
 
 
-def block_msg(win, iblock):
+def block_msg(win, iblock, command_keys):
     msg = f"< Block {iblock} >" \
           f"\n\nReady to begin?"
     message = visual.TextStim(win,
@@ -107,7 +107,7 @@ def block_msg(win, iblock):
     message.pos = (0, 0)
     message.draw()
 
-    commands = '[Escape]: Cancel\t[Space]: Begin'
+    commands = '[Backspace]: Quit\t[Zero]: Begin'
     cmnd_text = visual.TextStim(win,
                                 text=commands,
                                 color='black',
@@ -117,10 +117,10 @@ def block_msg(win, iblock):
     cmnd_text.draw()
 
     win.flip()
-    pressed_key = event.waitKeys(keyList=['space', 'escape'])
-    if 'escape' in pressed_key:
+    pressed_key = event.waitKeys(keyList=list(command_keys.values()))
+    if 'backspace' in pressed_key:
         core.quit()
-    elif 'space' in pressed_key:
+    elif 'num_insert' in pressed_key:
         pass
 
     # show a blanck window for one second

@@ -27,15 +27,15 @@ import random
 import os
 import gen_distributed_events as gen_evnts
 
-# from egi_pynetstation.NetStation import NetStation
+from egi_pynetstation.NetStation import NetStation
 
 # -------------------------------------------------
 # insert session meta data
 # -------------------------------------------------
-person = 'test'
-N_BLOCKS = 1
-N_TRIALS = 32  # must be a factor of FOUR
-screen_num = 0  # 0: primary    1: secondary
+subID = 'test'
+N_BLOCKS = 2
+N_TRIALS = 4  # must be a factor of FOUR
+screen_num = 1  # 0: primary    1: secondary
 full_screen = False
 netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
@@ -45,6 +45,8 @@ temp_data = 'temp.json'
 try:
     # read from file
     df = pd.read_json(temp_data)
+    # read file name
+    file_name = df.file_name
     # update the block number
     iblock = df.last_block_num[0] + 1
     df.last_block_num[0] = iblock
@@ -52,8 +54,13 @@ try:
     df.to_json(temp_data)
 except:
     iblock = 1
+    # create file name
+    date = sup.get_date()
+    time = sup.get_time()
+    file_name = f"beh_{date}_{time}_{subID}.json"
     # create a dictionary of variables to be saved
-    trial_dict = {'last_block_num': [iblock]}
+    trial_dict = {'last_block_num': [iblock],
+                  'file_name': [file_name]}
     # convert to data frame
     df = pd.DataFrame(trial_dict)
     # write to file
@@ -61,9 +68,6 @@ except:
 # -------------------------------------------------
 # destination file
 # -------------------------------------------------
-date = sup.get_date()
-time = sup.get_time()
-file_name = f"beh_{date}_{time}_{person}.json"
 data_path = os.path.join('data', file_name)
 # -------------------------------------------------
 # initialize netstation at the beginning of the first block
@@ -82,7 +86,7 @@ if netstation:
 else:
     ns = None
 # -------------------------------------------------
-# initialize the display
+# initialize the display and the keyboard
 # -------------------------------------------------
 REF_RATE = 60
 TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
@@ -100,6 +104,8 @@ FIX_X = 0
 FIX_Y = 0
 
 INSTRUCT_DUR = REF_RATE  # duration of the instruction period [frames]
+
+command_keys = {"quit_key": "backspace", "response": "num_insert"}
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
@@ -167,7 +173,7 @@ np.random.shuffle(irr_image1_pos_x)
 irr_image2_pos_x = -irr_image1_pos_x
 
 # show a message before the block begins
-sup.block_msg(win, iblock)
+sup.block_msg(win, iblock, command_keys)
 
 # hide the cursor
 mouse = event.Mouse(win=win, visible=False)
@@ -201,7 +207,7 @@ for itrial in range(N_TRIALS):
                                                          TRIAL_DUR,
                                                          REF_RATE,
                                                          TRIAL_DUR - REF_RATE,
-                                                         REF_RATE*2)
+                                                         REF_RATE * 2)
     n_total_evnts = len(change_start_frames)
     change_frames = np.array(change_start_frames)
     change_times = np.empty((n_total_evnts,))
@@ -379,7 +385,7 @@ for itrial in range(N_TRIALS):
                       label=f"CND{cnd}")
 
     for iframe in range(TRIAL_DUR):
-        pressed_key = event.getKeys(keyList=['space', 'escape'])
+        pressed_key = event.getKeys(keyList=list(command_keys.values()))
         # set the position of each task-relevant image
         rel_image1.pos = (path1_x[iframe], path1_y[iframe])
         rel_image2.pos = (path2_x[iframe], path2_y[iframe])
@@ -426,10 +432,10 @@ for itrial in range(N_TRIALS):
         win.flip()
 
         # force exit with 'escape' button
-        if 'escape' in pressed_key:
+        if 'backspace' in pressed_key:
             core.quit()
         # check if spacebar is pressed within 1 sec from tilt
-        if 'space' in pressed_key:
+        if 'num_insert' in pressed_key:
             res_t = timer.getTime()
             response_times.append(round(res_t * 1000))
     response_times.pop(0)
@@ -472,8 +478,8 @@ for itrial in range(N_TRIALS):
     print(f"RunPerf: {run_perf:6.2f}%")
     # fill the remaining values in the data frame
     dfnew.loc[acc_trial - 1,
-              ['cummulative_performance',
-               'running_performance']] = [cum_perf, run_perf]
+    ['cummulative_performance',
+     'running_performance']] = [cum_perf, run_perf]
     # save the data frame
     dfnew.to_json(data_path)
 
