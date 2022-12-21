@@ -25,7 +25,7 @@ import pandas as pd
 import numpy as np
 import random
 import os
-from egi_pynetstation.NetStation import NetStation
+# from egi_pynetstation.NetStation import NetStation
 
 # -------------------------------------------------
 # insert session meta data
@@ -87,7 +87,7 @@ ITI_DUR = 120  # inter-trial interval [frames]
 REF_RATE = 60
 
 # configure the monitor and the stimulus window
-mon = sup.config_mon_dell()
+mon = sup.config_mon_imac24()
 win = sup.config_win(mon=mon, fullscr=full_screen, screen=screen_num)
 sup.test_refresh_rate(win, REF_RATE)
 
@@ -312,11 +312,11 @@ for itrial in range(N_TRIALS):
 
     # load the changed image
     if change_image == 1:
-        image3_directory = os.path.join("images", f"face_tilt{tilt_mag}",
-                                        f"_{tilt_dir}.png")
+        image3_directory = os.path.join("images",
+                                        f"face_tilt{tilt_mag}_{tilt_dir}.png")
     else:
-        image3_directory = os.path.join("images", f"house_tilt{tilt_mag}",
-                                        f"_{tilt_dir}.png")
+        image3_directory = os.path.join("images",
+                                        f"house_tilt{tilt_mag}_{tilt_dir}.png")
 
     rel_image3 = visual.ImageStim(win,
                                   image=image3_directory,
@@ -411,7 +411,7 @@ for itrial in range(N_TRIALS):
             if math.isnan(RT):
                 print(f"RT: Early   ", end="")
             else:
-                print(f"RT: {int(RT):03d}ms   ", end="")
+                print(f"RT: {int(RT):3d}ms   ", end="")
     # ------------------ main period ends
     if response == 0:
         print(f"RT: None    ", end="")
