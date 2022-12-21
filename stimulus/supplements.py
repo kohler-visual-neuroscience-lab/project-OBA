@@ -107,7 +107,7 @@ def block_msg(win, iblock, command_keys):
     message.pos = (0, 0)
     message.draw()
 
-    commands = '[Backspace]: Quit\t[Zero]: Begin'
+    commands = '[Backspace]: Quit\t[0/Insert]: Begin'
     cmnd_text = visual.TextStim(win,
                                 text=commands,
                                 color='black',
