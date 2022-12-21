@@ -1,5 +1,6 @@
 from psychopy import monitors, visual, event, core
 from datetime import date, datetime
+import numpy as np
 import math
 
 
@@ -9,7 +10,8 @@ def test_refresh_rate(win, ref_rate):
                                        nMaxFrames=100,
                                        nWarmUpFrames=10,
                                        threshold=1)
-    actual_fr = round(actual_fr, 2)
+    if actual_fr is not None:
+        actual_fr = round(actual_fr, 2)
 
     print('\n=======================================================')
     print(f"Nominal refresh rate:  {ref_rate} Hz")
@@ -45,7 +47,7 @@ def config_win(mon, fullscr, screen):
     else:
         win = visual.Window(monitor=mon,
                             units='deg',
-                            size=[500, 500],
+                            size=[700, 700],
                             pos=[0, 0],
                             color=[0, 0, 0])
     win.mouseVisible = False
@@ -77,7 +79,7 @@ def draw_probe(win, color, radius=.5, pos=(0, 0)):
 
 
 def escape_session():
-    exit_key = event.getKeys(keyList=['escape'])
+    exit_key = event.getKeys(keyList=['escape', 'space'])
     if 'escape' in exit_key:
         core.quit()
 
@@ -147,6 +149,31 @@ def evaluate_response(cue_image, change_image, rt, response):
     else:
         resp = False
     return resp
+
+
+def evaluate_response2(cue_image, change_image, change_times, response_times):
+    ind_arr = (change_image == cue_image)
+    n_exp_resp = np.sum(ind_arr)
+    valid_change_times = change_times[ind_arr]
+    if n_exp_resp > 0:
+        if len(valid_change_times) == len(response_times):
+            rts = np.round(response_times - valid_change_times)
+            resp_eval = all(100 < rts) and all(rts < 1000)
+            if resp_eval:
+                avg_rt = int(np.mean(rts))
+            else:
+                avg_rt = np.nan
+        else:
+            resp_eval = False
+            avg_rt = np.nan
+    else:
+        if not response_times:
+            resp_eval = True
+            avg_rt = np.nan
+        else:
+            resp_eval = False
+            avg_rt = np.nan
+    return resp_eval, avg_rt
 
 
 def cal_next_tilt(goal_perf, run_perf):
