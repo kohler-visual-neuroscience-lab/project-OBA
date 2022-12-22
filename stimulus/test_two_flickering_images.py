@@ -7,7 +7,7 @@ initiated on:       2022-11-08
 last modified on:   2022-11-18
 """
 from psychopy import visual
-import supplements as sup
+import lib as sup
 import random
 from egi_pynetstation.NetStation import NetStation
 

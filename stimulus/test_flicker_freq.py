@@ -7,7 +7,7 @@ initiated on:       2022-11-08
 last modified on:   2022-11-08
 """
 from psychopy import event, visual, core
-import supplements as sup
+import lib as sup
 import matplotlib.pyplot as plt
 import numpy as np
 import math

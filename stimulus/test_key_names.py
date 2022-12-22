@@ -1,5 +1,5 @@
 from psychopy import event, visual, core
-import supplements as sup
+import lib as sup
 import pandas as pd
 import numpy as np
 
