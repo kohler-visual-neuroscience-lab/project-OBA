@@ -38,8 +38,8 @@ subID = 'test'
 N_BLOCKS = 2
 N_TRIALS = 4  # must be a factor of FOUR
 screen_num = 1  # 0: primary    1: secondary
-full_screen = False
-netstation = False  # decide whether to connect with NetStation
+full_screen = True
+netstation = True  # decide whether to connect with NetStation
 # -------------------------------------------------
 # find out the last recorded block number
 # -------------------------------------------------
