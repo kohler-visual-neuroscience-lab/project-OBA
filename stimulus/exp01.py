@@ -34,9 +34,9 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # -------------------------------------------------
 # insert session meta data
 # -------------------------------------------------
-subID = 'test'
-N_BLOCKS = 2
-N_TRIALS = 4  # must be a factor of FOUR
+subID = '0002'
+N_BLOCKS = 4
+N_TRIALS = 32  # must be a factor of FOUR
 screen_num = 1  # 0: primary    1: secondary
 full_screen = True
 netstation = True  # decide whether to connect with NetStation
