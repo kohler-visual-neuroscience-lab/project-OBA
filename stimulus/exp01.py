@@ -17,7 +17,6 @@ There are four conditions:
     cnd 4: face left, house right, attend house
 
 """
-import math
 from psychopy import event, visual, core
 import supplements as sup
 import gen_random_path as gen_path
