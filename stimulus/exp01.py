@@ -25,15 +25,19 @@ import pandas as pd
 import numpy as np
 import random
 import os
-# from egi_pynetstation.NetStation import NetStation
+import gen_events
+from egi_pynetstation.NetStation import NetStation
+
+# disable the false-positive chained assignment warning
+pd.options.mode.chained_assignment = None  # default='warn'
 
 # -------------------------------------------------
 # insert session meta data
 # -------------------------------------------------
-person = 'test'
-N_BLOCKS = 1
-N_TRIALS = 32  # must be a factor of FOUR
-screen_num = 0  # 0: primary    1: secondary
+subID = 'test'
+N_BLOCKS = 2
+N_TRIALS = 4  # must be a factor of FOUR
+screen_num = 1  # 0: primary    1: secondary
 full_screen = False
 netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
@@ -43,15 +47,22 @@ temp_data = 'temp.json'
 try:
     # read from file
     df = pd.read_json(temp_data)
+    # read file name
+    file_name = df.file_name[0]
     # update the block number
-    iblock = df.last_block_num[0] + 1
-    df.last_block_num[0] = iblock
+    iblock = df['last_block_num'][0] + 1
+    df['last_block_num'][0] = iblock
     # write to file
     df.to_json(temp_data)
 except:
     iblock = 1
+    # create file name
+    date = sup.get_date()
+    time = sup.get_time()
+    file_name = f"beh_{date}_{time}_{subID}.json"
     # create a dictionary of variables to be saved
-    trial_dict = {'last_block_num': [iblock]}
+    trial_dict = {'last_block_num': [iblock],
+                  'file_name': [file_name]}
     # convert to data frame
     df = pd.DataFrame(trial_dict)
     # write to file
@@ -59,9 +70,6 @@ except:
 # -------------------------------------------------
 # destination file
 # -------------------------------------------------
-date = sup.get_date()
-time = sup.get_time()
-file_name = f"beh_{date}_{time}_{person}.json"
 data_path = os.path.join('data', file_name)
 # -------------------------------------------------
 # initialize netstation at the beginning of the first block
@@ -80,14 +88,14 @@ if netstation:
 else:
     ns = None
 # -------------------------------------------------
-# initialize the display
+# initialize the display and the keyboard
 # -------------------------------------------------
-TRIAL_DUR = 600  # duration of a trial in [frames]
-ITI_DUR = 120  # inter-trial interval [frames]
 REF_RATE = 60
+TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
+ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
 # configure the monitor and the stimulus window
-mon = sup.config_mon_imac24()
+mon = sup.config_mon_dell()
 win = sup.config_win(mon=mon, fullscr=full_screen, screen=screen_num)
 sup.test_refresh_rate(win, REF_RATE)
 
@@ -97,7 +105,9 @@ FIX_OFFSET = 5  # deg
 FIX_X = 0
 FIX_Y = 0
 
-INSTRUCT_DUR = 60  # duration of the instruction period [frames]
+INSTRUCT_DUR = REF_RATE  # duration of the instruction period [frames]
+
+command_keys = {"quit_key": "backspace", "response": "num_insert"}
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
@@ -114,11 +124,11 @@ IMAGE3_SIZE = (size_factor, size_factor)
 IMAGE_OPACITY = .4
 
 # jittering properties
-JITTER_REPETITION = 12  # number of frames where the relevant images keep
-# their positions
+JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
+# images keep their positions
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = 1
+REL_IMGPATH_SIGMA = .7
 REL_IMGPATH_STEP = .1
 
 REL_IMAGE_POS0_X = 0
@@ -136,10 +146,8 @@ irr_image2_freq = 12
 IRR_IMAGE1_nFRAMES = REF_RATE / irr_image1_freq
 IRR_IMAGE2_nFRAMES = REF_RATE / irr_image2_freq
 
-# possible frames, in which change can happen
-change_frame_list = list(range(480, 540 + 1, 1))
 # duration of changed-image [frames]
-CHANGE_DUR = 18
+TILT_DUR = int(REF_RATE / 4)
 
 # load images
 rel_image1 = visual.ImageStim(win,
@@ -152,7 +160,7 @@ rel_image2 = visual.ImageStim(win,
                               opacity=IMAGE_OPACITY)
 
 # potential gap durations
-gap_dur_list = range(30, 60 + 1, 1)
+gap_dur_list = range(int(REF_RATE / 2), REF_RATE + 1, 1)
 
 # probability of the valid cues
 p_valid_cue = .5
@@ -160,8 +168,6 @@ p_valid_cue = .5
 # define a timer to measure the change-detection reaction time
 # -------------------------------------------------
 timer = core.Clock()
-change_time = float("nan")
-response_time = float("nan")
 
 irr_image1_pos_x = np.concatenate((np.repeat(IRR_IMAGE_X, N_TRIALS / 2),
                                    np.repeat(-IRR_IMAGE_X, N_TRIALS / 2)))
@@ -169,7 +175,7 @@ np.random.shuffle(irr_image1_pos_x)
 irr_image2_pos_x = -irr_image1_pos_x
 
 # show a message before the block begins
-sup.block_msg(win, iblock)
+sup.block_msg(win, iblock, command_keys)
 
 # hide the cursor
 mouse = event.Mouse(win=win, visible=False)
@@ -188,17 +194,29 @@ np.random.shuffle(cnd_array)
 # #################################################
 for itrial in range(N_TRIALS):
     acc_trial += 1
-    print(f"[Trial {acc_trial:02d}]   ", end="")
+    print(f"[Trial {acc_trial:03d}]   ", end="")
     if acc_trial > 1:
         # read current running performance
         df_temp = pd.read_json(data_path)
-        prev_run_perf = df_temp.loc[acc_trial - 2, 'run_perf']
-        prev_tilt_mag = df_temp.loc[acc_trial - 2, 'tilt_mag']
-        # print(prev_run_perf)
-        # print(prev_tilt_mag)
+        prev_run_perf = df_temp.loc[acc_trial - 2, 'running_performance']
+        prev_tilt_mag = df_temp.loc[acc_trial - 2, 'tilt_magnitude']
     else:
         prev_run_perf = None
         prev_tilt_mag = None
+
+    # randomly select frames, in which change happens
+    change_start_frames = gen_events.gen_events(REF_RATE)
+    n_total_evnts = len(change_start_frames)
+    change_frames = np.array(change_start_frames)
+    change_times = np.empty((n_total_evnts,))
+    change_times[:] = np.nan
+    response_times = [np.nan]
+
+    for i in change_start_frames:
+        for j in range(TILT_DUR - 1):
+            change_frames = \
+                np.hstack((change_frames, [i + j + 1]))
+
     # -------------------------------------------------
     # set up the stimulus behavior in current trial
     # -------------------------------------------------
@@ -212,12 +230,10 @@ for itrial in range(N_TRIALS):
     else:
         order = None
         print('Invalid condition number!')
+    print(f"Cnd: {cnd}   #Events: {n_total_evnts}   ", end="")
 
     # randomly decide on gap duration
     gap_dur = random.choice(gap_dur_list)
-
-    # randomly decide on the time of the change
-    change_frame = random.choice(change_frame_list)
 
     # randomly decide on which image to cue (show in the beginning)
     cue_image = random.choice([1, 2])
@@ -244,17 +260,11 @@ for itrial in range(N_TRIALS):
         IRR_IMAGE2_nFRAMES = None
         print("Invalid image order!")
 
-    # on a proportion of trials change the non-target image
-    if np.random.choice([True, False], p=[p_valid_cue, 1 - p_valid_cue]):
-        change_image = cue_image
-    else:
-        if cue_image == 1:
-            change_image = 2
-        else:
-            change_image = 1
-    print(f"Cnd: {cnd}   ", end="")
+    # pick the tilting image for each event , independently of the cued image
+    tilt_images = np.random.choice([1, 2], n_total_evnts)
+    # pick the tilting direction for each event
+    tilt_dirs = np.random.choice(['CW', 'CCW'], n_total_evnts)
     # ------------------------------------------------- setup end
-
     # load irrelevant images
     irr_image1 = visual.ImageStim(win,
                                   image=image1_directory,
@@ -293,8 +303,6 @@ for itrial in range(N_TRIALS):
     path2_x = np.repeat(path2_x, JITTER_REPETITION)
     path2_y = np.repeat(path2_y, JITTER_REPETITION)
 
-    # randomly decide which tilt to choose
-    tilt_dir = random.choice(['CW', 'CCW'])
     if acc_trial == 1:
         tilt_mag = 25
         tilt_change = 0
@@ -307,32 +315,39 @@ for itrial in range(N_TRIALS):
             tilt_mag = 49
         elif tilt_mag < 1:
             tilt_mag = 1
-    print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ",
-          end="")
+    print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ", end="")
 
     # load the changed image
-    if change_image == 1:
-        image3_directory = os.path.join("images",
-                                        f"face_tilt{tilt_mag}_{tilt_dir}.png")
-    else:
-        image3_directory = os.path.join("images",
-                                        f"house_tilt{tilt_mag}_{tilt_dir}.png")
+    image3_directory1cw = os.path.join("images",
+                                       f"face_tilt{tilt_mag}_CW.png")
+    image3_directory1ccw = os.path.join("images",
+                                        f"face_tilt{tilt_mag}_CCW.png")
+    image3_directory2cw = os.path.join("images",
+                                       f"house_tilt{tilt_mag}_CW.png")
+    image3_directory2ccw = os.path.join("images",
+                                        f"house_tilt{tilt_mag}_CCW.png")
 
-    rel_image3 = visual.ImageStim(win,
-                                  image=image3_directory,
-                                  size=IMAGE3_SIZE,
-                                  opacity=IMAGE_OPACITY)
+    rel_image3_1cw = visual.ImageStim(win,
+                                      image=image3_directory1cw,
+                                      size=IMAGE3_SIZE,
+                                      opacity=IMAGE_OPACITY)
+    rel_image3_1ccw = visual.ImageStim(win,
+                                       image=image3_directory1ccw,
+                                       size=IMAGE3_SIZE,
+                                       opacity=IMAGE_OPACITY)
+    rel_image3_2cw = visual.ImageStim(win,
+                                      image=image3_directory2cw,
+                                      size=IMAGE3_SIZE,
+                                      opacity=IMAGE_OPACITY)
+    rel_image3_2ccw = visual.ImageStim(win,
+                                       image=image3_directory2ccw,
+                                       size=IMAGE3_SIZE,
+                                       opacity=IMAGE_OPACITY)
     # -------------------------------------------------
     # run the stimulus
     # -------------------------------------------------
-    # set response state to no response
-    response = 0  # 0: no change detected | 1: change detected
-    # preassign response variables
-    change_time = float("nan")
-    response_time = float("nan")
-    RT = float("nan")
-    # reset the timer
-    timer.reset()
+    # set current event number
+    cur_evnt_n = 0
     # ------------------
     # instruction period
     # ------------------
@@ -359,37 +374,50 @@ for itrial in range(N_TRIALS):
     # ------------------
     # main period
     # ------------------
-    # clear any response collected by getKey()
-    event.clearEvents()
+    # reset the timer in the beginning of the task (super imposed images)
+    timer.reset()
+
     if netstation:
         # send a trigger to indicate beginning of each trial
         ns.send_event(event_type=f"CND{cnd}",
                       label=f"CND{cnd}")
+
     for iframe in range(TRIAL_DUR):
-        sup.escape_session()  # force exit with 'escape' button
+        pressed_key = event.getKeys(keyList=list(command_keys.values()))
         # set the position of each task-relevant image
         rel_image1.pos = (path1_x[iframe], path1_y[iframe])
         rel_image2.pos = (path2_x[iframe], path2_y[iframe])
 
+        # get the time of change
+        if iframe in change_start_frames:
+            ch_t = timer.getTime()
+            change_times[cur_evnt_n] = round(ch_t * 1000)
+            cur_evnt_n += 1
+
         # if conditions satisfied change the image
-        if (iframe > change_frame) & (
-                iframe < change_frame + CHANGE_DUR):
-            if change_image == 1:
-                rel_image3.pos = (path1_x[iframe], path1_y[iframe])
-                rel_image2.draw()
-                rel_image3.draw()
-            elif change_image == 2:
-                rel_image3.pos = (path2_x[iframe], path2_y[iframe])
-                rel_image3.draw()
-                rel_image1.draw()
+        if iframe in change_frames:
+            if tilt_dirs[cur_evnt_n - 1] == 'CW':
+                if tilt_images[cur_evnt_n - 1] == 1:
+                    rel_image3_1cw.pos = (path1_x[iframe], path1_y[iframe])
+                    rel_image2.draw()
+                    rel_image3_1cw.draw()
+                elif tilt_images[cur_evnt_n - 1] == 2:
+                    rel_image3_2cw.pos = (path2_x[iframe], path2_y[iframe])
+                    rel_image3_2cw.draw()
+                    rel_image1.draw()
+            else:
+                if tilt_images[cur_evnt_n - 1] == 1:
+                    rel_image3_1ccw.pos = (path1_x[iframe], path1_y[iframe])
+                    rel_image2.draw()
+                    rel_image3_1ccw.draw()
+                elif tilt_images[cur_evnt_n - 1] == 2:
+                    rel_image3_2ccw.pos = (path2_x[iframe], path2_y[iframe])
+                    rel_image3_2ccw.draw()
+                    rel_image1.draw()
         # if not, show the unchanged versions
         else:
             rel_image2.draw()
             rel_image1.draw()
-
-        # get the time of change
-        if iframe == change_frame:
-            change_time = timer.getTime()
 
         # draw irrelevant images conditionally
         if sup.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
@@ -401,47 +429,46 @@ for itrial in range(N_TRIALS):
                         cue=cue_image)
         win.flip()
 
-        # get response
-        response_key = event.getKeys(keyList=['space'])
-        if 'space' in response_key and not response:
-            response = 1
-            response_time = timer.getTime()
-            # measure reaction time in ms and end trial
-            RT = round((response_time - change_time) * 1000, 0)
-            if math.isnan(RT):
-                print(f"RT: Early   ", end="")
-            else:
-                print(f"RT: {int(RT):3d}ms   ", end="")
-    # ------------------ main period ends
-    if response == 0:
-        print(f"RT: None    ", end="")
+        # force exit with 'escape' button
+        if 'backspace' in pressed_key:
+            core.quit()
+        # check if spacebar is pressed within 1 sec from tilt
+        if 'num_insert' in pressed_key:
+            res_t = timer.getTime()
+            response_times.append(round(res_t * 1000))
+    response_times.pop(0)
     # evaluate the response
-    resp_eval = sup.evaluate_response(cue_image, change_image, RT, response)
-    print(f"RespEval: {int(resp_eval)}   ", end="")
+    [resp_eval, avg_rt] = sup.evaluate_response2(cue_image, tilt_images,
+                                                 change_times, response_times)
+    if np.isnan(avg_rt):
+        print(f"Eval: {int(resp_eval)}   avgRT:  nan    ", end="")
+    else:
+        print(f"Eval: {int(resp_eval)}   avgRT: {avg_rt:03d}ms   ", end="")
+
     # -------------------------------------------------
     # create data frame and save
     # -------------------------------------------------
     # create a dictionary of variables to be saved
     trial_dict = {'trial_num': [acc_trial],
                   'condition_num': [cnd],
+                  'cued_image': [cue_image],
                   'image_order': [order],
-                  'change_image': [change_image],
-                  'cue_image': [cue_image],
-                  'response_given': [response],
-                  'response_time': [RT],
-                  'response_eval': [resp_eval],
-                  'cum_perf': [np.nan],
-                  'run_perf': [np.nan],
-                  'tilt_mag': [tilt_mag]}
+                  'n_events': n_total_evnts,
+                  'tilted_images': [tilt_images],
+                  'tilt_directions': [tilt_dirs],
+                  'tilt_magnitude': [tilt_mag],
+                  'avg_rt': [avg_rt],
+                  'response_evaluation': [resp_eval],
+                  'cummulative_performance': [np.nan],
+                  'running_performance': [np.nan]}
     # convert to data frame
     dfnew = pd.DataFrame(trial_dict)
     # if not first trial, load the existing data frame and concatenate
     if acc_trial > 1:
         df = pd.read_json(data_path)
         dfnew = pd.concat([df, dfnew], ignore_index=True)
-
     # calculate the cumulative performance (all recorded trials)
-    eval_series = dfnew.response_eval
+    eval_series = dfnew.response_evaluation
     eval_array = eval_series.values
     cum_perf = round(sum(eval_array) / len(eval_array) * 100, 2)
     print(f"CumPerf: {cum_perf:6.2f}%   ", end="")
@@ -449,7 +476,9 @@ for itrial in range(N_TRIALS):
     run_perf = round(sum(eval_array[-10:]) / len(eval_array[-10:]) * 100, 2)
     print(f"RunPerf: {run_perf:6.2f}%")
     # fill the remaining values in the data frame
-    dfnew.loc[acc_trial - 1, ['cum_perf', 'run_perf']] = [cum_perf, run_perf]
+    dfnew.loc[acc_trial - 1,
+    ['cummulative_performance',
+     'running_performance']] = [cum_perf, run_perf]
     # save the data frame
     dfnew.to_json(data_path)
 
