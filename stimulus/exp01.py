@@ -19,7 +19,7 @@ There are four conditions:
 """
 import math
 from psychopy import event, visual, core
-import supplements as sup
+import lib as sup
 import gen_random_path as gen_path
 import pandas as pd
 import numpy as np
