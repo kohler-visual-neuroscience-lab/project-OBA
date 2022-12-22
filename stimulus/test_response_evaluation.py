@@ -1,5 +1,5 @@
 import numpy as np
-from supplements import evaluate_response2
+from lib import evaluate_response2
 
 cue_image = 1
 change_image = np.array([1, 2, 2, 2])
