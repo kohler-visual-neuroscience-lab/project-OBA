@@ -25,9 +25,12 @@ import pandas as pd
 import numpy as np
 import random
 import os
-import gen_distributed_events as gen_evnts
+import gen_fragmented_events as gen_frag
 
 from egi_pynetstation.NetStation import NetStation
+
+# disable the false-positive chained assignment warning
+pd.options.mode.chained_assignment = None  # default='warn'
 
 # -------------------------------------------------
 # insert session meta data
@@ -46,10 +49,10 @@ try:
     # read from file
     df = pd.read_json(temp_data)
     # read file name
-    file_name = df.file_name
+    file_name = df.file_name[0]
     # update the block number
-    iblock = df.last_block_num[0] + 1
-    df.last_block_num[0] = iblock
+    iblock = df['last_block_num'][0] + 1
+    df['last_block_num'][0] = iblock
     # write to file
     df.to_json(temp_data)
 except:
@@ -203,11 +206,7 @@ for itrial in range(N_TRIALS):
         prev_tilt_mag = None
 
     # randomly select frames, in which change happens
-    change_start_frames = gen_evnts.gen_ditributed_event(0,
-                                                         TRIAL_DUR,
-                                                         REF_RATE,
-                                                         TRIAL_DUR - REF_RATE,
-                                                         REF_RATE * 2)
+    change_start_frames = gen_frag.gen_events(REF_RATE)
     n_total_evnts = len(change_start_frames)
     change_frames = np.array(change_start_frames)
     change_times = np.empty((n_total_evnts,))
@@ -232,7 +231,7 @@ for itrial in range(N_TRIALS):
     else:
         order = None
         print('Invalid condition number!')
-    print(f"Cnd: {cnd}   ", end="")
+    print(f"Cnd: {cnd}   #Events: {n_total_evnts}   ", end="")
 
     # randomly decide on gap duration
     gap_dur = random.choice(gap_dur_list)
@@ -455,6 +454,7 @@ for itrial in range(N_TRIALS):
                   'condition_num': [cnd],
                   'cued_image': [cue_image],
                   'image_order': [order],
+                  'n_events': n_total_evnts,
                   'tilted_images': [tilt_images],
                   'tilt_directions': [tilt_dirs],
                   'tilt_magnitude': [tilt_mag],
