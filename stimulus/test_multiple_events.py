@@ -16,12 +16,3 @@ for iframe in range(600):
         event.clearEvents()
 win.flip()
 print(key_array)
-
-# timer = core.Clock()
-# timer.reset()
-# a = np.empty((3,))
-# a[:] = np.nan
-# print(a)
-# for i in range(3):
-#     a[i] = timer.getTime()
-# print(a)
