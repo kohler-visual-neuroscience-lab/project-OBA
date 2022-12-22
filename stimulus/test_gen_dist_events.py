@@ -16,6 +16,6 @@ for i in range(1000):
     times = np.hstack((times, change_start_frames))
 
 fig, ax = plt.subplots(2, 1)
-ax[0].hist(len_arr)
+ax[0].hist(len_arr, bins=list(range(0, 7, 1)))
 ax[1] = plt.hist(times)
 plt.show()
