@@ -58,7 +58,7 @@ except:
     # create file name
     date = sup.get_date()
     time = sup.get_time()
-    file_name = f"beh_{date}_{time}_{subID}.json"
+    file_name = f"{subID}_{date}_{time}.json"
     # create a dictionary of variables to be saved
     trial_dict = {'last_block_num': [iblock],
                   'file_name': [file_name]}
