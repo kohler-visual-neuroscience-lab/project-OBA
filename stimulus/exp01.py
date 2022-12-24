@@ -25,7 +25,9 @@ import numpy as np
 import random
 import os
 import gen_events
-from egi_pynetstation.NetStation import NetStation
+
+# from egi_pynetstation.NetStation import NetStation
+
 
 # disable the false-positive chained assignment warning
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -33,12 +35,12 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # -------------------------------------------------
 # insert session meta data
 # -------------------------------------------------
-subID = '0002'
-N_BLOCKS = 4
-N_TRIALS = 32  # must be a factor of FOUR
-screen_num = 1  # 0: primary    1: secondary
+subID = 'test'
+N_BLOCKS = 1
+N_TRIALS = 4  # must be a factor of FOUR
+screen_num = 0  # 0: primary    1: secondary
 full_screen = True
-netstation = True  # decide whether to connect with NetStation
+netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
 # find out the last recorded block number
 # -------------------------------------------------
@@ -89,7 +91,7 @@ else:
 # -------------------------------------------------
 # initialize the display and the keyboard
 # -------------------------------------------------
-REF_RATE = 60
+REF_RATE = 120
 TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
@@ -100,13 +102,13 @@ sup.test_refresh_rate(win, REF_RATE)
 
 # fixation cross
 FIX_SIZE = .7
-FIX_OFFSET = 5  # deg
 FIX_X = 0
-FIX_Y = 0
+FIX_Y = 4
 
 INSTRUCT_DUR = REF_RATE  # duration of the instruction period [frames]
 
-command_keys = {"quit_key": "backspace", "response": "num_insert"}
+command_keys = {"quit_key": "escape", "response_key": "space"}
+# command_keys = {"quit_key": "backspace", "response_key": "num_insert"}
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
@@ -127,23 +129,18 @@ JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
 # images keep their positions
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = .7
+REL_IMGPATH_SIGMA = .5
 REL_IMGPATH_STEP = .1
 
-REL_IMAGE_POS0_X = 0
-REL_IMAGE_POS0_Y = 4.5
+REL_IMAGE_POS0_X = FIX_X
+REL_IMAGE_POS0_Y = FIX_Y
 
 IRR_IMAGE_X = 4
 IRR_IMAGE1_POS_Y = -2.5
 IRR_IMAGE2_POS_Y = -2.5
 
-# irr_image1_freq = random.choice([7.5, 12])
-# IRR_IMAGE2_FREQ = np.setdiff1d(np.array([7.5, 12]), irr_image1_freq)
-irr_image1_freq = 7.5
-irr_image2_freq = 12
-
-IRR_IMAGE1_nFRAMES = REF_RATE / irr_image1_freq
-IRR_IMAGE2_nFRAMES = REF_RATE / irr_image2_freq
+freq1 = 7.5
+freq2 = 12
 
 # duration of changed-image [frames]
 TILT_DUR = int(REF_RATE / 4)
@@ -161,8 +158,6 @@ rel_image2 = visual.ImageStim(win,
 # potential gap durations
 gap_dur_list = range(int(REF_RATE / 2), REF_RATE + 1, 1)
 
-# probability of the valid cues
-p_valid_cue = .5
 # -------------------------------------------------
 # define a timer to measure the change-detection reaction time
 # -------------------------------------------------
@@ -246,8 +241,6 @@ for itrial in range(N_TRIALS):
         print("Invalid condition number!")
 
     # for now: make sure the left image is tagged with f1 and the other with f2
-    freq1 = 7.5
-    freq2 = 12
     if order == 1:
         IRR_IMAGE1_nFRAMES = REF_RATE / freq1
         IRR_IMAGE2_nFRAMES = REF_RATE / freq2
@@ -429,16 +422,16 @@ for itrial in range(N_TRIALS):
         win.flip()
 
         # force exit with 'escape' button
-        if 'backspace' in pressed_key:
+        if command_keys['quit_key'] in pressed_key:
             core.quit()
         # check if spacebar is pressed within 1 sec from tilt
-        if 'num_insert' in pressed_key:
+        if command_keys['response_key'] in pressed_key:
             res_t = timer.getTime()
             response_times.append(round(res_t * 1000))
     response_times.pop(0)
     # evaluate the response
-    [resp_eval, avg_rt] = sup.evaluate_response2(cue_image, tilt_images,
-                                                 change_times, response_times)
+    [resp_eval, avg_rt] = sup.evaluate_response(cue_image, tilt_images,
+                                                change_times, response_times)
     if np.isnan(avg_rt):
         print(f"Eval: {int(resp_eval)}   avgRT:  nan    ", end="")
     else:
@@ -476,8 +469,8 @@ for itrial in range(N_TRIALS):
     print(f"RunPerf: {run_perf:6.2f}%")
     # fill the remaining values in the data frame
     dfnew.loc[acc_trial - 1,
-    ['cummulative_performance',
-     'running_performance']] = [cum_perf, run_perf]
+              ['cummulative_performance',
+               'running_performance']] = [cum_perf, run_perf]
     # save the data frame
     dfnew.to_json(data_path)
 
