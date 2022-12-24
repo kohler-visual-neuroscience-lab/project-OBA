@@ -78,12 +78,6 @@ def draw_probe(win, color, radius=.5, pos=(0, 0)):
     inner_probe.draw()
 
 
-def escape_session():
-    exit_key = event.getKeys(keyList=['backspace'])
-    if 'backspace' in exit_key:
-        core.quit()
-
-
 def get_date():
     today = date.today()
     return (str(today.year).zfill(4) +
@@ -118,9 +112,9 @@ def block_msg(win, iblock, command_keys):
 
     win.flip()
     pressed_key = event.waitKeys(keyList=list(command_keys.values()))
-    if 'backspace' in pressed_key:
+    if command_keys['quit_key'] in pressed_key:
         core.quit()
-    elif 'num_insert' in pressed_key:
+    elif command_keys['response_key'] in pressed_key:
         pass
 
     # show a blanck window for one second
@@ -141,17 +135,7 @@ def decide_on_show(iframe, nframes):
         return False
 
 
-def evaluate_response(cue_image, change_image, rt, response):
-    if (cue_image == change_image) and (rt >= 0):
-        resp = True
-    elif (cue_image != change_image) and (response == 0):
-        resp = True
-    else:
-        resp = False
-    return resp
-
-
-def evaluate_response2(cue_image, change_image, change_times, response_times):
+def evaluate_response(cue_image, change_image, change_times, response_times):
     ind_arr = (change_image == cue_image)
     n_exp_resp = np.sum(ind_arr)
     valid_change_times = change_times[ind_arr]
