@@ -15,8 +15,8 @@ def gen_events(ref_rate):
     segment_times = [1 * ref_rate,
                      4 * ref_rate,
                      7 * ref_rate]
-    n_events = np.random.choice(segment_numbers, p=[.1, .3, .6])
-    random.shuffle(segment_numbers)
+    n_events = np.random.choice(segment_numbers, p=[.1, .4, .5])
+    np.random.shuffle(segment_numbers)
     event_frames = np.full((n_events,), np.nan)
     for ievent in range(n_events):
         event_frames[ievent] = random.choice(range(2 * ref_rate)) + \
