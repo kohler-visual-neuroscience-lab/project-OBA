@@ -130,7 +130,7 @@ JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
 # images keep their positions
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = .1
+REL_IMGPATH_SIGMA = .2
 REL_IMGPATH_STEP = .1
 
 REL_IMAGE_POS0_X = FIX_X
