@@ -1,5 +1,5 @@
 import numpy as np
-from lib import evaluate_response
+from evaluate_responses import eval_resp
 
 n_tests = 14
 perf_arr = []
@@ -11,8 +11,8 @@ cue_image = 1
 change_image = np.array([2, 1, 2])
 change_times = np.array([2000, 5000, 7000])
 response_times = np.array([])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[0] = 67
@@ -22,8 +22,8 @@ cue_image = 1
 change_image = np.array([2])
 change_times = np.array([2000])
 response_times = np.array([])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[1] = 100
@@ -33,8 +33,8 @@ cue_image = 2
 change_image = np.array([2])
 change_times = np.array([2000])
 response_times = np.array([])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[2] = 0
@@ -44,8 +44,8 @@ cue_image = 1
 change_image = np.array([1])
 change_times = np.array([2000])
 response_times = np.array([2500, 4000])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[3] = 0
@@ -55,8 +55,8 @@ cue_image = 1
 change_image = np.array([1, 1])
 change_times = np.array([1000, 3000])
 response_times = np.array([2500])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[4] = 0
@@ -66,8 +66,8 @@ cue_image = 1
 change_image = np.array([1, 1])
 change_times = np.array([1000, 3000])
 response_times = np.array([2500, 3200])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[5] = 50
@@ -77,8 +77,8 @@ cue_image = 1
 change_image = np.array([1, 1, 1])
 change_times = np.array([1000, 3000, 5000])
 response_times = np.array([1500, 2500, 5200, 5300])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[6] = 33
@@ -88,8 +88,8 @@ cue_image = 1
 change_image = np.array([1, 1, 1])
 change_times = np.array([1000, 3000, 5000])
 response_times = np.array([1500, 4200, 5200])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[7] = 67
@@ -99,8 +99,8 @@ cue_image = 1
 change_image = np.array([2, 2, 1])
 change_times = np.array([3000, 5000, 7000])
 response_times = np.array([2500, 5200, 5300])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[8] = 0
@@ -110,8 +110,8 @@ cue_image = 2
 change_image = np.array([1, 2, 2, 2])
 change_times = np.array([1000, 3000, 5000, 7000])
 response_times = np.array([3400, 6100, 7600])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[9] = 75
@@ -121,8 +121,8 @@ cue_image = 2
 change_image = np.array([2, 2, 1])
 change_times = np.array([1000, 2500, 7000])
 response_times = np.array([1500, 7400, 7500])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[10] = 33
@@ -132,8 +132,8 @@ cue_image = 1
 change_image = np.array([1, 2, 1, 2])
 change_times = np.array([1000, 3000, 5000, 7000])
 response_times = np.array([])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[11] = 50
@@ -143,8 +143,8 @@ cue_image = 1
 change_image = np.array([1, 2, 1, 2])
 change_times = np.array([1000, 3000, 5000, 7000])
 response_times = np.array([2100, 3000, 5500])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[12] = 50
@@ -154,8 +154,8 @@ cue_image = 1
 change_image = np.array([1, 1, 1, 1])
 change_times = np.array([1000, 3000, 5000, 7000])
 response_times = np.array([2100, 3000, 5500])
-perf, rt = evaluate_response(cue_image, change_image,
-                             change_times, response_times)
+perf, rt = eval_resp(cue_image, change_image,
+                     change_times, response_times)
 perf_arr.append(perf)
 rt_arr.append(rt)
 expected_perf[13] = 25
