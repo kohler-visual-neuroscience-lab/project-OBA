@@ -25,6 +25,7 @@ import numpy as np
 import random
 import os
 import gen_events
+from evaluate_responses import eval_resp
 
 # from egi_pynetstation.NetStation import NetStation
 
@@ -39,7 +40,7 @@ subID = 'test'
 N_BLOCKS = 1
 N_TRIALS = 4  # must be a factor of FOUR
 screen_num = 0  # 0: primary    1: secondary
-full_screen = True
+full_screen = False
 netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
 # find out the last recorded block number
@@ -129,7 +130,7 @@ JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
 # images keep their positions
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = .5
+REL_IMGPATH_SIGMA = .1
 REL_IMGPATH_STEP = .1
 
 REL_IMAGE_POS0_X = FIX_X
@@ -430,12 +431,15 @@ for itrial in range(N_TRIALS):
             response_times.append(round(res_t * 1000))
     response_times.pop(0)
     # evaluate the response
-    [resp_eval, avg_rt] = sup.evaluate_response(cue_image, tilt_images,
-                                                change_times, response_times)
+    [resp_eval, avg_rt] = eval_resp(cue_image,
+                                             tilt_images,
+                                             change_times,
+                                             response_times)
     if np.isnan(avg_rt):
-        print(f"Eval: {int(resp_eval)}   avgRT:  nan    ", end="")
+        print(f"Perf:{int(resp_eval):3d}%   avgRT:  nan    ", end="")
     else:
-        print(f"Eval: {int(resp_eval)}   avgRT: {avg_rt:03d}ms   ", end="")
+        print(f"Perf:{int(resp_eval):3d}%   avgRT:{int(avg_rt):4d}ms   ",
+              end="")
 
     # -------------------------------------------------
     # create data frame and save
@@ -462,11 +466,11 @@ for itrial in range(N_TRIALS):
     # calculate the cumulative performance (all recorded trials)
     eval_series = dfnew.response_evaluation
     eval_array = eval_series.values
-    cum_perf = round(sum(eval_array) / len(eval_array) * 100, 2)
-    print(f"CumPerf: {cum_perf:6.2f}%   ", end="")
+    cum_perf = round(sum(eval_array) / len(eval_array), 2)
+    print(f"CumPerf:{cum_perf:6.2f}%   ", end="")
     # calculate the running performance (last 10 trials)
-    run_perf = round(sum(eval_array[-10:]) / len(eval_array[-10:]) * 100, 2)
-    print(f"RunPerf: {run_perf:6.2f}%")
+    run_perf = round(sum(eval_array[-10:]) / len(eval_array[-10:]), 2)
+    print(f"RunPerf:{run_perf:6.2f}%")
     # fill the remaining values in the data frame
     dfnew.loc[acc_trial - 1,
               ['cummulative_performance',
@@ -475,8 +479,10 @@ for itrial in range(N_TRIALS):
     dfnew.to_json(data_path)
 
     # run the inter-trial period
-    if resp_eval:
+    if resp_eval > 66:
         color = 'limegreen'
+    elif resp_eval > 33:
+        color = 'orange'
     else:
         color = 'tomato'
     for igap in range(ITI_DUR):
