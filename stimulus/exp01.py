@@ -431,14 +431,14 @@ for itrial in range(N_TRIALS):
             response_times.append(round(res_t * 1000))
     response_times.pop(0)
     # evaluate the response
-    [resp_eval, avg_rt] = eval_resp(cue_image,
-                                             tilt_images,
-                                             change_times,
-                                             response_times)
+    [instant_perf, avg_rt] = eval_resp(cue_image,
+                                       tilt_images,
+                                       change_times,
+                                       response_times)
     if np.isnan(avg_rt):
-        print(f"Perf:{int(resp_eval):3d}%   avgRT:  nan    ", end="")
+        print(f"Perf:{int(instant_perf):3d}%   avgRT:  nan    ", end="")
     else:
-        print(f"Perf:{int(resp_eval):3d}%   avgRT:{int(avg_rt):4d}ms   ",
+        print(f"Perf:{int(instant_perf):3d}%   avgRT:{int(avg_rt):4d}ms   ",
               end="")
 
     # -------------------------------------------------
@@ -454,7 +454,7 @@ for itrial in range(N_TRIALS):
                   'tilt_directions': [tilt_dirs],
                   'tilt_magnitude': [tilt_mag],
                   'avg_rt': [avg_rt],
-                  'response_evaluation': [resp_eval],
+                  'instan_performance': [instant_perf],
                   'cummulative_performance': [np.nan],
                   'running_performance': [np.nan]}
     # convert to data frame
