@@ -113,8 +113,8 @@ command_keys = {"quit_key": "escape", "response_key": "space"}
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
-image1_directory = os.path.join("images", "face_tilt0.png")
-image2_directory = os.path.join("images", "house_tilt0.png")
+image1_directory = os.path.join("image", "face_tilt0.png")
+image2_directory = os.path.join("image", "house_tilt0.png")
 
 # size [deg]
 size_factor = 7
@@ -311,13 +311,13 @@ for itrial in range(N_TRIALS):
     print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ", end="")
 
     # load the changed image
-    image3_directory1cw = os.path.join("images",
+    image3_directory1cw = os.path.join("image",
                                        f"face_tilt{tilt_mag}_CW.png")
-    image3_directory1ccw = os.path.join("images",
+    image3_directory1ccw = os.path.join("image",
                                         f"face_tilt{tilt_mag}_CCW.png")
-    image3_directory2cw = os.path.join("images",
+    image3_directory2cw = os.path.join("image",
                                        f"house_tilt{tilt_mag}_CW.png")
-    image3_directory2ccw = os.path.join("images",
+    image3_directory2ccw = os.path.join("image",
                                         f"house_tilt{tilt_mag}_CCW.png")
 
     rel_image3_1cw = visual.ImageStim(win,
