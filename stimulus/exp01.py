@@ -454,7 +454,7 @@ for itrial in range(N_TRIALS):
                   'tilt_directions': [tilt_dirs],
                   'tilt_magnitude': [tilt_mag],
                   'avg_rt': [avg_rt],
-                  'instan_performance': [instant_perf],
+                  'instant_performance': [instant_perf],
                   'cummulative_performance': [np.nan],
                   'running_performance': [np.nan]}
     # convert to data frame
