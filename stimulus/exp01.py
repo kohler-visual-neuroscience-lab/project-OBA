@@ -479,9 +479,9 @@ for itrial in range(N_TRIALS):
     dfnew.to_json(data_path)
 
     # run the inter-trial period
-    if resp_eval > 66:
+    if instant_perf > 66:
         color = 'limegreen'
-    elif resp_eval > 33:
+    elif instant_perf > 33:
         color = 'orange'
     else:
         color = 'tomato'
