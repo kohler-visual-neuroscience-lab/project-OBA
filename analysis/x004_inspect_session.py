@@ -4,14 +4,13 @@ import numpy as np
 import pandas as pd
 import os
 import cleanplot as cp
-from scipy.stats import ttest_rel
 
 """
 Mohammad Shams <mShamsResearch@gmail.com> Dec 28, 2022
 
-Question: does each frequency tagged image appear contralaterally in the brain?
-The data being tested here is from Subj 0002 while running exp01, recorded on 
-Dec 12, 2022
+- Inspects the recorded behavioral and EEG data of a single session.
+- Generates two figures: behavioral analysis, SSVEP analysis
+
 """
 
 
