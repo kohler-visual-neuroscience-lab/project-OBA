@@ -16,7 +16,7 @@ Dec 12, 2022
 
 
 # /// functions
-def snr_spectrum(psd, noise_n_neighbor_freqs=1, noise_skip_neighbor_freqs=1):
+def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
     # Construct a kernel that calculates the mean of the neighboring
     # frequencies
     averaging_kernel = np.concatenate((
@@ -44,255 +44,200 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=1, noise_skip_neighbor_freqs=1):
     return psd / mean_noise
 
 
-# /// load data
+# ----------------------------------------------------------------------------
+
+# /// LOAD DATA ///
+
 eeg_file = '0002_20221222_025047.mff'
 beh_file = '0002_20221222_145047.json'
 # set the full path to the raw data
 eeg_path = os.path.join('..', 'data', 'rawData', 'test_exp01', eeg_file)
 beh_path = os.path.join('..', 'data', 'rawData', 'test_exp01', beh_file)
-raw = mne.io.read_raw_egi(eeg_path, preload=True)
-
-# /// setup
-raw.info['line_freq'] = 60.
-# set montage
-montage = mne.channels.make_standard_montage('GSN-HydroCel-129')
-raw.set_montage(montage, match_alias=True)
-# set common average reference
-raw.set_eeg_reference('average', projection=False, verbose=False)
-# apply bandpass filter
-raw.filter(l_freq=0.1, h_freq=None, fir_design='firwin', verbose=False)
-
-# /// events
-events = mne.find_events(raw, stim_channel=['CND1', 'CND2', 'CND3', 'CND4'])
-event_id = raw.event_id
-# visualize events
-# fig = mne.viz.plot_events(events, sfreq=raw.info['sfreq'],
-#                           first_samp=raw.first_samp, event_id=event_id)
-# fig.subplots_adjust(right=0.7)  # make room for legend
-
-
-# /// behavior
-# read behavioral data
+eeg = mne.io.read_raw_egi(eeg_path, preload=True)
 beh_data = pd.read_json(beh_path)
-# +++ test +++
-# make sure that number of events (in eeg file) matches the number of trials
-# (in beh file)
-assert events.shape[0] == beh_data.shape[0]
-# ++++++++++++
+# extract subject's ID
+sub_id = beh_file[:4]
+# ----------------------------------------------------------------------------
+
+# /// SETUP BEHAVIORAL DATA ///
+
+# extract number of trials
 n_trials = beh_data.shape[0]
 # convert tilt magnitudes to degrees
 tilt_angle = (beh_data['tilt_magnitude'].values + 1) / 10
+# ----------------------------------------------------------------------------
 
-# /// plot behavioral results
-fig, axs = plt.subplots(3, figsize=(6, 6))
+# /// SETUP EEG DATA ///
 
-# @@@ plot performances over session
-axs[0].plot(beh_data['cummulative_performance'], color='blue')
-axs[0].plot(beh_data['running_performance'], color='tomato')
-cp.trim_axes(axs[0], [0 - 2, n_trials], [0 - 5, 100 + 1])
-axs[0].set_ylabel('Performance (%)')
+eeg.info['line_freq'] = 60.
+# set montage
+montage = mne.channels.make_standard_montage('GSN-HydroCel-129')
+eeg.set_montage(montage, match_alias=True)
+# set common average reference
+eeg.set_eeg_reference('average', projection=False, verbose=False)
+# apply bandpass filter
+eeg.filter(l_freq=0.1, h_freq=None, fir_design='firwin', verbose=False)
 
-# @@@ plot RT over session
-axs[1].plot(beh_data['avg_rt'], 'o', markerfacecolor='k',
-            markeredgecolor='none')
-cp.trim_axes(axs[1], [0 - 2, n_trials], [0 - 50, 1000 + 1])
-axs[1].set_ylabel('RT (ms)')
+# /// extract events
+events = mne.find_events(eeg, stim_channel=['CND1', 'CND2', 'CND3', 'CND4'])
+event_id = eeg.event_id
 
-# @@@ plot tilt angles over session
-axs[2].plot(tilt_angle, color='k')
-cp.trim_axes(axs[2], [0 - 2, n_trials], [0 - .3, 5 + .1])
-axs[2].set_ylabel('Tilt angle (deg)')
-axs[2].set_xlabel('Trials')
+# /// reshape data into epochs
+tmin = 0  # in sec wrt event times
+tmax = 10  # in sec wrt event times
+epochs = mne.Epochs(eeg, events=events,
+                    event_id=[event_id['CND1'], event_id['CND2'],
+                              event_id['CND3'], event_id['CND4']],
+                    tmin=tmin, tmax=tmax, baseline=None, verbose=False)
+
+# /// calculate signal-to-noise ratio (SNR) and power spectral density (PSD)
+tmin = tmin
+tmax = tmax
+fmin = 1.
+fmax = 30.
+sampling_freq = epochs.info['sfreq']
+# calculate PSD
+spectrum = epochs.compute_psd('welch',
+                              n_fft=int(sampling_freq * (tmax - tmin)),
+                              n_overlap=0, n_per_seg=None, tmin=tmin,
+                              tmax=tmax, fmin=fmin, fmax=fmax, window='boxcar',
+                              verbose=False)
+psds, freqs = spectrum.get_data(return_freqs=True)
+# calculate SNR
+snrs = snr_spectrum(psds, noise_n_neighbor_freqs=3,
+                    noise_skip_neighbor_freqs=1)
+# define a freq range
+freq_range = range(np.where(np.floor(freqs) == 1.)[0][0],
+                   np.where(np.ceil(freqs) == fmax - 1)[0][0])
+# average PSD across all trials and all channels within the desired freq range
+psds_plot = 10 * np.log10(psds)
+psds_mean = psds_plot.mean(axis=(0, 1))[freq_range]
+psds_std = psds_plot.std(axis=(0, 1))[freq_range]
+# average SNR across all trials and all channels within the desired freq range
+snr_mean = snrs.mean(axis=(0, 1))[freq_range]
+snr_std = snrs.std(axis=(0, 1))[freq_range]
+
+# /// prepare data for topography maps
+# index the closest frequency bin to stimulation frequency
+stim_freq1 = 7.5
+i_bin_1f1 = np.argmin(abs(freqs - stim_freq1 * 1))
+i_bin_2f1 = np.argmin(abs(freqs - stim_freq1 * 2))
+i_bin_3f1 = np.argmin(abs(freqs - stim_freq1 * 3))
+stim_freq2 = 12
+i_bin_1f2 = np.argmin(abs(freqs - stim_freq2 * 1))
+i_bin_2f2 = np.argmin(abs(freqs - stim_freq2 * 2))
+i_bin_3f2 = np.argmin(abs(freqs - stim_freq2 * 3))
+# index first harmonics of both stimulus frequencies
+# NOTE: the dimensions of snrs are: events/trials x channels x freq_bins
+snrs_1f1 = snrs[:, :, i_bin_1f1]
+snrs_1f2 = snrs[:, :, i_bin_1f2]
+# average across events/trials
+snrs_1f1_avg = snrs_1f1.mean(axis=0)
+snrs_1f2_avg = snrs_1f2.mean(axis=0)
+# ----------------------------------------------------------------------------
+
+# +++ TEST +++
+
+# make sure that number of events (in eeg file) matches the number of trials
+# (in beh file)
+assert events.shape[0] == beh_data.shape[0]
+# ----------------------------------------------------------------------------
+
+#  @@@ PLOT BEHAVIORAL ANALYSES @@@
+
+_, axs = plt.subplots(4, 2, figsize=(10, 8), width_ratios=[3, 1])
+cp.prep4ai()
+
+# events as a function of trials
+x_evnt1 = np.nonzero(events[:, 2] == 1)
+axs[0, 0].plot(x_evnt1, 1 * np.ones(len(x_evnt1)), 'o',
+               markerfacecolor='r', markeredgecolor='none')
+x_evnt2 = np.nonzero(events[:, 2] == 2)
+axs[0, 0].plot(x_evnt2, 2 * np.ones(len(x_evnt2)), 'o',
+               markerfacecolor='g', markeredgecolor='none')
+x_evnt3 = np.nonzero(events[:, 2] == 3)
+axs[0, 0].plot(x_evnt3, 3 * np.ones(len(x_evnt3)), 'o',
+               markerfacecolor='b', markeredgecolor='none')
+x_evnt4 = np.nonzero(events[:, 2] == 4)
+axs[0, 0].plot(x_evnt4, 4 * np.ones(len(x_evnt4)), 'o',
+               markerfacecolor='m', markeredgecolor='none')
+axs[0, 0].set(yticks=[1, 2, 3, 4],
+              yticklabels=['CND1', 'CND2', 'CND3', 'CND4'],
+              ylabel='Events', xlim=[0 - 2, n_trials], ylim=[1 - .5, 4.5])
+
+# performances over session
+axs[1, 0].plot(beh_data['cummulative_performance'], color='blue')
+axs[1, 0].plot(beh_data['running_performance'], color='tomato')
+axs[1, 0].set(ylabel='Performance [%]',
+              xlim=[0 - 2, n_trials], ylim=[0 - 5, 100])
+cp.trim_axes(axs[1, 0])
+
+# RT over session
+axs[2, 0].plot(beh_data['avg_rt'], 'o', markerfacecolor='k',
+               markeredgecolor='none')
+axs[2, 0].set_yticks(range(0, 1000 + 1, 250))
+axs[2, 0].set(ylabel='RT [ms]',
+              xlim=[0 - 2, n_trials], ylim=[0 - 50, 1000])
+cp.trim_axes(axs[2, 0])
+
+# tilt angles over session
+axs[3, 0].plot(tilt_angle, color='k')
+axs[3, 0].set(xlabel='Trials', ylabel='Tilt angle [deg]',
+              xlim=[0 - 2, n_trials], ylim=[0 - .3, 6])
+cp.trim_axes(axs[3, 0])
+
+#  leave this subplot empty
+axs[0, 1].axis('off')
+
+#  leave this subplot empty
+axs[1, 1].axis('off')
+
+# RT histogram
+hist_bins = range(0, 1000, 100)
+axs[2, 1].hist(beh_data['avg_rt'], facecolor='k', bins=hist_bins)
+axs[2, 1].set_xticks(range(0, 1000 + 1, 250))
+axs[2, 1].set(xticks=range(0, 1000 + 1, 250),
+              xlabel='RT [ms]', ylabel='Count',
+              xlim=[0 - 30, 1000], ylim=[0 - .5, 30])
+cp.trim_axes(axs[2, 1])
+
+#  leave this subplot empty
+axs[3, 1].axis('off')
+
 plt.show()
+# ----------------------------------------------------------------------------
 
-# # times are wrt event times
-# tmin = 0  # in sec
-# tmax = 8  # in sec
-# epochs = mne.Epochs(raw,
-#                     events=events,
-#                     event_id=[event_id['cnd1'], event_id['cnd2'],
-#                               event_id['cnd3'], event_id['cnd4']],
-#                     tmin=tmin, tmax=tmax, baseline=None, verbose=False)
-# tmin = tmin
-# tmax = tmax
-# fmin = 1.
-# fmax = 50.
-# sfreq = epochs.info['sfreq']
-# spectrum = epochs.compute_psd('welch', n_fft=int(sfreq * (tmax - tmin)),
-#                               n_overlap=0, n_per_seg=None, tmin=tmin,
-#                               tmax=tmax, fmin=fmin, fmax=fmax, window='boxcar',
-#                               verbose=False)
-# psds, freqs = spectrum.get_data(return_freqs=True)
-# snrs = snr_spectrum(psds, noise_n_neighbor_freqs=3,
-#                     noise_skip_neighbor_freqs=1)
-#
-# # find index of frequency bin closest to stimulation frequency
-# stim_freq1 = 7.5
-# stim_freq2 = 12
-# i_bin_1f1 = np.argmin(abs(freqs - stim_freq1))
-# i_bin_2f1 = np.argmin(abs(freqs - stim_freq1 * 2))
-# i_bin_3f1 = np.argmin(abs(freqs - stim_freq1 * 3))
-# i_bin_1f2 = np.argmin(abs(freqs - stim_freq2))
-# i_bin_2f2 = np.argmin(abs(freqs - stim_freq2 * 2))
-# i_bin_3f2 = np.argmin(abs(freqs - stim_freq2 * 3))
-#
-# i_trial_c1 = np.where(epochs.events[:, 2] == event_id['cnd1'])[0]
-# i_trial_c2 = np.where(epochs.events[:, 2] == event_id['cnd2'])[0]
-# i_trial_c3 = np.where(epochs.events[:, 2] == event_id['cnd3'])[0]
-# i_trial_c4 = np.where(epochs.events[:, 2] == event_id['cnd4'])[0]
-#
-# # get average SNR at xx Hz for ALL channels
-# freq = '1'
-#
-# cnd1_1 = snrs[i_trial_c1, :, i_bin_1f2].mean(axis=0)
-# cnd2_1 = snrs[i_trial_c2, :, i_bin_1f2].mean(axis=0)
-# cnd3_1 = snrs[i_trial_c3, :, i_bin_1f2].mean(axis=0)
-# cnd4_1 = snrs[i_trial_c4, :, i_bin_1f2].mean(axis=0)
-#
-# cnd1_2 = snrs[i_trial_c1, :, i_bin_2f2].mean(axis=0)
-# cnd2_2 = snrs[i_trial_c2, :, i_bin_2f2].mean(axis=0)
-# cnd3_2 = snrs[i_trial_c3, :, i_bin_2f2].mean(axis=0)
-# cnd4_2 = snrs[i_trial_c4, :, i_bin_2f2].mean(axis=0)
-#
-# cnd1_3 = snrs[i_trial_c1, :, i_bin_3f2].mean(axis=0)
-# cnd2_3 = snrs[i_trial_c2, :, i_bin_3f2].mean(axis=0)
-# cnd3_3 = snrs[i_trial_c3, :, i_bin_3f2].mean(axis=0)
-# cnd4_3 = snrs[i_trial_c4, :, i_bin_3f2].mean(axis=0)
-# # ==================================
-# # plot SNR topography maps for the 1st harmonic
-# # ==================================
-# vlim1_13 = np.min([cnd1_1, cnd3_1])
-# vlim2_13 = np.max([cnd1_1, cnd3_1])
-# vlim1_24 = np.min([cnd2_1, cnd4_1])
-# vlim2_24 = np.max([cnd2_1, cnd4_1])
-# fig, ax = plt.subplots(2, 2)
-# fig.suptitle(f"Subject: {data_path[0:4]}")
-# ax[0, 0].set_title(f'FH_F_1f{freq}')
-# ax[0, 1].set_title(f'HF_F_1f{freq}')
-# ax[1, 0].set_title(f'FH_H_1f{freq}')
-# ax[1, 1].set_title(f'HF_H_1f{freq}')
-# mne.viz.plot_topomap(cnd1_1, epochs.info, axes=ax[0, 0],
-#                      vlim=(vlim1_13, vlim2_13), show=False)
-# mne.viz.plot_topomap(cnd2_1, epochs.info, axes=ax[0, 1],
-#                      vlim=(vlim1_24, vlim2_24), show=False)
-# mne.viz.plot_topomap(cnd3_1, epochs.info, axes=ax[1, 0],
-#                      vlim=(vlim1_13, vlim2_13), show=False)
-# mne.viz.plot_topomap(cnd4_1, epochs.info, axes=ax[1, 1],
-#                      vlim=(vlim1_24, vlim2_24), show=False)
-# plt.savefig(f'topomap_1f{freq}_{data_path[0:4]}.png')
-# # ==================================
-# # plot SNR topography maps for the 2nd harmonic
-# # ==================================
-# vlim1_13 = np.min([cnd1_2, cnd3_2])
-# vlim2_13 = np.max([cnd1_2, cnd3_2])
-# vlim1_24 = np.min([cnd2_2, cnd4_2])
-# vlim2_24 = np.max([cnd2_2, cnd4_2])
-# fig, ax = plt.subplots(2, 2)
-# fig.suptitle(f"Subject: {data_path[0:4]}")
-# ax[0, 0].set_title(f'FH_F_2f{freq}')
-# ax[0, 1].set_title(f'HF_F_2f{freq}')
-# ax[1, 0].set_title(f'FH_H_2f{freq}')
-# ax[1, 1].set_title(f'HF_H_2f{freq}')
-# mne.viz.plot_topomap(cnd1_2, epochs.info, axes=ax[0, 0],
-#                      vlim=(vlim1_13, vlim2_13), show=False)
-# mne.viz.plot_topomap(cnd2_2, epochs.info, axes=ax[0, 1],
-#                      vlim=(vlim1_24, vlim2_24), show=False)
-# mne.viz.plot_topomap(cnd3_2, epochs.info, axes=ax[1, 0],
-#                      vlim=(vlim1_13, vlim2_13), show=False)
-# mne.viz.plot_topomap(cnd4_2, epochs.info, axes=ax[1, 1],
-#                      vlim=(vlim1_24, vlim2_24), show=False)
-# plt.savefig(f'topomap_2f{freq}_{data_path[0:4]}.png')
-# # ==================================
-# # plot SNR topography maps for the 3rd harmonic
-# # ==================================
-# vlim1_13 = np.min([cnd1_3, cnd3_3])
-# vlim2_13 = np.max([cnd1_3, cnd3_3])
-# vlim1_24 = np.min([cnd2_3, cnd4_3])
-# vlim2_24 = np.max([cnd2_3, cnd4_3])
-# fig, ax = plt.subplots(2, 2)
-# fig.suptitle(f"Subject: {data_path[0:4]}")
-# ax[0, 0].set_title(f'FH_F_3f{freq}')
-# ax[0, 1].set_title(f'HF_F_3f{freq}')
-# ax[1, 0].set_title(f'FH_H_3f{freq}')
-# ax[1, 1].set_title(f'HF_H_3f{freq}')
-# mne.viz.plot_topomap(cnd1_3, epochs.info, axes=ax[0, 0],
-#                      vlim=(vlim1_13, vlim2_13), show=False)
-# mne.viz.plot_topomap(cnd2_3, epochs.info, axes=ax[0, 1],
-#                      vlim=(vlim1_24, vlim2_24), show=False)
-# mne.viz.plot_topomap(cnd3_3, epochs.info, axes=ax[1, 0],
-#                      vlim=(vlim1_13, vlim2_13), show=False)
-# mne.viz.plot_topomap(cnd4_3, epochs.info, axes=ax[1, 1],
-#                      vlim=(vlim1_24, vlim2_24), show=False)
-# plt.savefig(f'topomap_3f{freq}_{data_path[0:4]}.png')
-# # ==================================
-# # plot SNR difference maps for the first harmonic
-# # ==================================
-# if freq == '1':
-#     face_boost = cnd1_1 - cnd3_1
-#     house_boost = cnd4_1 - cnd2_1
-# elif freq == '2':
-#     face_boost = cnd2_1 - cnd4_1
-#     house_boost = cnd3_1 - cnd1_1
-# else:
-#     print("### Requested frequency is out of range. ###")
-#     face_boost = None
-#     house_boost = None
-#
-# vlim1_F = np.min(face_boost)
-# vlim2_F = np.max(face_boost)
-# vlim1_H = np.min(house_boost)
-# vlim2_H = np.max(house_boost)
-# fig, ax = plt.subplots(1, 2)
-# fig.suptitle(f"Subject: {data_path[0:4]}")
-# ax[0].set_title(f'Face_boost_1f{freq}')
-# ax[1].set_title(f'House_boost_1f{freq}')
-# mne.viz.plot_topomap(face_boost, epochs.info, axes=ax[0], show=False,
-#                      vlim=(vlim1_F, vlim2_F))
-# mne.viz.plot_topomap(house_boost, epochs.info, axes=ax[1], show=False,
-#                      vlim=(vlim1_H, vlim2_H))
-# plt.savefig(f'topomap_diff_1f{freq}_{data_path[0:4]}.png')
-# # ==================================
-# # plot SNR difference maps (rms average across harmonics)
-# # ==================================
-# cnd1_rms = np.empty(len(cnd1_1))
-# cnd2_rms = np.empty(len(cnd1_1))
-# cnd3_rms = np.empty(len(cnd1_1))
-# cnd4_rms = np.empty(len(cnd1_1))
-# cnd1_rms[:] = np.nan
-# cnd2_rms[:] = np.nan
-# cnd3_rms[:] = np.nan
-# cnd4_rms[:] = np.nan
-# for i in range(len(cnd1_1)):
-#     cnd1_rms[i] = np.sqrt(np.mean(np.power([cnd1_1[i], cnd1_2[i], cnd1_3[i]],
-#                                            2)))
-#     cnd2_rms[i] = np.sqrt(np.mean(np.power([cnd2_1[i], cnd2_2[i], cnd2_3[i]],
-#                                            2)))
-#     cnd3_rms[i] = np.sqrt(np.mean(np.power([cnd3_1[i], cnd3_2[i], cnd3_3[i]],
-#                                            2)))
-#     cnd4_rms[i] = np.sqrt(np.mean(np.power([cnd4_1[i], cnd4_2[i], cnd4_3[i]],
-#                                            2)))
-# if freq == '1':
-#     face_boost = cnd1_rms - cnd3_rms
-#     house_boost = cnd4_rms - cnd2_rms
-# elif freq == '2':
-#     face_boost = cnd2_rms - cnd4_rms
-#     house_boost = cnd3_rms - cnd1_rms
-# else:
-#     print("### Requested frequency is out of range. ###")
-#     face_boost = None
-#     house_boost = None
-#
-# vlim1_F = np.min(face_boost)
-# vlim2_F = np.max(face_boost)
-# vlim1_H = np.min(house_boost)
-# vlim2_H = np.max(house_boost)
-#
-# fig, ax = plt.subplots(1, 2)
-# fig.suptitle(f"Subject: {data_path[0:4]}")
-# ax[0].set_title(f'Face_boost_f{freq}')
-# ax[1].set_title(f'House_boost_f{freq}')
-# mne.viz.plot_topomap(face_boost, epochs.info, axes=ax[0], show=False,
-#                      vlim=(vlim1_F, vlim2_F))
-# mne.viz.plot_topomap(house_boost, epochs.info, axes=ax[1], show=False,
-#                      vlim=(vlim1_H, vlim2_H))
-# plt.savefig(f'topomap_diff_123f{freq}_{data_path[0:4]}.png')
+# @@@ PLOT EEG DATA ANALYSES @@@
+
+fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+fig.suptitle(f'Subject ID: {sub_id} — All channels')
+cp.prep4ai()
+
+# PSD spectrum
+axes[0, 0].plot(freqs[freq_range], psds_mean, color='k')
+axes[0, 0].fill_between(
+    freqs[freq_range], psds_mean - psds_std, psds_mean + psds_std,
+    color='k', alpha=.2)
+axes[0, 0].set(ylabel='PSD [dB]', xlim=[fmin, fmax])
+cp.trim_axes(axes[0, 0])
+
+# SNR spectrum
+axes[1, 0].plot(freqs[freq_range], snr_mean, color='k')
+axes[1, 0].fill_between(
+    freqs[freq_range], snr_mean - snr_std, snr_mean + snr_std,
+    color='k', alpha=.2)
+axes[1, 0].set(xlabel='Frequency [Hz]', ylabel='SNR',
+               xlim=[fmin, fmax], ylim=[-1.5, 10])
+cp.trim_axes(axes[1, 0])
+
+# topography maps
+mne.viz.plot_topomap(snrs_1f1_avg, epochs.info, vlim=(1, None),
+                     axes=axes[0, 1])
+axes[0, 1].set(title='1f1')
+
+mne.viz.plot_topomap(snrs_1f2_avg, epochs.info, vlim=(1, None),
+                     axes=axes[1, 1])
+axes[1, 1].set(title='1f2')
+
+plt.show()
+# ----------------------------------------------------------------------------
