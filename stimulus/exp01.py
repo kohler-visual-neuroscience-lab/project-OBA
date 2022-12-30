@@ -11,10 +11,10 @@ the two images appear on each side of the fixation cross and flicker
 at two different frequencies.
 
 There are four conditions:
-    cnd 1: face left, house right, attend face
-    cnd 2: house left, face right, attend face
-    cnd 3: face left, house right, attend house
-    cnd 4: face left, house right, attend house
+    CND1: FH(F); face left, house right, attend face
+    CND2: HF(F); house left, face right, attend face
+    CND3: FH(H); face left, house right, attend house
+    CND4: HF(H); face left, house right, attend house
 
 """
 from psychopy import event, visual, core
