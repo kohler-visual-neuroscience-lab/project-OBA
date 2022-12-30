@@ -142,7 +142,7 @@ snrs_1f2_avg = snrs_1f2.mean(axis=0)
 assert events.shape[0] == beh_data.shape[0]
 # ----------------------------------------------------------------------------
 
-#  @@@ PLOT BEHAVIORAL ANALYSES @@@
+# @@@ PLOT BEHAVIORAL ANALYSES @@@
 
 _, axs = plt.subplots(4, 2, figsize=(10, 8), width_ratios=[3, 1])
 cp.prep4ai()
@@ -185,10 +185,10 @@ axs[3, 0].set(xlabel='Trials', ylabel='Tilt angle [deg]',
               xlim=[0 - 2, n_trials], ylim=[0 - .3, 6])
 cp.trim_axes(axs[3, 0])
 
-#  leave this subplot empty
+# leave this subplot empty
 axs[0, 1].axis('off')
 
-#  leave this subplot empty
+# leave this subplot empty
 axs[1, 1].axis('off')
 
 # RT histogram
@@ -200,7 +200,7 @@ axs[2, 1].set(xticks=range(0, 1000 + 1, 250),
               xlim=[0 - 30, 1000], ylim=[0 - .5, 30])
 cp.trim_axes(axs[2, 1])
 
-#  leave this subplot empty
+# leave this subplot empty
 axs[3, 1].axis('off')
 
 plt.show()
