@@ -18,7 +18,7 @@ There are four conditions:
 
 """
 from psychopy import event, visual, core
-import lib as sup
+from lib import stim_flow_control as sfc
 import gen_random_path as gen_path
 import pandas as pd
 import numpy as np
@@ -59,8 +59,8 @@ try:
 except:
     iblock = 1
     # create file name
-    date = sup.get_date()
-    time = sup.get_time()
+    date = sfc.get_date()
+    time = sfc.get_time()
     file_name = f"{subID}_{date}_{time}.json"
     # create a dictionary of variables to be saved
     trial_dict = {'last_block_num': [iblock],
@@ -97,9 +97,9 @@ TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
 # configure the monitor and the stimulus window
-mon = sup.config_mon_dell()
-win = sup.config_win(mon=mon, fullscr=full_screen, screen=screen_num)
-sup.test_refresh_rate(win, REF_RATE)
+mon = sfc.config_mon_dell()
+win = sfc.config_win(mon=mon, fullscr=full_screen, screen=screen_num)
+sfc.test_refresh_rate(win, REF_RATE)
 
 # fixation cross
 FIX_SIZE = .7
@@ -170,7 +170,7 @@ np.random.shuffle(irr_image1_pos_x)
 irr_image2_pos_x = -irr_image1_pos_x
 
 # show a message before the block begins
-sup.block_msg(win, iblock, command_keys)
+sfc.block_msg(win, iblock, command_keys)
 
 # hide the cursor
 mouse = event.Mouse(win=win, visible=False)
@@ -301,7 +301,7 @@ for itrial in range(N_TRIALS):
         tilt_change = 0
     else:
         # calculate what titl angle (magnitude) to use
-        tilt_change = sup.cal_next_tilt(goal_perf=80, run_perf=prev_run_perf)
+        tilt_change = sfc.cal_next_tilt(goal_perf=80, run_perf=prev_run_perf)
         tilt_mag = int(prev_tilt_mag + tilt_change)
         # take care of saturated scenarios
         if tilt_mag > 49:
@@ -360,7 +360,7 @@ for itrial in range(N_TRIALS):
         win.flip()
     # run gap period
     for igap in range(random.choice(gap_dur_list)):
-        sup.draw_fixdot(win=win, size=FIX_SIZE,
+        sfc.draw_fixdot(win=win, size=FIX_SIZE,
                         pos=(FIX_X, FIX_Y),
                         cue=cue_image)
         win.flip()
@@ -413,11 +413,11 @@ for itrial in range(N_TRIALS):
             rel_image1.draw()
 
         # draw irrelevant images conditionally
-        if sup.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
             irr_image1.draw()
-        if sup.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
             irr_image2.draw()
-        sup.draw_fixdot(win=win, size=FIX_SIZE,
+        sfc.draw_fixdot(win=win, size=FIX_SIZE,
                         pos=(FIX_X, FIX_Y),
                         cue=cue_image)
         win.flip()
@@ -486,7 +486,7 @@ for itrial in range(N_TRIALS):
     else:
         color = 'tomato'
     for igap in range(ITI_DUR):
-        sup.draw_probe(win, color)
+        sfc.draw_probe(win, color)
         win.flip()
 
 if iblock == N_BLOCKS:
