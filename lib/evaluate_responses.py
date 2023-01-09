@@ -14,7 +14,7 @@ def eval_resp(cue_image, change_image, tilt_times, resp_times):
         - responsd earlier than 100 ms after tilt (anticipatory resp)
         - respond later than 1000 ms after tilt (late resp)
     :param cue_image: the cued image (one or two)
-    :param change_image: an array of changed/tilted images
+    :param change_image: an array of changed/tilted image
     :param tilt_times:  an array of the change/tilt times
     :param resp_times: an array of response times
     :return: performance and average reaction time
