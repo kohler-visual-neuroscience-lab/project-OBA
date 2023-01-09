@@ -2,7 +2,7 @@
 ***** Object-based attention (OBA) project
 ***** Experiment 01
 
-    Mohammad Shams <m.shams.ahmar@gmail.com>
+    Mohammad Shams <MShamsCBR@gmail.com>
     Initiated on:       2022-11-25
 
 Two superimposed images flicker near the fixation cross and subject's task is
@@ -17,14 +17,14 @@ There are four conditions:
     CND4: HF(H); face left, house right, attend house
 
 """
-from psychopy import event, visual, core
-from lib import stim_flow_control as sfc
-import gen_random_path as gen_path
-import pandas as pd
-import numpy as np
-import random
 import os
+import random
 import gen_events
+import numpy as np
+import pandas as pd
+import gen_random_path as gen_path
+from lib import stim_flow_control as sfc
+from psychopy import event, visual, core
 from evaluate_responses import eval_resp
 
 # from egi_pynetstation.NetStation import NetStation
