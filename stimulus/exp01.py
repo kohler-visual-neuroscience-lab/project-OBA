@@ -26,9 +26,7 @@ import gen_random_path as gen_path
 from lib import stim_flow_control as sfc
 from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
-
-# from egi_pynetstation.NetStation import NetStation
-
+from egi_pynetstation.NetStation import NetStation
 
 # disable the false-positive chained assignment warning
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -37,11 +35,11 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # insert session meta data
 # -------------------------------------------------
 subID = 'test'
-N_BLOCKS = 1
-N_TRIALS = 4  # number of trials per block (must be a factor of FOUR)
-screen_num = 0  # 0: primary    1: secondary
-full_screen = True
-netstation = False  # decide whether to connect with NetStation
+N_BLOCKS = 1  # (4)
+N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
+screen_num = 0  # 0: ctrl room    1: test room
+full_screen = False  # (True/False)
+netstation = False  # (True/False) decide whether to connect with NetStation
 # -------------------------------------------------
 # find out the last recorded block number
 # -------------------------------------------------
@@ -70,9 +68,9 @@ except:
     # write to file
     df.to_json(temp_data)
 # -------------------------------------------------
-# destination file
+# directory configuration
 # -------------------------------------------------
-data_path = os.path.join('data', file_name)
+data_path = os.path.join("..", "data", "raw", file_name)
 # -------------------------------------------------
 # initialize netstation at the beginning of the first block
 # -------------------------------------------------
@@ -109,12 +107,11 @@ FIX_Y = 4
 INSTRUCT_DUR = REF_RATE  # duration of the instruction period [frames]
 
 command_keys = {"quit_key": "backspace", "response_key": "num_insert"}
-# command_keys = {"quit_key": "backspace", "response_key": "num_insert"}
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
-image1_directory = os.path.join("..", "stimulus", "image", "face_tilt0.png")
-image2_directory = os.path.join("..", "stimulus", "image", "house_tilt0.png")
+image1_directory = os.path.join("image", "face_tilt0.png")
+image2_directory = os.path.join("image", "house_tilt0.png")
 
 # size [deg]
 size_factor = 7
@@ -141,7 +138,7 @@ IRR_IMAGE1_POS_Y = -2.5
 IRR_IMAGE2_POS_Y = -2.5
 
 freq1 = 7.5
-freq2 = 12
+freq2 = 24  # 12
 
 # duration of changed-image [frames]
 TILT_DUR = int(REF_RATE / 4)
@@ -179,7 +176,7 @@ acc_trial = (iblock - 1) * N_TRIALS
 
 # create an equal number of trials per condition in current block
 n_trials_per_cnd = int(N_TRIALS / 4)
-cnd_array = np.hstack([np.ones(n_trials_per_cnd, dtype=int),
+cnd_array = np.hstack([np.ones(n_trials_per_cnd, dtype=int) * 1,
                        np.ones(n_trials_per_cnd, dtype=int) * 2,
                        np.ones(n_trials_per_cnd, dtype=int) * 3,
                        np.ones(n_trials_per_cnd, dtype=int) * 4])
@@ -219,9 +216,9 @@ for itrial in range(N_TRIALS):
     cnd = cnd_array[itrial - 1]
     # find out in which order the image appear
     if cnd == 1 or cnd == 3:
-        order = 1  # Face - House
+        order = 1  # image1(Face) - image2(House)
     elif cnd == 2 or cnd == 4:
-        order = 2  # House - Face
+        order = 2  # image2(House) - image1(Face)
     else:
         order = None
         print('Invalid condition number!')
@@ -241,13 +238,13 @@ for itrial in range(N_TRIALS):
         cue_image = None
         print("Invalid condition number!")
 
-    # for now: make sure the left image is tagged with f1 and the other with f2
+    # the left image is tagged with f1 and the other with f2
     if order == 1:
         IRR_IMAGE1_nFRAMES = REF_RATE / freq1
         IRR_IMAGE2_nFRAMES = REF_RATE / freq2
     elif order == 2:
-        IRR_IMAGE1_nFRAMES = REF_RATE / freq2
         IRR_IMAGE2_nFRAMES = REF_RATE / freq1
+        IRR_IMAGE1_nFRAMES = REF_RATE / freq2
     else:
         IRR_IMAGE1_nFRAMES = None
         IRR_IMAGE2_nFRAMES = None
@@ -311,13 +308,13 @@ for itrial in range(N_TRIALS):
     print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ", end="")
 
     # load the changed image
-    image3_directory1cw = os.path.join("..", "stimulus", "image",
+    image3_directory1cw = os.path.join("image",
                                        f"face_tilt{tilt_mag}_CW.png")
-    image3_directory1ccw = os.path.join("..", "stimulus", "image",
+    image3_directory1ccw = os.path.join("image",
                                         f"face_tilt{tilt_mag}_CCW.png")
-    image3_directory2cw = os.path.join("..", "stimulus", "image",
+    image3_directory2cw = os.path.join("image",
                                        f"house_tilt{tilt_mag}_CW.png")
-    image3_directory2ccw = os.path.join("..", "stimulus", "image",
+    image3_directory2ccw = os.path.join("image",
                                         f"house_tilt{tilt_mag}_CCW.png")
 
     rel_image3_1cw = visual.ImageStim(win,
