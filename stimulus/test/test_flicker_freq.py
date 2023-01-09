@@ -39,11 +39,11 @@ REF_RATE = 60
 
 TRIAL_DUR = 300  # duration of a trial in [frames]
 
-image_directory = "images/face.png"
+image_directory = "image/face.png"
 IMAGE_FREQ = 7.5
 IMAGE_DUR = REF_RATE / IMAGE_FREQ
 
-# load images
+# load image
 image = visual.ImageStim(win, image=image_directory, pos=(0, 0))
 
 # set a timer
@@ -63,7 +63,7 @@ image_curr_stat = False  # a flag to determine image appearance status
 
 for iframe in range(TRIAL_DUR):
     sup.escape_session()  # allow force exit with 'escape' button
-    # draw images on certain frames
+    # draw image on certain frames
     if sup.decide_on_show(iframe, IMAGE_DUR):
         image_prev_stat = image_curr_stat
         image_curr_stat = True

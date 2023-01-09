@@ -1,5 +1,5 @@
 """
-to test if the two frequencies tagged with the two images can be seen in XDIVA
+to test if the two frequencies tagged with the two image can be seen in XDIVA
 
 Mohammad Shams
 m.shams.ahmar@gmail.com
@@ -43,8 +43,8 @@ print(f"Measured refresh rate: {actual_fr} Hz")
 NTRIALS = 30  # number of trials
 TRIAL_DUR = 600  # duration of a trial in [frames]
 PAUSE_DUR = 120  # duration of the inter-trial pause
-image1_directory = "images/house.png"
-image2_directory = "images/face.png"
+image1_directory = "image/house.png"
+image2_directory = "image/face.png"
 
 IMAGE1_DUR = REF_RATE / 7.5
 IMAGE2_DUR = REF_RATE / 12
@@ -59,7 +59,7 @@ if netstation:
 try:
     for itrial in range(NTRIALS):
         print(f"starting trial {itrial}...")
-        # load images and randomize their horizontal order
+        # load image and randomize their horizontal order
         image1_xpos = random.choice([+3.5, -3.5])
         image1 = visual.ImageStim(win, image=image1_directory,
                                   pos=(image1_xpos, 0))
@@ -84,7 +84,7 @@ try:
             sup.escape_session()  # allow force exit with 'escape' button
             # add the fixation cross
             sup.draw_fixdot(win=win, size=.7, pos=(0, 0))
-            # draw images on certain frames
+            # draw image on certain frames
             if sup.decide_on_show(iframe, IMAGE1_DUR):
                 image1.draw()
             if sup.decide_on_show(iframe, IMAGE2_DUR):
