@@ -14,9 +14,9 @@ cats = ['face', 'house']
 
 for cat in cats:
     # set the source image path
-    source_path = os.path.join("images", "source", f"{cat}.png")
+    source_path = os.path.join("image", "source", f"{cat}.png")
     # set the save image path
-    save_path = os.path.join("images")
+    save_path = os.path.join("image")
     # read the image
     im = Image.open(source_path)
     # define the span of tilts (degrees)
