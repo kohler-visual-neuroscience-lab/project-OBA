@@ -57,7 +57,7 @@ beh_data = pd.read_json(beh_path)
 
 # ----------------------------------------------------------------------------
 
-# /// SET UP SAVE PATH AND PARAMETERS
+# /// SET UP SAVE PATH AND PARAMETERS ///
 
 save_path = os.path.join('..', 'results')
 # extract subject's ID
