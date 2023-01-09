@@ -446,6 +446,7 @@ for itrial in range(N_TRIALS):
     # -------------------------------------------------
     # create a dictionary of variables to be saved
     trial_dict = {'trial_num': [acc_trial],
+                  'block_num': [iblock],
                   'condition_num': [cnd],
                   'cued_image': [cue_image],
                   'image_order': [order],
