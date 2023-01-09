@@ -1,17 +1,19 @@
 =================================================
-OBA Project (SSVEP)
+OBA Project
 Dec 21, 2022
-Mohammad Shams <m.shams.ahmar@gmail.com>
+Mo Shams MShamsCBR<@gmail.com>
+Amanda Di Pietrantonio <mandad15@my.yorku.ca>
 =================================================
 [1] There will be four blocks of 32 trials.
-[2] Feel free to abort the experiment at any time by pressing the escape button
-.
-[3] Keep fixating at the middle marker as long as it is on the screen.
+[2] Feel free to abort the experiment at any time by pressing the backspace
+button.
+[3] Keep fixating at the marker (+/X) as long as it is on the screen.
 [4] The shape of the fixation marker helps remember the cued image (face: '+',
 house 'x').
 [5] Out of the two superimposed images on top of the fixation marker, attend to
  the one that appeared before the trial began.
-[6] If the cued image tilted, press the spacebar.
-[7] If the cued image did not titled, do nothing.
-[8] A colored circle at the end of each trial shows if the response was correc
-(green) or wrong (red).
+[6] If the cued image tilted, press the insert/0 button.
+[7] If the cued image did not tilt, press no key.
+[8] A coloured circle will appear at the end of the trial that shows how well
+you performed in the current trial. (green - well done, orange - you can do
+better, red - please be more careful).
