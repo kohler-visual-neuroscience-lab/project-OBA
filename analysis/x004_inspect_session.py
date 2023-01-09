@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from lib import cleanplot as cp
 
 """
-MoShams <mShamsAhmar@gmail.com> Dec 28, 2022
+MoShams <MShamsCBR@gmail.com> Dec 28, 2022
 
 - Inspects the recorded behavioral and EEG data of a single session.
 - Generates two figures: behavioral analysis, SSVEP analysis
