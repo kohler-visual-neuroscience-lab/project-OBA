@@ -50,8 +50,8 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 eeg_file = '0002_20221222_025047.mff'
 beh_file = '0002_20221222_145047.json'
 # set the full path to the raw data
-eeg_path = os.path.join('..', 'data', 'rawData', 'test_exp01', eeg_file)
-beh_path = os.path.join('..', 'data', 'rawData', 'test_exp01', beh_file)
+eeg_path = os.path.join('..', 'data', 'raw', 'test_exp01', eeg_file)
+beh_path = os.path.join('..', 'data', 'raw', 'test_exp01', beh_file)
 eeg = mne.io.read_raw_egi(eeg_path, preload=True)
 beh_data = pd.read_json(beh_path)
 
