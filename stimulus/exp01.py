@@ -5,9 +5,9 @@
     Mohammad Shams <MShamsCBR@gmail.com>
     Initiated on:       2022-11-25
 
-Two superimposed images flicker near the fixation cross and subject's task is
-to report a brief tilt in the one of the images. Simultaneously, a copy of
-the two images appear on each side of the fixation cross and flicker
+Two superimposed image flicker near the fixation cross and subject's task is
+to report a brief tilt in the one of the image. Simultaneously, a copy of
+the two image appear on each side of the fixation cross and flicker
 at two different frequencies.
 
 There are four conditions:
@@ -25,7 +25,7 @@ import pandas as pd
 import gen_random_path as gen_path
 from lib import stim_flow_control as sfc
 from psychopy import event, visual, core
-from evaluate_responses import eval_resp
+from lib.evaluate_responses import eval_resp
 
 # from egi_pynetstation.NetStation import NetStation
 
@@ -38,9 +38,9 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # -------------------------------------------------
 subID = 'test'
 N_BLOCKS = 1
-N_TRIALS = 4  # must be a factor of FOUR
+N_TRIALS = 4  # number of trials per block (must be a factor of FOUR)
 screen_num = 0  # 0: primary    1: secondary
-full_screen = False
+full_screen = True
 netstation = False  # decide whether to connect with NetStation
 # -------------------------------------------------
 # find out the last recorded block number
@@ -92,7 +92,7 @@ else:
 # -------------------------------------------------
 # initialize the display and the keyboard
 # -------------------------------------------------
-REF_RATE = 120
+REF_RATE = 60
 TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
@@ -108,13 +108,13 @@ FIX_Y = 4
 
 INSTRUCT_DUR = REF_RATE  # duration of the instruction period [frames]
 
-command_keys = {"quit_key": "escape", "response_key": "space"}
+command_keys = {"quit_key": "backspace", "response_key": "num_insert"}
 # command_keys = {"quit_key": "backspace", "response_key": "num_insert"}
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
-image1_directory = os.path.join("image", "face_tilt0.png")
-image2_directory = os.path.join("image", "house_tilt0.png")
+image1_directory = os.path.join("..", "stimulus", "image", "face_tilt0.png")
+image2_directory = os.path.join("..", "stimulus", "image", "house_tilt0.png")
 
 # size [deg]
 size_factor = 7
@@ -127,7 +127,7 @@ IMAGE_OPACITY = .4
 
 # jittering properties
 JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
-# images keep their positions
+# image keep their positions
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
 REL_IMGPATH_SIGMA = .2
@@ -146,7 +146,7 @@ freq2 = 12
 # duration of changed-image [frames]
 TILT_DUR = int(REF_RATE / 4)
 
-# load images
+# load image
 rel_image1 = visual.ImageStim(win,
                               image=image1_directory,
                               size=IMAGE1_SIZE,
@@ -217,7 +217,7 @@ for itrial in range(N_TRIALS):
     # -------------------------------------------------
     # extract current trial's condition
     cnd = cnd_array[itrial - 1]
-    # find out in which order the images appear
+    # find out in which order the image appear
     if cnd == 1 or cnd == 3:
         order = 1  # Face - House
     elif cnd == 2 or cnd == 4:
@@ -258,7 +258,7 @@ for itrial in range(N_TRIALS):
     # pick the tilting direction for each event
     tilt_dirs = np.random.choice(['CW', 'CCW'], n_total_evnts)
     # ------------------------------------------------- setup end
-    # load irrelevant images
+    # load irrelevant image
     irr_image1 = visual.ImageStim(win,
                                   image=image1_directory,
                                   pos=(irr_image1_pos_x[itrial],
@@ -311,13 +311,13 @@ for itrial in range(N_TRIALS):
     print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ", end="")
 
     # load the changed image
-    image3_directory1cw = os.path.join("image",
+    image3_directory1cw = os.path.join("..", "stimulus", "image",
                                        f"face_tilt{tilt_mag}_CW.png")
-    image3_directory1ccw = os.path.join("image",
+    image3_directory1ccw = os.path.join("..", "stimulus", "image",
                                         f"face_tilt{tilt_mag}_CCW.png")
-    image3_directory2cw = os.path.join("image",
+    image3_directory2cw = os.path.join("..", "stimulus", "image",
                                        f"house_tilt{tilt_mag}_CW.png")
-    image3_directory2ccw = os.path.join("image",
+    image3_directory2ccw = os.path.join("..", "stimulus", "image",
                                         f"house_tilt{tilt_mag}_CCW.png")
 
     rel_image3_1cw = visual.ImageStim(win,
@@ -367,7 +367,7 @@ for itrial in range(N_TRIALS):
     # ------------------
     # main period
     # ------------------
-    # reset the timer in the beginning of the task (super imposed images)
+    # reset the timer in the beginning of the task (super imposed image)
     timer.reset()
 
     if netstation:
@@ -412,7 +412,7 @@ for itrial in range(N_TRIALS):
             rel_image2.draw()
             rel_image1.draw()
 
-        # draw irrelevant images conditionally
+        # draw irrelevant image conditionally
         if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
             irr_image1.draw()
         if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
@@ -465,7 +465,7 @@ for itrial in range(N_TRIALS):
         df = pd.read_json(data_path)
         dfnew = pd.concat([df, dfnew], ignore_index=True)
     # calculate the cumulative performance (all recorded trials)
-    eval_series = dfnew.response_evaluation
+    eval_series = dfnew.instant_performance
     eval_array = eval_series.values
     cum_perf = round(sum(eval_array) / len(eval_array), 2)
     print(f"CumPerf:{cum_perf:6.2f}%   ", end="")

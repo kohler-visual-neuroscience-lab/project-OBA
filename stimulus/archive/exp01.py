@@ -5,9 +5,9 @@
     Mohammad Shams <m.shams.ahmar@gmail.com>
     Initiated on:       2022-11-25
 
-Two superimposed images flicker near the fixation cross and subject's task is
-to report a brief tilt in the one of the images. Simultaneously, a copy of
-the two images appear on each side of the fixation cross and flicker
+Two superimposed image flicker near the fixation cross and subject's task is
+to report a brief tilt in the one of the image. Simultaneously, a copy of
+the two image appear on each side of the fixation cross and flicker
 at two different frequencies.
 
 There are four conditions:
@@ -101,8 +101,8 @@ INSTRUCT_DUR = 60  # duration of the instruction period [frames]
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
-image1_directory = os.path.join("../images", "face_tilt0.png")
-image2_directory = os.path.join("../images", "house_tilt0.png")
+image1_directory = os.path.join("../image", "face_tilt0.png")
+image2_directory = os.path.join("../image", "house_tilt0.png")
 
 # size [deg]
 size_factor = 7
@@ -114,7 +114,7 @@ IMAGE3_SIZE = (size_factor, size_factor)
 IMAGE_OPACITY = .4
 
 # jittering properties
-JITTER_REPETITION = 12  # number of frames where the relevant images keep
+JITTER_REPETITION = 12  # number of frames where the relevant image keep
 # their positions
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
@@ -141,7 +141,7 @@ change_frame_list = list(range(480, 540 + 1, 1))
 # duration of changed-image [frames]
 CHANGE_DUR = 18
 
-# load images
+# load image
 rel_image1 = visual.ImageStim(win,
                               image=image1_directory,
                               size=IMAGE1_SIZE,
@@ -204,7 +204,7 @@ for itrial in range(N_TRIALS):
     # -------------------------------------------------
     # extract current trial's condition
     cnd = cnd_array[itrial - 1]
-    # find out in which order the images appear
+    # find out in which order the image appear
     if cnd == 1 or cnd == 3:
         order = 1  # Face - House
     elif cnd == 2 or cnd == 4:
@@ -255,7 +255,7 @@ for itrial in range(N_TRIALS):
     print(f"Cnd: {cnd}   ", end="")
     # ------------------------------------------------- setup end
 
-    # load irrelevant images
+    # load irrelevant image
     irr_image1 = visual.ImageStim(win,
                                   image=image1_directory,
                                   pos=(irr_image1_pos_x[itrial],
@@ -312,10 +312,10 @@ for itrial in range(N_TRIALS):
 
     # load the changed image
     if change_image == 1:
-        image3_directory = os.path.join("../images",
+        image3_directory = os.path.join("../image",
                                         f"face_tilt{tilt_mag}_{tilt_dir}.png")
     else:
-        image3_directory = os.path.join("../images",
+        image3_directory = os.path.join("../image",
                                         f"house_tilt{tilt_mag}_{tilt_dir}.png")
 
     rel_image3 = visual.ImageStim(win,
@@ -391,7 +391,7 @@ for itrial in range(N_TRIALS):
         if iframe == change_frame:
             change_time = timer.getTime()
 
-        # draw irrelevant images conditionally
+        # draw irrelevant image conditionally
         if sup.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
             irr_image1.draw()
         if sup.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
