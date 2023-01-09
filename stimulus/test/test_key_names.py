@@ -1,5 +1,5 @@
 from psychopy import event, visual, core
-import lib as sup
+from lib import stim_flow_control as sup
 import pandas as pd
 import numpy as np
 
