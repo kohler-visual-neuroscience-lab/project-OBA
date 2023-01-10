@@ -16,9 +16,11 @@
 # ======================
 # ----- added by MoShams
 *.json
-*.mff
 *.png
 *.pdf
 *.ai
-/stimulus/images
 *.pyc
+/data
+/stimulus/image
+!/stimulus/image/.gitkeep
+!*/stimulus/image/source
