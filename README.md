@@ -15,7 +15,8 @@ Q2: Does attention to an instance of an object transfer to other instances
 of the object across space?
 
 Q3: Does attention to an instance of an object transfer to other images 
-typically (or artificially by training) associated to that object across space?
+typically (or artificially by training) associated with that object across 
+space?
 
 ---
 
