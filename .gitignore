@@ -15,12 +15,11 @@
 
 # ======================
 # ----- added by MoShams
-#*.json
-*.png
+*.json
 *.pdf
 *.ai
 *.pyc
-/data
-/stimulus/image
-!/stimulus/image/.gitkeep
-!*/stimulus/image/source
+data
+result
+stimulus/image/*
+!stimulus/image/source
