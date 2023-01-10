@@ -59,7 +59,7 @@ beh_data = pd.read_json(beh_path)
 
 # /// SET UP SAVE PATH AND PARAMETERS ///
 
-save_path = os.path.join('..', 'results')
+save_path = os.path.join('..', 'result')
 # extract subject's ID
 sub_id = beh_file[:4]
 # extract recoding date
