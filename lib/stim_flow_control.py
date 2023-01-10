@@ -90,8 +90,8 @@ def get_time():
     return now.strftime("%H%M%S")
 
 
-def block_msg(win, iblock, command_keys):
-    msg = f"< Block {iblock} >" \
+def block_msg(win, iblock, nblocks, command_keys):
+    msg = f"< Block {iblock}/{nblocks} >" \
           f"\n\nReady to begin?"
     message = visual.TextStim(win,
                               text=msg,
@@ -101,7 +101,7 @@ def block_msg(win, iblock, command_keys):
     message.pos = (0, 0)
     message.draw()
 
-    commands = '[Backspace]: Quit\t[0/Insert]: Begin'
+    commands = '[Backspace]: Quit\t\t[0/Insert]: Begin'
     cmnd_text = visual.TextStim(win,
                                 text=commands,
                                 color='black',
