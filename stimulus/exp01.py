@@ -26,7 +26,7 @@ import gen_random_path as gen_path
 from lib import stim_flow_control as sfc
 from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
-from egi_pynetstation.NetStation import NetStation
+# from egi_pynetstation.NetStation import NetStation
 
 # disable the false-positive chained assignment warning
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -34,12 +34,13 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # -------------------------------------------------
 # insert session meta data
 # -------------------------------------------------
-subID = 'test'
-N_BLOCKS = 1  # (4)
+subID = "test"
+N_BLOCKS = 2  # (4)
 N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 0  # 0: ctrl room    1: test room
-full_screen = False  # (True/False)
+full_screen = True  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
+keyboard = "mac"  # numpad/mac
 # -------------------------------------------------
 # find out the last recorded block number
 # -------------------------------------------------
@@ -54,7 +55,7 @@ try:
     df['last_block_num'][0] = iblock
     # write to file
     df.to_json(temp_data)
-except:
+except ValueError:
     iblock = 1
     # create file name
     date = sfc.get_date()
@@ -65,8 +66,7 @@ except:
                   'file_name': [file_name]}
     # convert to data frame
     df = pd.DataFrame(trial_dict)
-    # write to file
-    df.to_json(temp_data)
+    # Note: saving is postponed to the end of the first trial
 # -------------------------------------------------
 # directory configuration
 # -------------------------------------------------
@@ -90,7 +90,7 @@ else:
 # -------------------------------------------------
 # initialize the display and the keyboard
 # -------------------------------------------------
-REF_RATE = 60
+REF_RATE = 120
 TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
@@ -106,7 +106,12 @@ FIX_Y = 4
 
 INSTRUCT_DUR = REF_RATE  # duration of the instruction period [frames]
 
-command_keys = {"quit_key": "backspace", "response_key": "num_insert"}
+if keyboard == "numpad":
+    command_keys = {"quit_key": "backspace", "response_key": "num_insert"}
+elif keyboard == "mac":
+    command_keys = {"quit_key": "escape", "response_key": "space"}
+else:
+    raise NameError(f"Keyboard name '{keyboard}' not recognized.")
 # -------------------------------------------------
 # set image properties and load
 # -------------------------------------------------
@@ -124,7 +129,7 @@ IMAGE_OPACITY = .4
 
 # jittering properties
 JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
-# image keep their positions
+# images keep their positions (equal to 100 ms at 60 Hz)
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
 REL_IMGPATH_SIGMA = .2
@@ -141,7 +146,7 @@ freq1 = 7.5
 freq2 = 24  # 12
 
 # duration of changed-image [frames]
-TILT_DUR = int(REF_RATE / 4)
+TILT_DUR = int(REF_RATE / 5)  # equal to 200 ms at 60 Hz
 
 # load image
 rel_image1 = visual.ImageStim(win,
@@ -161,13 +166,8 @@ gap_dur_list = range(int(REF_RATE / 2), REF_RATE + 1, 1)
 # -------------------------------------------------
 timer = core.Clock()
 
-irr_image1_pos_x = np.concatenate((np.repeat(IRR_IMAGE_X, N_TRIALS / 2),
-                                   np.repeat(-IRR_IMAGE_X, N_TRIALS / 2)))
-np.random.shuffle(irr_image1_pos_x)
-irr_image2_pos_x = -irr_image1_pos_x
-
 # show a message before the block begins
-sfc.block_msg(win, iblock, command_keys)
+sfc.block_msg(win, iblock, N_BLOCKS, command_keys)
 
 # hide the cursor
 mouse = event.Mouse(win=win, visible=False)
@@ -240,15 +240,19 @@ for itrial in range(N_TRIALS):
 
     # the left image is tagged with f1 and the other with f2
     if order == 1:
+        irr_image1_pos_x = -IRR_IMAGE_X  # face left
         IRR_IMAGE1_nFRAMES = REF_RATE / freq1
         IRR_IMAGE2_nFRAMES = REF_RATE / freq2
     elif order == 2:
+        irr_image1_pos_x = IRR_IMAGE_X  # face right
         IRR_IMAGE2_nFRAMES = REF_RATE / freq1
         IRR_IMAGE1_nFRAMES = REF_RATE / freq2
     else:
+        irr_image1_pos_x = None
         IRR_IMAGE1_nFRAMES = None
         IRR_IMAGE2_nFRAMES = None
         print("Invalid image order!")
+    irr_image2_pos_x = -irr_image1_pos_x  # house on the other side
 
     # pick the tilting image for each event , independently of the cued image
     tilt_images = np.random.choice([1, 2], n_total_evnts)
@@ -258,13 +262,13 @@ for itrial in range(N_TRIALS):
     # load irrelevant image
     irr_image1 = visual.ImageStim(win,
                                   image=image1_directory,
-                                  pos=(irr_image1_pos_x[itrial],
+                                  pos=(irr_image1_pos_x,
                                        IRR_IMAGE1_POS_Y),
                                   size=IMAGE1_SIZE,
                                   opacity=IMAGE_OPACITY)
     irr_image2 = visual.ImageStim(win,
                                   image=image2_directory,
-                                  pos=(irr_image2_pos_x[itrial],
+                                  pos=(irr_image2_pos_x,
                                        IRR_IMAGE2_POS_Y),
                                   size=IMAGE2_SIZE,
                                   opacity=IMAGE_OPACITY)
@@ -384,7 +388,7 @@ for itrial in range(N_TRIALS):
             change_times[cur_evnt_n] = round(ch_t * 1000)
             cur_evnt_n += 1
 
-        # if conditions satisfied change the image
+        # if conditions satisfied tilt the image
         if iframe in change_frames:
             if tilt_dirs[cur_evnt_n - 1] == 'CW':
                 if tilt_images[cur_evnt_n - 1] == 1:
@@ -458,7 +462,9 @@ for itrial in range(N_TRIALS):
     # convert to data frame
     dfnew = pd.DataFrame(trial_dict)
     # if not first trial, load the existing data frame and concatenate
-    if acc_trial > 1:
+    if acc_trial == 1:
+        df.to_json(temp_data)  # to keep a record of the block number
+    else:
         df = pd.read_json(data_path)
         dfnew = pd.concat([df, dfnew], ignore_index=True)
     # calculate the cumulative performance (all recorded trials)
