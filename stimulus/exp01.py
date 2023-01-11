@@ -2,13 +2,14 @@
 ***** Object-based attention (OBA) project
 ***** Experiment 01
 
-    Mohammad Shams <MShamsCBR@gmail.com>
-    Initiated on:       2022-11-25
+    Mo Shams <MShamsCBR@gmail.com>
+    Nov 25, 2022
 
-Two superimposed image flicker near the fixation cross and subject's task is
-to report a brief tilt in the one of the image. Simultaneously, a copy of
-the two image appear on each side of the fixation cross and flicker
-at two different frequencies.
+Two superimposed images jitter and subject's task is to report a brief tilt
+in the one of the image. Simultaneously, a copy of each image appears on
+each side of the fixation cross and flicker at two different frequencies.
+The flickering image on the left side will flicker always at f1 Hz, and the
+one on the right side at f2 Hz.
 
 There are four conditions:
     CND1: FH(F); face left, house right, attend face
@@ -26,24 +27,23 @@ import gen_random_path as gen_path
 from lib import stim_flow_control as sfc
 from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
-# from egi_pynetstation.NetStation import NetStation
+from egi_pynetstation.NetStation import NetStation
+# ----------------------------------------------------------------------------
 
-# disable the false-positive chained assignment warning
-pd.options.mode.chained_assignment = None  # default='warn'
+# /// INSERT SESSION'S META DATA ///
 
-# -------------------------------------------------
-# insert session meta data
-# -------------------------------------------------
 subID = "test"
 N_BLOCKS = 2  # (4)
 N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 0  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
-keyboard = "mac"  # numpad/mac
-# -------------------------------------------------
+keyboard = "numpad"  # numpad/mac
+# ----------------------------------------------------------------------------
+
+# /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
+
 # find out the last recorded block number
-# -------------------------------------------------
 temp_data = 'temp.json'
 try:
     # read from file
@@ -67,13 +67,14 @@ except ValueError:
     # convert to data frame
     df = pd.DataFrame(trial_dict)
     # Note: saving is postponed to the end of the first trial
-# -------------------------------------------------
-# directory configuration
-# -------------------------------------------------
+
+# set data directory
 data_path = os.path.join("..", "data", "raw", file_name)
-# -------------------------------------------------
+# ----------------------------------------------------------------------------
+
+# /// CONFIGURE ECI CONNECTION ///
+
 # initialize netstation at the beginning of the first block
-# -------------------------------------------------
 if netstation:
     # Set an IP address for the computer running NetStation as an IPv4 string
     IP_ns = '10.10.10.42'
@@ -87,10 +88,13 @@ if netstation:
     ns.begin_rec()
 else:
     ns = None
-# -------------------------------------------------
+
+# ----------------------------------------------------------------------------
+
+# /// CONFIGURE STIMULUS PARAMETERS AND INPUTS ///
+
 # initialize the display and the keyboard
-# -------------------------------------------------
-REF_RATE = 120
+REF_RATE = 60
 TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
@@ -112,9 +116,8 @@ elif keyboard == "mac":
     command_keys = {"quit_key": "escape", "response_key": "space"}
 else:
     raise NameError(f"Keyboard name '{keyboard}' not recognized.")
-# -------------------------------------------------
+
 # set image properties and load
-# -------------------------------------------------
 image1_directory = os.path.join("image", "face_tilt0.png")
 image2_directory = os.path.join("image", "house_tilt0.png")
 
@@ -143,7 +146,7 @@ IRR_IMAGE1_POS_Y = -2.5
 IRR_IMAGE2_POS_Y = -2.5
 
 freq1 = 7.5
-freq2 = 24  # 12
+freq2 = 12
 
 # duration of changed-image [frames]
 TILT_DUR = int(REF_RATE / 5)  # equal to 200 ms at 60 Hz
@@ -161,9 +164,7 @@ rel_image2 = visual.ImageStim(win,
 # potential gap durations
 gap_dur_list = range(int(REF_RATE / 2), REF_RATE + 1, 1)
 
-# -------------------------------------------------
 # define a timer to measure the change-detection reaction time
-# -------------------------------------------------
 timer = core.Clock()
 
 # show a message before the block begins
@@ -181,10 +182,17 @@ cnd_array = np.hstack([np.ones(n_trials_per_cnd, dtype=int) * 1,
                        np.ones(n_trials_per_cnd, dtype=int) * 3,
                        np.ones(n_trials_per_cnd, dtype=int) * 4])
 np.random.shuffle(cnd_array)
-# #################################################
-#                   TRIAL itrial
-# #################################################
+
+# ----------------------------------------------------------------------------
+
+# /// TRIAL BEGINS ///
+
 for itrial in range(N_TRIALS):
+
+    # --------------------------------
+
+    # /// set up the stimulus behavior in current trial
+
     acc_trial += 1
     print(f"[Trial {acc_trial:03d}]   ", end="")
     if acc_trial > 1:
@@ -209,9 +217,6 @@ for itrial in range(N_TRIALS):
             change_frames = \
                 np.hstack((change_frames, [i + j + 1]))
 
-    # -------------------------------------------------
-    # set up the stimulus behavior in current trial
-    # -------------------------------------------------
     # extract current trial's condition
     cnd = cnd_array[itrial - 1]
     # find out in which order the image appear
@@ -258,8 +263,11 @@ for itrial in range(N_TRIALS):
     tilt_images = np.random.choice([1, 2], n_total_evnts)
     # pick the tilting direction for each event
     tilt_dirs = np.random.choice(['CW', 'CCW'], n_total_evnts)
-    # ------------------------------------------------- setup end
-    # load irrelevant image
+
+    # --------------------------------
+
+    # /// load irrelevant image
+
     irr_image1 = visual.ImageStim(win,
                                   image=image1_directory,
                                   pos=(irr_image1_pos_x,
@@ -337,19 +345,17 @@ for itrial in range(N_TRIALS):
                                        image=image3_directory2ccw,
                                        size=IMAGE3_SIZE,
                                        opacity=IMAGE_OPACITY)
-    # -------------------------------------------------
-    # run the stimulus
-    # -------------------------------------------------
-    # set current event number
+    # --------------------------------
+
+    # /// run the stimulus
+
     cur_evnt_n = 0
-    # ------------------
-    # instruction period
-    # ------------------
-    # run gap period
+
+    # gap period
     for igap in range(random.choice(gap_dur_list)):
         win.flip()
-    # run the cue stimulus
-    # randomly move the cue vertically
+
+    # cue period
     cue_yoffset = random.choice(range(-5, 5))
     for iframe_instruction in range(INSTRUCT_DUR):
         if cue_image == 1:
@@ -359,23 +365,20 @@ for itrial in range(N_TRIALS):
             rel_image2.pos = (0, cue_yoffset)
             rel_image2.draw()
         win.flip()
+
     # run gap period
     for igap in range(random.choice(gap_dur_list)):
         sfc.draw_fixdot(win=win, size=FIX_SIZE,
                         pos=(FIX_X, FIX_Y),
                         cue=cue_image)
         win.flip()
-    # ------------------
-    # main period
-    # ------------------
-    # reset the timer in the beginning of the task (super imposed image)
-    timer.reset()
 
+    # tilt detection period
+    timer.reset()
     if netstation:
         # send a trigger to indicate beginning of each trial
         ns.send_event(event_type=f"CND{cnd}",
                       label=f"CND{cnd}")
-
     for iframe in range(TRIAL_DUR):
         pressed_key = event.getKeys(keyList=list(command_keys.values()))
         # set the position of each task-relevant image
@@ -423,10 +426,10 @@ for itrial in range(N_TRIALS):
                         cue=cue_image)
         win.flip()
 
-        # force exit with 'escape' button
+        # response period
         if command_keys['quit_key'] in pressed_key:
             core.quit()
-        # check if spacebar is pressed within 1 sec from tilt
+        # check if space bar is pressed within 1 sec from tilt
         if command_keys['response_key'] in pressed_key:
             res_t = timer.getTime()
             response_times.append(round(res_t * 1000))
@@ -442,9 +445,10 @@ for itrial in range(N_TRIALS):
         print(f"Perf:{int(instant_perf):3d}%   avgRT:{int(avg_rt):4d}ms   ",
               end="")
 
-    # -------------------------------------------------
-    # create data frame and save
-    # -------------------------------------------------
+    # --------------------------------
+
+    # /// prepare data for saving
+
     # create a dictionary of variables to be saved
     trial_dict = {'trial_num': [acc_trial],
                   'block_num': [iblock],
@@ -467,6 +471,11 @@ for itrial in range(N_TRIALS):
     else:
         df = pd.read_json(data_path)
         dfnew = pd.concat([df, dfnew], ignore_index=True)
+
+    # --------------------------------
+
+    # /// calculate cummulative and running performances
+
     # calculate the cumulative performance (all recorded trials)
     eval_series = dfnew.instant_performance
     eval_array = eval_series.values
@@ -482,7 +491,7 @@ for itrial in range(N_TRIALS):
     # save the data frame
     dfnew.to_json(data_path)
 
-    # run the inter-trial period
+    # feedback period
     if instant_perf > 66:
         color = 'limegreen'
     elif instant_perf > 33:
@@ -492,6 +501,10 @@ for itrial in range(N_TRIALS):
     for igap in range(ITI_DUR):
         sfc.draw_probe(win, color)
         win.flip()
+
+# --------------------------------
+
+# /// STOP/PAUSE ECI
 
 if iblock == N_BLOCKS:
     # remove the temorary file
