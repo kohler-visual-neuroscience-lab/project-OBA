@@ -32,12 +32,12 @@ from egi_pynetstation.NetStation import NetStation
 
 # /// INSERT SESSION'S META DATA ///
 
-subID = "test"
-N_BLOCKS = 2  # (4)
-N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
-screen_num = 0  # 0: ctrl room    1: test room
+subID = "0010"
+N_BLOCKS = 4  # (4)
+N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
+screen_num = 1  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
-netstation = False  # (True/False) decide whether to connect with NetStation
+netstation = True  # (True/False) decide whether to connect with NetStation
 keyboard = "numpad"  # numpad/mac
 # ----------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ try:
     df['last_block_num'][0] = iblock
     # write to file
     df.to_json(temp_data)
-except ValueError:
+except:
     iblock = 1
     # create file name
     date = sfc.get_date()
