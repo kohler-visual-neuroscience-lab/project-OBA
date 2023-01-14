@@ -47,11 +47,18 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 
 # /// SET UP SOURCE DATA PATH AND PARAMETERS ///
 
-eeg_file = '0002_20221222_025047.mff'
-beh_file = '0002_20221222_145047.json'
+eeg_file = '0005_20230113_105012.mff'
+beh_file = '0005_20230113_104958.json'
+
+# eeg_file = '0010_20230113_010843.mff'
+# beh_file = '0010_20230113_130828.json'
+
+# eeg_file = '0011_20230113_120420.mff'
+# beh_file = '0011_20230113_120405.json'
+
 # set the full path to the raw data
-eeg_path = os.path.join('..', 'data', 'raw', 'test_exp01', eeg_file)
-beh_path = os.path.join('..', 'data', 'raw', 'test_exp01', beh_file)
+eeg_path = os.path.join('..', 'data', 'raw', eeg_file)
+beh_path = os.path.join('..', 'data', 'raw', beh_file)
 eeg = mne.io.read_raw_egi(eeg_path, preload=True)
 beh_data = pd.read_json(beh_path)
 
@@ -211,10 +218,10 @@ axs[0, 0].set(yticks=[1, 2, 3, 4],
               yticklabels=['CND1', 'CND2', 'CND3', 'CND4'],
               ylabel='Events', xlim=[0 - 2, n_trials + 1], ylim=[1 - .5, 4.5])
 cp.add_shades(axs[0, 0], n_blocks, n_trials)
-axs[0, 0].text(0*32 + 3, 4.6, 'Block1')
-axs[0, 0].text(1*32 + 3, 4.6, 'Block2')
-axs[0, 0].text(2*32 + 3, 4.6, 'Block3')
-axs[0, 0].text(3*32 + 3, 4.6, 'Block4')
+axs[0, 0].text(0 * 32 + 3, 4.6, 'Block1')
+axs[0, 0].text(1 * 32 + 3, 4.6, 'Block2')
+axs[0, 0].text(2 * 32 + 3, 4.6, 'Block3')
+axs[0, 0].text(3 * 32 + 3, 4.6, 'Block4')
 cp.trim_axes(axs[0, 0])
 
 # performances over session
@@ -294,12 +301,12 @@ cp.trim_axes(axes[1, 0])
 vmin = 1
 vmax = 5
 im, _ = mne.viz.plot_topomap(snrs_1f1_avg, epochs.info, vlim=(vmin, vmax),
-                             axes=axes[0, 1])
+                             axes=axes[0, 1], show=False)
 axes[0, 1].set(title='1f1')
 cp.add_snr_colorbar(fig, axes[0, 1], im)
 
 im, _ = mne.viz.plot_topomap(snrs_1f2_avg, epochs.info, vlim=(vmin, vmax),
-                             axes=axes[1, 1])
+                             axes=axes[1, 1], show=False)
 axes[1, 1].set(title='1f2')
 cp.add_snr_colorbar(fig, axes[1, 1], im)
 
@@ -322,44 +329,44 @@ cp.prep4ai()
 # @@@ Face boost pairs
 # Topography map of CND1, FH(F), 1f1:
 im, _ = mne.viz.plot_topomap(snrs_cnd1_1f1_avg, epochs.info, axes=axes[0, 0],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[0, 0].set(title='CND1 FH(F) 1f1')
 cp.add_snr_colorbar(fig, axes[0, 0], im)
 # Topography map of CND3, FH(H), 1f1:
 im, _ = mne.viz.plot_topomap(snrs_cnd3_1f1_avg, epochs.info, axes=axes[0, 1],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[0, 1].set(title='CND3 FH(H) 1f1')
 cp.add_snr_colorbar(fig, axes[0, 1], im)
 # Topography map of CND2, HF(F), 1f2:
 im, _ = mne.viz.plot_topomap(snrs_cnd2_1f2_avg, epochs.info, axes=axes[1, 0],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[1, 0].set(title='CND2 HF(F) 1f2')
 cp.add_snr_colorbar(fig, axes[1, 0], im)
 # Topography map of CND4, HF(H), 1f2:
 im, _ = mne.viz.plot_topomap(snrs_cnd4_1f2_avg, epochs.info, axes=axes[1, 1],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[1, 1].set(title='CND4 HF(H) 1f2')
 cp.add_snr_colorbar(fig, axes[1, 1], im)
 
 # @@@ House boost pairs
 # Topography map of CND4, HF(H), 1f1:
 im, _ = mne.viz.plot_topomap(snrs_cnd4_1f1_avg, epochs.info, axes=axes[2, 0],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[2, 0].set(title='CND4 HF(H) 1f1')
 cp.add_snr_colorbar(fig, axes[2, 0], im)
 # Topography map of CND2, HF(F), 1f1:
 im, _ = mne.viz.plot_topomap(snrs_cnd2_1f1_avg, epochs.info, axes=axes[2, 1],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[2, 1].set(title='CND2 HF(F) 1f1')
 cp.add_snr_colorbar(fig, axes[2, 1], im)
 # Topography map of CND3, FH(H), 1f2:
 im, _ = mne.viz.plot_topomap(snrs_cnd3_1f2_avg, epochs.info, axes=axes[3, 0],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[3, 0].set(title='CND3 FH(H) 1f2')
 cp.add_snr_colorbar(fig, axes[3, 0], im)
 # Topography map of CND1, FH(F), 1f2:
 im, _ = mne.viz.plot_topomap(snrs_cnd1_1f2_avg, epochs.info, axes=axes[3, 1],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[3, 1].set(title='CND1 FH(F) 1f2')
 cp.add_snr_colorbar(fig, axes[3, 1], im)
 
@@ -369,23 +376,23 @@ vmin = -3
 vmax = 3
 # Topography map of face boost at 1f1:
 im, _ = mne.viz.plot_topomap(face_boost_1f1, epochs.info, axes=axes[0, 2],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[0, 2].set(title='Face boost 1f1')
 cp.add_snr_colorbar(fig, axes[0, 2], im)
 # Topography map of face boost at 1f2:
 im, _ = mne.viz.plot_topomap(face_boost_1f2, epochs.info, axes=axes[1, 2],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[1, 2].set(title='Face boost 1f2')
 cp.add_snr_colorbar(fig, axes[1, 2], im)
 
 # Topography map of house boost at 1f1:
 im, _ = mne.viz.plot_topomap(house_boost_1f1, epochs.info, axes=axes[2, 2],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[2, 2].set(title='House boost 1f1')
 cp.add_snr_colorbar(fig, axes[2, 2], im)
 # Topography map of house boost at 1f2:
 im, _ = mne.viz.plot_topomap(house_boost_1f2, epochs.info, axes=axes[3, 2],
-                             vlim=(vmin, vmax))
+                             vlim=(vmin, vmax), show=False)
 axes[3, 2].set(title='House boost 1f2')
 cp.add_snr_colorbar(fig, axes[3, 2], im)
 
