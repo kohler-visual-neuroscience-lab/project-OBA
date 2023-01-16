@@ -27,7 +27,8 @@ For stimulus generation:
 
 For data analysis:
 - MNE 1.3.0
-- Python 3.9.15
+- Python 3.9.15 (York: 3.10.8)
+- Matplotlib 3.6.2
 
 ---
 
