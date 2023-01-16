@@ -17,7 +17,7 @@ MoShams <MShamsCBR@gmail.com> Dec 28, 2022
 # /// functions
 def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
     # Construct a kernel that calculates the mean of the neighboring
-    # frequencies
+    # frequencies (noisy neighbors!)
     averaging_kernel = np.concatenate((
         np.ones(noise_n_neighbor_freqs),
         np.zeros(2 * noise_skip_neighbor_freqs + 1),
@@ -89,6 +89,8 @@ eeg.info['line_freq'] = 60.
 # set montage
 montage = mne.channels.make_standard_montage('GSN-HydroCel-129')
 eeg.set_montage(montage, match_alias=True)
+easycap_montage = mne.channels.make_standard_montage('GSN-HydroCel-129')
+easycap_montage.plot()
 # set common average reference
 eeg.set_eeg_reference('average', projection=False, verbose=False)
 # apply bandpass filter
@@ -182,6 +184,16 @@ face_boost_1f2 = snrs_cnd2_1f2_avg - snrs_cnd4_1f2_avg
 house_boost_1f1 = snrs_cnd4_1f1_avg - snrs_cnd2_1f1_avg
 house_boost_1f2 = snrs_cnd3_1f2_avg - snrs_cnd1_1f2_avg
 
+# average across all channels
+face_boost = np.mean((face_boost_1f1 + face_boost_1f2) / 2)
+house_boost = np.mean((house_boost_1f1 + house_boost_1f2) / 2)
+
+# average across occipital channels
+occ_ch = ['E66', 'E69', 'E70', 'E71', 'E73', 'E74', 'E75',
+          'E76', 'E81', 'E82', 'E83', 'E84', 'E88', 'E89']
+ind_occ = np.nonzero(np.isin(epochs.info.ch_names, occ_ch))
+face_boost_occ = np.mean(((face_boost_1f1 + face_boost_1f2) / 2)[ind_occ])
+house_boost_occ = np.mean(((house_boost_1f1 + house_boost_1f2) / 2)[ind_occ])
 # ----------------------------------------------------------------------------
 
 # +++ TEST +++
@@ -216,12 +228,15 @@ axs[0, 0].plot(x_evnt4, 4 * np.ones(len(x_evnt4)), 'o', markersize=mrksize,
                markerfacecolor='k', markeredgecolor='none')
 axs[0, 0].set(yticks=[1, 2, 3, 4],
               yticklabels=['CND1', 'CND2', 'CND3', 'CND4'],
-              ylabel='Events', xlim=[0 - 2, n_trials + 1], ylim=[1 - .5, 4.5])
+              ylabel='Events', xlim=[0 - 2, n_trials + 1],
+              ylim=[1 - .25, 4 + .25])
 cp.add_shades(axs[0, 0], n_blocks, n_trials)
 axs[0, 0].text(0 * 32 + 3, 4.6, 'Block1')
 axs[0, 0].text(1 * 32 + 3, 4.6, 'Block2')
 axs[0, 0].text(2 * 32 + 3, 4.6, 'Block3')
 axs[0, 0].text(3 * 32 + 3, 4.6, 'Block4')
+axs[0, 0].get_xaxis().set_visible(False)
+axs[0, 0].spines['bottom'].set_visible(False)
 cp.trim_axes(axs[0, 0])
 
 # performances over session
@@ -230,9 +245,12 @@ line_cumperf, = axs[1, 0].plot(trials, beh_data['cummulative_performance'],
 line_runperf, = axs[1, 0].plot(trials, beh_data['running_performance'],
                                color='k')
 axs[1, 0].set(ylabel='Performance [%]',
-              xlim=[0 - 2, n_trials + 1], ylim=[0 - 5, 100])
-leg = axs[1, 0].legend([line_cumperf, line_runperf], ['cum perf', 'run perf'])
+              xlim=[0 - 2, n_trials + 1], ylim=[0, 100])
+leg = axs[1, 0].legend([line_cumperf, line_runperf],
+                       ['Cummulative perf.', 'Running perf.'])
 leg.get_frame().set_linewidth(0)
+axs[1, 0].get_xaxis().set_visible(False)
+axs[1, 0].spines['bottom'].set_visible(False)
 cp.add_shades(axs[1, 0], n_blocks, n_trials)
 cp.trim_axes(axs[1, 0])
 
@@ -241,14 +259,17 @@ axs[2, 0].plot(trials, beh_data['avg_rt'], 'o', markerfacecolor='k',
                markeredgecolor='none', markersize=mrksize)
 axs[2, 0].set_yticks(range(0, 1000 + 1, 250))
 axs[2, 0].set(ylabel='RT [ms]',
-              xlim=[0 - 2, n_trials + 1], ylim=[0 - 50, 1000])
+              xlim=[0 - 2, n_trials + 1], ylim=[0, 1000+25])
 cp.add_shades(axs[2, 0], n_blocks, n_trials)
+axs[2, 0].get_xaxis().set_visible(False)
+axs[2, 0].spines['bottom'].set_visible(False)
 cp.trim_axes(axs[2, 0])
 
 # tilt angles over session
 axs[3, 0].plot(trials, tilt_angle, color='k')
 axs[3, 0].set(xlabel='Trials', ylabel='Tilt angle [deg]',
-              xlim=[0 - 2, n_trials + 1], ylim=[0 - .3, 6])
+              xticks=[0, 32, 64, 96, 128],
+              xlim=[0, n_trials], ylim=[0, 6])
 cp.add_shades(axs[3, 0], n_blocks, n_trials)
 cp.trim_axes(axs[3, 0])
 
@@ -264,7 +285,7 @@ axs[2, 1].hist(beh_data['avg_rt'], facecolor='k', bins=hist_bins)
 axs[2, 1].set_xticks(range(0, 1000 + 1, 250))
 axs[2, 1].set(xticks=range(0, 1000 + 1, 250),
               xlabel='RT [ms]', ylabel='Count',
-              xlim=[0 - 30, 1000], ylim=[0 - .5, 30])
+              xlim=[0, 1000], ylim=[0, 30])
 cp.trim_axes(axs[2, 1])
 
 # leave this subplot empty
@@ -400,3 +421,23 @@ cp.add_snr_colorbar(fig, axes[3, 2], im)
 plt.savefig(os.path.join(save_path, f'{sub_id}_'
                                     f'{rec_date}_topomap_all_conditions.pdf'))
 # ----------------------------------------------------------------------------
+
+# @@@ PLOT AVERAGE SNR ACROSS ALL CHANNELS @@@
+
+fig, axs = plt.subplots(1, 2, figsize=(5, 4), sharey=True)
+fig.suptitle(f'Subject ID: {sub_id} – Avg. SNR improvement')
+axs[0].bar([1, 2], [face_boost, house_boost], color='k')
+axs[0].set(title='All channels', xticks=[1, 2],
+           xticklabels=['face', 'house'], ylabel='SNR improvement')
+cp.trim_axes(axs[0])
+cp.prep4ai()
+
+axs[1].bar([1, 2], [face_boost_occ, house_boost_occ], color='k')
+axs[1].set(title='Occipital channels', xticks=[1, 2],
+           xticklabels=['face', 'house'])
+cp.trim_axes(axs[1])
+cp.prep4ai()
+
+# save figure
+plt.savefig(os.path.join(save_path, f'{sub_id}_'
+                                    f'{rec_date}_avg_SNR_improvement.pdf'))
