@@ -1,7 +1,7 @@
-from psychopy import monitors, visual, event, core
-from datetime import date, datetime
-import numpy as np
 import math
+import numpy as np
+from datetime import date, datetime
+from psychopy import monitors, visual, event, core
 
 
 def test_refresh_rate(win, ref_rate):
@@ -91,7 +91,7 @@ def get_time():
 
 
 def block_msg(win, iblock, nblocks, command_keys):
-    msg = f"< Block {iblock}/{nblocks} >" \
+    msg = f"<<< Block {iblock}/{nblocks} >>>" \
           f"\n\nReady to begin?"
     message = visual.TextStim(win,
                               text=msg,
@@ -141,3 +141,12 @@ def cal_next_tilt(goal_perf, run_perf):
     step_max = 5
     step_change = round(delta / delta_max * step_max, 0)
     return step_change
+
+
+def gen_image_pairs(nexmp, ntrials):
+    face_cntr = np.repeat(np.arange(1, nexmp + 1, 1), nexmp)
+    house_cntr = np.tile(np.arange(1, nexmp + 1, 1), nexmp)
+    allpairs = np.array(list(zip(face_cntr, house_cntr)))
+    np.random.shuffle(allpairs[:ntrials])
+    pairs = allpairs[:ntrials]
+    return pairs
