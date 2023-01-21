@@ -47,14 +47,32 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 
 # /// SET UP SOURCE DATA PATH AND PARAMETERS ///
 
-eeg_file = '0005_20230113_105012.mff'
-beh_file = '0005_20230113_104958.json'
+# ---
+
+# eeg_file = '0005_20230113_105012.mff'
+# beh_file = '0005_20230113_104958.json'
 
 # eeg_file = '0010_20230113_010843.mff'
 # beh_file = '0010_20230113_130828.json'
 
 # eeg_file = '0011_20230113_120420.mff'
 # beh_file = '0011_20230113_120405.json'
+
+# ---
+
+# eeg_file = '0001_20230120_120918.mff'
+# beh_file = '0001_20230120_120903.json'
+
+# eeg_file = '0008_20230120_023153.mff'
+# beh_file = '0008_20230120_143138.json'
+
+# eeg_file = '0009_20230120_105003.mff'
+# beh_file = '0009_20230120_104948.json'
+
+eeg_file = '0011_20230120_012119.mff'
+beh_file = '0011_20230120_132104.json'
+
+# ---
 
 # set the full path to the raw data
 eeg_path = os.path.join('..', 'data', 'raw', eeg_file)
@@ -437,6 +455,8 @@ axs[1].set(title='Occipital channels', xticks=[1, 2],
            xticklabels=['face', 'house'])
 cp.trim_axes(axs[1])
 cp.prep4ai()
+
+plt.tight_layout()
 
 # save figure
 plt.savefig(os.path.join(save_path, f'{sub_id}_'
