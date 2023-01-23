@@ -75,8 +75,8 @@ beh_file = '0011_20230120_132104.json'
 # ---
 
 # set the full path to the raw data
-eeg_path = os.path.join('..', 'data', 'raw', eeg_file)
-beh_path = os.path.join('..', 'data', 'raw', beh_file)
+eeg_path = os.path.join('..', 'data', eeg_file)
+beh_path = os.path.join('..', 'data', beh_file)
 eeg = mne.io.read_raw_egi(eeg_path, preload=True)
 beh_data = pd.read_json(beh_path)
 
@@ -84,7 +84,7 @@ beh_data = pd.read_json(beh_path)
 
 # /// SET UP SAVE PATH AND PARAMETERS ///
 
-save_path = os.path.join('..', 'result')
+save_path = os.path.join('..', 'result', 'exp01')
 # extract subject's ID
 sub_id = beh_file[:4]
 # extract recoding date
