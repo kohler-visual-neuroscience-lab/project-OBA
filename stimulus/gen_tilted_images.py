@@ -22,7 +22,7 @@ for cat in cats:
     for exm in exms:
         # set the source image path
         source_path = os.path.join("image", "source",
-                                   f"{cat}{exm}_cropped.png")
+                                   f"{cat}{exm}.png")
         # read the image
         im = Image.open(source_path)
         # define the span of tilts (degrees)
