@@ -53,25 +53,45 @@ def clean_bar(ax):
 
 # /// SET UP SOURCE DATA PATH AND PARAMETERS ///
 
-nsub = 6
 eeg_file = []
 beh_file = []
 df_pool = []
 # ---
-eeg_file.append('0005_20230113_105012.mff')
-beh_file.append('0005_20230113_104958.json')
-eeg_file.append('0010_20230113_010843.mff')
-beh_file.append('0010_20230113_130828.json')
+# eeg_file.append('0005_20230113_105012.mff')
+# beh_file.append('0005_20230113_104958.json')
+# eeg_file.append('0010_20230113_010843.mff')
+# beh_file.append('0010_20230113_130828.json')
 # ---
-eeg_file.append('0001_20230120_120918.mff')
-beh_file.append('0001_20230120_120903.json')
-eeg_file.append('0008_20230120_023153.mff')
-beh_file.append('0008_20230120_143138.json')
-eeg_file.append('0009_20230120_105003.mff')
-beh_file.append('0009_20230120_104948.json')
-eeg_file.append('0011_20230120_012119.mff')
-beh_file.append('0011_20230120_132104.json')
+# eeg_file.append('0001_20230120_120918.mff')
+# beh_file.append('0001_20230120_120903.json')
+# eeg_file.append('0008_20230120_023153.mff')
+# beh_file.append('0008_20230120_143138.json')
+# eeg_file.append('0009_20230120_105003.mff')
+# beh_file.append('0009_20230120_104948.json')
+# eeg_file.append('0011_20230120_012119.mff')
+# beh_file.append('0011_20230120_132104.json')
+# --- Data recorded on the new stimulus set by Amanda
+eeg_file.append('0012_20230217_114539.mff')
+beh_file.append('0012_20230217_114521.json')
+eeg_file.append('2001_20230222_114534.mff')
+beh_file.append('2001_20230222_114516.json')
+eeg_file.append('5002_20230303_113227.mff')
+beh_file.append('5002_20230303_113207.json')
+eeg_file.append('5003_20230303_013154.mff')
+beh_file.append('5003_20230303_133134.json')
+eeg_file.append('5004_20230303_030932.mff')
+beh_file.append('5004_20230303_150912.json')
+eeg_file.append('0001_20230308_103710.mff')
+beh_file.append('0001_20230308_103626.json')
+
 # ----------------------------------------------------------------------------
+# +++ TEST +++
+nsub1 = len(eeg_file)
+nsub2 = len(beh_file)
+assert nsub1 == nsub2
+# ++++++++++++
+nsub = nsub1
+
 for isub in range(np.size(beh_file)):
     # set the full path to the raw data
     eeg_path = os.path.join('..', 'data', eeg_file[isub])
@@ -87,7 +107,7 @@ for isub in range(np.size(beh_file)):
 
     # /// SET UP SAVE PATH AND PARAMETERS ///
 
-    save_path = os.path.join('..', 'result')
+    save_path = os.path.join('..', 'result', 'exp01')
     # extract subject's ID
     sub_id = beh_file[:4]
     # extract recoding date

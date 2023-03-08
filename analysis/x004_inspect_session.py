@@ -69,10 +69,29 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # eeg_file = '0009_20230120_105003.mff'
 # beh_file = '0009_20230120_104948.json'
 
-eeg_file = '0011_20230120_012119.mff'
-beh_file = '0011_20230120_132104.json'
+# eeg_file = '0011_20230120_012119.mff'
+# beh_file = '0011_20230120_132104.json'
 
-# ---
+# --- DATA recorded by Amanda on the new stimulus set
+
+# eeg_file = '0012_20230217_114539.mff'
+# beh_file = '0012_20230217_114521.json'
+
+# eeg_file = '2001_20230222_114534.mff'
+# beh_file = '2001_20230222_114516.json'
+
+# eeg_file = '5002_20230303_113227.mff'
+# beh_file = '5002_20230303_113207.json'
+
+# eeg_file = '5003_20230303_013154.mff'
+# beh_file = '5003_20230303_133134.json'
+
+# eeg_file = '5004_20230303_030932.mff'
+# beh_file = '5004_20230303_150912.json'
+
+eeg_file = '0001_20230308_103710.mff'
+beh_file = '0001_20230308_103626.json'
+
 
 # set the full path to the raw data
 eeg_path = os.path.join('..', 'data', eeg_file)
@@ -446,7 +465,7 @@ fig, axs = plt.subplots(1, 2, figsize=(5, 4), sharey=True)
 fig.suptitle(f'Subject ID: {sub_id} – Avg. SNR improvement')
 axs[0].bar([1, 2], [face_boost, house_boost], color='k')
 axs[0].set(title='All channels', xticks=[1, 2],
-           xticklabels=['face', 'house'], ylabel='SNR improvement')
+           xticklabels=['face', 'house'], ylabel='SNR improvement [%]')
 cp.trim_axes(axs[0])
 cp.prep4ai()
 
