@@ -11,12 +11,12 @@ each side of the fixation cross and flicker at two different frequencies.
 The flickering image on the left side will flicker always at f1 Hz, and the
 one on the right side at f2 Hz.
 
-This is basically the same as version 0, but here we use eight different
+This is basically the same as version 1, but here we use eight different
 exemplars from each category (face/house). There will be 64 pairs, and each
 will appear twice within a 128-trial session.
 
-This is similar to version two, but here we use a new image set, which is
-more stereotypical
+The image set we use here are those "iconic" ones, i.e., feature-full images
+such as the chinese anchient builing.
 
 There are four conditions:
     CND1: FH(F); face left, house right, attend face
@@ -190,9 +190,9 @@ for itrial in range(N_TRIALS):
 
     # --------------------------------
     # set image properties and load
-    image1_directory = os.path.join("image", "image_set_v02",
+    image1_directory = os.path.join("image", "image_set_v01",
                                     f"face{iface}_tilt0.png")
-    image2_directory = os.path.join("image", "image_set_v02",
+    image2_directory = os.path.join("image", "image_set_v01",
                                     f"house{ihouse}_tilt0.png")
 
     # load image
@@ -336,13 +336,13 @@ for itrial in range(N_TRIALS):
     print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ", end="")
 
     # load the changed image
-    image3_directory1cw = os.path.join("image", "image_set_v02",
+    image3_directory1cw = os.path.join("image", "image_set_v01",
                                        f"face{iface}_tilt{tilt_mag}_CW.png")
-    image3_directory1ccw = os.path.join("image", "image_set_v02",
+    image3_directory1ccw = os.path.join("image", "image_set_v01",
                                         f"face{iface}_tilt{tilt_mag}_CCW.png")
-    image3_directory2cw = os.path.join("image", "image_set_v02",
+    image3_directory2cw = os.path.join("image", "image_set_v01",
                                        f"house{ihouse}_tilt{tilt_mag}_CW.png")
-    image3_directory2ccw = os.path.join("image", "image_set_v02",
+    image3_directory2ccw = os.path.join("image", "image_set_v01",
                                         f"house{ihouse}_tilt{tilt_mag}_CCW.png")
 
     rel_image3_1cw = visual.ImageStim(win,
