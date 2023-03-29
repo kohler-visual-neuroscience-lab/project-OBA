@@ -147,6 +147,6 @@ def gen_image_pairs(nexmp, ntrials):
     face_cntr = np.repeat(np.arange(1, nexmp + 1, 1), nexmp)
     house_cntr = np.tile(np.arange(1, nexmp + 1, 1), nexmp)
     allpairs = np.array(list(zip(face_cntr, house_cntr)))
-    np.random.shuffle(allpairs[:ntrials])
+    np.random.shuffle(allpairs)
     pairs = allpairs[:ntrials]
     return pairs
