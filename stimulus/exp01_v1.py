@@ -34,19 +34,18 @@ import gen_random_path as gen_path
 from lib import stim_flow_control as sfc
 from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
-
-# from egi_pynetstation.NetStation import NetStation
+from egi_pynetstation.NetStation import NetStation
 # ----------------------------------------------------------------------------
 
 # /// INSERT SESSION'S META DATA ///
 
-subID = "test"
+subID = "0004"
 N_BLOCKS = 4  # (4)
 N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
-screen_num = 0  # 0: ctrl room    1: test room
+screen_num = 1  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
-netstation = False  # (True/False) decide whether to connect with NetStation
-keyboard = "mac"  # numpad/mac
+netstation = True  # (True/False) decide whether to connect with NetStation
+keyboard = "numpad"  # numpad/mac
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
