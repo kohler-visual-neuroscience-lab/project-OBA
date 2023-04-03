@@ -20,13 +20,13 @@ from egi_pynetstation.NetStation import NetStation
 
 # /// INSERT SESSION'S META DATA ///
 
-subID = "test"
-N_BLOCKS = 1  # (4)
-N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
+subID = "0004"
+N_BLOCKS = 4  # (4)
+N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 1  # 0: ctrl room    1: test room
-full_screen = False  # (True/False)
-netstation = False  # (True/False) decide whether to connect with NetStation
-keyboard = "mac"  # numpad/mac
+full_screen = True  # (True/False)
+netstation = True  # (True/False) decide whether to connect with NetStation
+keyboard = "numpad"  # numpad/mac
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
@@ -82,7 +82,7 @@ else:
 # /// CONFIGURE STIMULUS PARAMETERS AND INPUTS ///
 
 # initialize the display and the keyboard
-REF_RATE = 120
+REF_RATE = 60
 TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
@@ -125,7 +125,7 @@ JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
 # images keep their positions (equal to 100 ms at 60 Hz)
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = .2
+REL_IMGPATH_SIGMA = .5
 REL_IMGPATH_STEP = .1
 
 REL_IMAGE_POS0_X = FIX_X
@@ -165,8 +165,8 @@ np.random.shuffle(cnd_array)
 # /// TRIAL BEGINS ///
 
 for itrial in range(N_TRIALS):
-    ired = pairs[itrial][0]
-    igreen = pairs[itrial][1]
+    ired = 1
+    igreen = 1
 
     # --------------------------------
     # set image properties and load
