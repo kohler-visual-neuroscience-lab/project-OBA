@@ -47,7 +47,7 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 
 # /// SET UP SOURCE DATA PATH AND PARAMETERS ///
 
-# ---
+# N=8
 
 # eeg_file = '0005_20230113_105012.mff'
 # beh_file = '0005_20230113_104958.json'
@@ -58,10 +58,8 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # eeg_file = '0011_20230113_120420.mff'
 # beh_file = '0011_20230113_120405.json'
 
-# ---
-
-# eeg_file = '0001_20230120_120918.mff'
-# beh_file = '0001_20230120_120903.json'
+eeg_file = '0001_20230120_120918.mff'
+beh_file = '0001_20230120_120903.json'
 
 # eeg_file = '0008_20230120_023153.mff'
 # beh_file = '0008_20230120_143138.json'
@@ -72,30 +70,12 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # eeg_file = '0011_20230120_012119.mff'
 # beh_file = '0011_20230120_132104.json'
 
-# --- DATA recorded by Amanda on the new stimulus set
-
-# eeg_file = '0012_20230217_114539.mff'
-# beh_file = '0012_20230217_114521.json'
-
-# eeg_file = '2001_20230222_114534.mff'
-# beh_file = '2001_20230222_114516.json'
-
-# eeg_file = '5002_20230303_113227.mff'
-# beh_file = '5002_20230303_113207.json'
-
-# eeg_file = '5003_20230303_013154.mff'
-# beh_file = '5003_20230303_133134.json'
-
-# eeg_file = '5004_20230303_030932.mff'
-# beh_file = '5004_20230303_150912.json'
-
-eeg_file = '0001_20230308_103710.mff'
-beh_file = '0001_20230308_103626.json'
-
+# eeg_file = '0004_20230329_123905.mff'
+# beh_file = '0004_20230329_113904.json'
 
 # set the full path to the raw data
-eeg_path = os.path.join('..', 'data', eeg_file)
-beh_path = os.path.join('..', 'data', beh_file)
+eeg_path = os.path.join('..', 'data', 'exp01_v01', 'raw', eeg_file)
+beh_path = os.path.join('..', 'data',  'exp01_v01', 'raw', beh_file)
 eeg = mne.io.read_raw_egi(eeg_path, preload=True)
 beh_data = pd.read_json(beh_path)
 
@@ -103,7 +83,7 @@ beh_data = pd.read_json(beh_path)
 
 # /// SET UP SAVE PATH AND PARAMETERS ///
 
-save_path = os.path.join('..', 'result', 'exp01')
+save_path = os.path.join('..', 'result', 'exp01_v01')
 # extract subject's ID
 sub_id = beh_file[:4]
 # extract recoding date
@@ -459,17 +439,17 @@ plt.savefig(os.path.join(save_path, f'{sub_id}_'
                                     f'{rec_date}_topomap_all_conditions.pdf'))
 # ----------------------------------------------------------------------------
 
-# @@@ PLOT AVERAGE SNR ACROSS ALL CHANNELS @@@
+# @@@ PLOT AVERAGE SNR CHANNELS @@@
 
 fig, axs = plt.subplots(1, 2, figsize=(5, 4), sharey=True)
 fig.suptitle(f'Subject ID: {sub_id} – Avg. SNR improvement')
-axs[0].bar([1, 2], [face_boost, house_boost], color='k')
+axs[0].bar([1, 2], [face_boost, house_boost], color='grey')
 axs[0].set(title='All channels', xticks=[1, 2],
-           xticklabels=['face', 'house'], ylabel='SNR improvement [%]')
+           xticklabels=['face', 'house'], ylabel='SNR improvement')
 cp.trim_axes(axs[0])
 cp.prep4ai()
 
-axs[1].bar([1, 2], [face_boost_occ, house_boost_occ], color='k')
+axs[1].bar([1, 2], [face_boost_occ, house_boost_occ], color='grey')
 axs[1].set(title='Occipital channels', xticks=[1, 2],
            xticklabels=['face', 'house'])
 cp.trim_axes(axs[1])

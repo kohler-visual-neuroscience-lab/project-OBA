@@ -1,12 +1,13 @@
 import os
 import mne
+import scipy
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from lib import cleanplot as cp
 
 """
-MoShams <MShamsCBR@gmail.com> Jan 23, 2023
+MoShams <MShamsCBR@gmail.com> March 30, 2023
 
 Pools all the EEG analyses done for individuals and generates the population
 result.
@@ -56,33 +57,27 @@ def clean_bar(ax):
 eeg_file = []
 beh_file = []
 df_pool = []
-# ---
-# eeg_file.append('0005_20230113_105012.mff')
-# beh_file.append('0005_20230113_104958.json')
-# eeg_file.append('0010_20230113_010843.mff')
-# beh_file.append('0010_20230113_130828.json')
-# ---
-# eeg_file.append('0001_20230120_120918.mff')
-# beh_file.append('0001_20230120_120903.json')
-# eeg_file.append('0008_20230120_023153.mff')
-# beh_file.append('0008_20230120_143138.json')
-# eeg_file.append('0009_20230120_105003.mff')
-# beh_file.append('0009_20230120_104948.json')
-# eeg_file.append('0011_20230120_012119.mff')
-# beh_file.append('0011_20230120_132104.json')
-# --- Data recorded on the new stimulus set by Amanda
-eeg_file.append('0012_20230217_114539.mff')
-beh_file.append('0012_20230217_114521.json')
-eeg_file.append('2001_20230222_114534.mff')
-beh_file.append('2001_20230222_114516.json')
-eeg_file.append('5002_20230303_113227.mff')
-beh_file.append('5002_20230303_113207.json')
-eeg_file.append('5003_20230303_013154.mff')
-beh_file.append('5003_20230303_133134.json')
-eeg_file.append('5004_20230303_030932.mff')
-beh_file.append('5004_20230303_150912.json')
-eeg_file.append('0001_20230308_103710.mff')
-beh_file.append('0001_20230308_103626.json')
+
+eeg_file.append('0012_20230217_114539_exp01_v02.mff')
+beh_file.append('0012_20230217_114521_exp01_v02.json')
+eeg_file.append('2001_20230222_114534_exp01_v02.mff')
+beh_file.append('2001_20230222_114516_exp01_v02.json')
+eeg_file.append('5002_20230303_113227_exp01_v02.mff')
+beh_file.append('5002_20230303_113207_exp01_v02.json')
+eeg_file.append('5003_20230303_013154_exp01_v02.mff')
+beh_file.append('5003_20230303_133134_exp01_v02.json')
+eeg_file.append('5004_20230303_030932_exp01_v02.mff')
+beh_file.append('5004_20230303_150912_exp01_v02.json')
+eeg_file.append('0001_20230308_103710_exp01_v02.mff')
+beh_file.append('0001_20230308_103626_exp01_v02.json')
+eeg_file.append('0011_20230315_025355_exp01_v02.mff')
+beh_file.append('0011_20230315_145311_exp01_v02.json')
+eeg_file.append('0013_20230315_102521_exp01_v02.mff')
+beh_file.append('0013_20230315_102437_exp01_v02.json')
+eeg_file.append('5005_20230317_013439_exp01_v02.mff')
+beh_file.append('5005_20230317_123439_exp01_v02.json')
+eeg_file.append('0004_20230329_015110_exp01_v02.mff')
+beh_file.append('0004_20230329_125109_exp01_v02.json')
 
 # ----------------------------------------------------------------------------
 # +++ TEST +++
@@ -94,12 +89,12 @@ nsub = nsub1
 
 for isub in range(np.size(beh_file)):
     # set the full path to the raw data
-    eeg_path = os.path.join('..', 'data', eeg_file[isub])
-    beh_path = os.path.join('..', 'data', beh_file[isub])
+    eeg_path = os.path.join('..', 'data', 'exp01_v02', 'raw', eeg_file[isub])
+    beh_path = os.path.join('..', 'data', 'exp01_v02', 'raw', beh_file[isub])
     # +++ TEST +++
     assert eeg_file[isub][:13] == beh_file[isub][:13]
     # ++++++++++++
-    print(f"\n\n*** Loading subject #{isub + 1}...")
+    print(f"\n\n*** Analyzing subject #{isub + 1}...")
     eeg = mne.io.read_raw_egi(eeg_path, preload=True)
     beh = pd.read_json(beh_path)
 
@@ -107,7 +102,7 @@ for isub in range(np.size(beh_file)):
 
     # /// SET UP SAVE PATH AND PARAMETERS ///
 
-    save_path = os.path.join('..', 'result', 'exp01')
+    save_path = os.path.join('..', 'result', 'exp01_v02')
     # extract subject's ID
     sub_id = beh_file[:4]
     # extract recoding date
@@ -292,27 +287,45 @@ plt.savefig(os.path.join(save_path, f'Pop_N{nsub}_Behavior.pdf'))
 
 # @@@ PLOT EEG
 
+# @ all channels
 fig, axs = plt.subplots(1, 2, figsize=(5, 4), sharey=True)
 fig.suptitle(f'Population SNR Improvement (N={nsub})')
 axs[0].bar([1, 2], [df_pool.face_boost.mean(),
                     df_pool.house_boost.mean()], color='grey')
+# add individuals
 axs[0].plot(np.ones(nsub), df_pool.face_boost,
             'o', mec='black', mfc='none')
 axs[0].plot(2 * np.ones(nsub), df_pool.house_boost,
             'o', mec='black', mfc='none')
+# connect face and house improvement of each individual
+xxs = np.tile([1, 2], (nsub, 1)).transpose()
+yys = np.vstack((df_pool.face_boost, df_pool.house_boost))
+axs[0].plot(xxs, yys, color='black', lw=.5)
+# add-ons
 axs[0].set(xticks=[1, 2], xticklabels=['Face', 'House'],
            title='All Channels', ylabel='SNR Improvement [%]')
 clean_bar(axs[0])
 
+# @ occipital channels
 axs[1].bar([1, 2], [df_pool.face_boost_occ.mean(),
                     df_pool.house_boost_occ.mean()], color='grey')
+# add individuals
 axs[1].plot(np.ones(nsub), df_pool.face_boost_occ,
             'o', mec='black', mfc='none')
 axs[1].plot(2 * np.ones(nsub), df_pool.house_boost_occ,
             'o', mec='black', mfc='none')
+# connect face and house improvement of each individual
+xxs = np.tile([1, 2], (nsub, 1)).transpose()
+yys = np.vstack((df_pool.face_boost_occ, df_pool.house_boost_occ))
+axs[1].plot(xxs, yys, color='black', lw=.5)
 axs[1].set(xticks=[1, 2], xticklabels=['Face', 'House'],
            title='Occipital Channels', ylabel='SNR Improvement [%]')
 clean_bar(axs[1])
 
 plt.tight_layout()
 plt.savefig(os.path.join(save_path, f'Pop_N{nsub}_SNR.pdf'))
+
+
+# report stats
+scipy.stats.wilcoxon(df_pool.face_boost_occ)
+scipy.stats.wilcoxon(df_pool.house_boost_occ)
