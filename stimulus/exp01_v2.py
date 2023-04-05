@@ -11,7 +11,7 @@ each side of the fixation cross and flicker at two different frequencies.
 The flickering image on the left side will flicker always at f1 Hz, and the
 one on the right side at f2 Hz.
 
-This is basically the same as version 0, but here we use eight different
+This is basically the same as version 1, but here we use eight different
 exemplars from each category (face/house). There will be 64 pairs, and each
 will appear twice within a 128-trial session.
 
