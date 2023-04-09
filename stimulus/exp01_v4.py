@@ -48,7 +48,7 @@ except:
     # create file name
     date = sfc.get_date()
     time = sfc.get_time()
-    file_name = f"{subID}_{date}_{time}_exp01_v03.json"
+    file_name = f"{subID}_{date}_{time}_exp01_v04.json"
     # create a dictionary of variables to be saved
     trial_dict = {'last_block_num': [iblock],
                   'file_name': [file_name]}
@@ -170,9 +170,9 @@ for itrial in range(N_TRIALS):
 
     # --------------------------------
     # set image properties and load
-    image1_directory = os.path.join("image", "image_set_v03",
+    image1_directory = os.path.join("image", "image_set_v04",
                                     f"red{ired}_tilt0.png")
-    image2_directory = os.path.join("image", "image_set_v03",
+    image2_directory = os.path.join("image", "image_set_v04",
                                     f"green{igreen}_tilt0.png")
 
     # load image
@@ -316,13 +316,13 @@ for itrial in range(N_TRIALS):
     print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ", end="")
 
     # load the changed image
-    image3_directory1cw = os.path.join("image", "image_set_v03",
+    image3_directory1cw = os.path.join("image", "image_set_v04",
                                        f"red{ired}_tilt0.png")
-    image3_directory1ccw = os.path.join("image", "image_set_v03",
+    image3_directory1ccw = os.path.join("image", "image_set_v04",
                                         f"red{ired}_tilt0.png")
-    image3_directory2cw = os.path.join("image", "image_set_v03",
+    image3_directory2cw = os.path.join("image", "image_set_v04",
                                        f"green{igreen}_tilt0.png")
-    image3_directory2ccw = os.path.join("image", "image_set_v03",
+    image3_directory2ccw = os.path.join("image", "image_set_v04",
                                         f"green{igreen}_tilt0.png")
 
     rel_image3_1cw = visual.ImageStim(win,
