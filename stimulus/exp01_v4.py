@@ -1,9 +1,9 @@
 """
 ***** Object-based attention (OBA) project
-***** Experiment 01_v3
+***** Experiment 01_v4
 
     Mo Shams <MShamsCBR@gmail.com>
-    Apr 02, 2023
+    Apr 09, 2023
 
 """
 import os
@@ -20,13 +20,13 @@ from lib.evaluate_responses import eval_resp
 
 # /// INSERT SESSION'S META DATA ///
 
-subID = "test"
-N_BLOCKS = 1  # (4)
-N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
-screen_num = 0  # 0: ctrl room    1: test room
+subID = "0004"
+N_BLOCKS = 4  # (4)
+N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
+screen_num = 1  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
-netstation = False  # (True/False) decide whether to connect with NetStation
-keyboard = "mac"  # numpad/mac
+netstation = True  # (True/False) decide whether to connect with NetStation
+keyboard = "numpad"  # numpad/mac
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
@@ -118,7 +118,7 @@ IMAGE2_SIZE = (size_factor, size_factor)
 IMAGE3_SIZE = (size_factor, size_factor)
 
 # opacity (1: opac | 0: transparent)
-IMAGE_OPACITY = .6
+IMAGE_OPACITY = .5
 
 # jittering properties
 JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
