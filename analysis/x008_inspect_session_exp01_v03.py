@@ -151,10 +151,10 @@ snrs_1f1_avg = snrs_1f1.mean(axis=0)
 snrs_1f2_avg = snrs_1f2.mean(axis=0)
 
 # index trials/events in a certain condition
-i_cnd1 = events[:, 2] == 1
-i_cnd2 = events[:, 2] == 2
-i_cnd3 = events[:, 2] == 3
-i_cnd4 = events[:, 2] == 4
+i_cnd1 = beh_data['condition_num'] == 1
+i_cnd2 = beh_data['condition_num'] == 2
+i_cnd3 = beh_data['condition_num'] == 3
+i_cnd4 = beh_data['condition_num'] == 4
 # index trials/events in a certain condition at a certain frequency
 snrs_cnd1_1f1 = snrs[i_cnd1, :, i_bin_1f1]
 snrs_cnd2_1f1 = snrs[i_cnd2, :, i_bin_1f1]
@@ -440,3 +440,39 @@ plt.tight_layout()
 # save figure
 plt.savefig(os.path.join(save_path, f'{sub_id}_'
                                     f'{rec_date}_avg_SNR_improvement.pdf'))
+
+# ----------------------------------------------------------------------------
+
+# @@@ PLOT BOOST ACROSS TRIALS @@@
+ind_occ = [65, 68, 69, 70, 72, 73, 74, 75, 80, 81, 82, 83, 87, 88]
+
+ch_avg_cnd1 = snrs_cnd1_1f1[:, ind_occ].mean(axis=1)
+ch_avg_cnd2 = snrs_cnd2_1f1[:, ind_occ].mean(axis=1)
+ch_avg_cnd3 = snrs_cnd3_1f1[:, ind_occ].mean(axis=1)
+ch_avg_cnd4 = snrs_cnd4_1f1[:, ind_occ].mean(axis=1)
+ch_avg_cnd1_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd1, (4, 8)), axis=1)
+ch_avg_cnd2_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd2, (4, 8)), axis=1)
+ch_avg_cnd3_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd3, (4, 8)), axis=1)
+ch_avg_cnd4_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd4, (4, 8)), axis=1)
+
+ch_avg_cnd2 = snrs_cnd2_1f2[:, ind_occ].mean(axis=1)
+ch_avg_cnd3 = snrs_cnd3_1f2[:, ind_occ].mean(axis=1)
+ch_avg_cnd1 = snrs_cnd1_1f2[:, ind_occ].mean(axis=1)
+ch_avg_cnd4 = snrs_cnd4_1f2[:, ind_occ].mean(axis=1)
+ch_avg_cnd1_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd1, (4, 8)), axis=1)
+ch_avg_cnd2_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd2, (4, 8)), axis=1)
+ch_avg_cnd3_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd3, (4, 8)), axis=1)
+ch_avg_cnd4_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd4, (4, 8)), axis=1)
+
+red_boost_1f1_blocked = ch_avg_cnd1_blocked_1f1 - ch_avg_cnd3_blocked_1f1
+red_boost_1f2_blocked = ch_avg_cnd2_blocked_1f2 - ch_avg_cnd4_blocked_1f2
+
+green_boost_1f1_blocked = ch_avg_cnd4_blocked_1f1 - ch_avg_cnd2_blocked_1f1
+green_boost_1f2_blocked = ch_avg_cnd3_blocked_1f2 - ch_avg_cnd1_blocked_1f2
+
+red_boost_occ_blocked = (red_boost_1f1_blocked + red_boost_1f2_blocked)/2
+green_boost_occ_blocked = (green_boost_1f1_blocked + green_boost_1f2_blocked)/2
+
+fig, ax = plt.subplots()
+ax.plot(red_boost_occ_blocked)
+ax.plot(green_boost_occ_blocked)

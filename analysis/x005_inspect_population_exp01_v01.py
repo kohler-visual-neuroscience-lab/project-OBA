@@ -1,5 +1,6 @@
 import os
 import mne
+import scipy
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -191,10 +192,15 @@ for isub in range(np.size(beh_file)):
     snrs_1f2_avg = snrs_1f2.mean(axis=0)
 
     # index trials/events in a certain condition
-    i_cnd1 = events[:, 2] == 1
-    i_cnd2 = events[:, 2] == 2
-    i_cnd3 = events[:, 2] == 3
-    i_cnd4 = events[:, 2] == 4
+    # i_cnd1 = events[:, 2] == 1
+    # i_cnd2 = events[:, 2] == 2
+    # i_cnd3 = events[:, 2] == 3
+    # i_cnd4 = events[:, 2] == 4
+    i_cnd1 = beh.condition_num == 1
+    i_cnd2 = beh.condition_num == 2
+    i_cnd3 = beh.condition_num == 3
+    i_cnd4 = beh.condition_num == 4
+
     # index trials/events in a certain condition at a certain frequency
     snrs_cnd1_1f1 = snrs[i_cnd1, :, i_bin_1f1]
     snrs_cnd2_1f1 = snrs[i_cnd2, :, i_bin_1f1]
@@ -317,3 +323,16 @@ clean_bar(axs[1])
 
 plt.tight_layout()
 plt.savefig(os.path.join(save_path, f'Pop_N{nsub}_SNR.pdf'))
+
+# ----------------------------------------------------------------------------
+# stats
+stat_face = scipy.stats.wilcoxon(df_pool.face_boost_occ)
+stat_house = scipy.stats.wilcoxon(df_pool.house_boost_occ)
+print(f'Face mean improv. = {df_pool.face_boost_occ.mean()}')
+print(f'p-value = {stat_face.pvalue}')
+print(f'House mean improv. = {df_pool.house_boost_occ.mean()}')
+print(f'p-value = {stat_house.pvalue}')
+
+fig, axs = plt.subplots(1, 2)
+axs[0].scatter(df_pool.tilt, df_pool.face_boost_occ)
+axs[1].scatter(df_pool.tilt, df_pool.house_boost_occ)

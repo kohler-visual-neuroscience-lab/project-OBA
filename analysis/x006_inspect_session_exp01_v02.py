@@ -67,22 +67,21 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # eeg_file = '0001_20230308_103710_exp01_v02.mff'
 # beh_file = '0001_20230308_103626_exp01_v02.json'
 
-eeg_file = '0011_20230315_025355_exp01_v02.mff'
-beh_file = '0011_20230315_145311_exp01_v02.json'
+# eeg_file = '0011_20230315_025355_exp01_v02.mff'
+# beh_file = '0011_20230315_145311_exp01_v02.json'
 
 # eeg_file = '0013_20230315_102521_exp01_v02.mff'
 # beh_file = '0013_20230315_102437_exp01_v02.json'
 
-# eeg_file = '5005_20230317_013439_exp01_v02.mff'
-# beh_file = '5005_20230317_123439_exp01_v02.json'
+eeg_file = '5005_20230317_013439_exp01_v02.mff'
+beh_file = '5005_20230317_123439_exp01_v02.json'
 
 # eeg_file = '0004_20230329_015110_exp01_v02.mff'
 # beh_file = '0004_20230329_125109_exp01_v02.json'
 
-
 # set the full path to the raw data
 eeg_path = os.path.join('..', 'data', 'exp01_v02', 'raw', eeg_file)
-beh_path = os.path.join('..', 'data',  'exp01_v02', 'raw', beh_file)
+beh_path = os.path.join('..', 'data', 'exp01_v02', 'raw', beh_file)
 eeg = mne.io.read_raw_egi(eeg_path, preload=True)
 beh_data = pd.read_json(beh_path)
 
@@ -178,10 +177,10 @@ snrs_1f1_avg = snrs_1f1.mean(axis=0)
 snrs_1f2_avg = snrs_1f2.mean(axis=0)
 
 # index trials/events in a certain condition
-i_cnd1 = events[:, 2] == 1
-i_cnd2 = events[:, 2] == 2
-i_cnd3 = events[:, 2] == 3
-i_cnd4 = events[:, 2] == 4
+i_cnd1 = beh_data.condition_num == 1
+i_cnd2 = beh_data.condition_num == 2
+i_cnd3 = beh_data.condition_num == 3
+i_cnd4 = beh_data.condition_num == 4
 # index trials/events in a certain condition at a certain frequency
 snrs_cnd1_1f1 = snrs[i_cnd1, :, i_bin_1f1]
 snrs_cnd2_1f1 = snrs[i_cnd2, :, i_bin_1f1]
@@ -283,7 +282,7 @@ axs[2, 0].plot(trials, beh_data['avg_rt'], 'o', markerfacecolor='k',
                markeredgecolor='none', markersize=mrksize)
 axs[2, 0].set_yticks(range(0, 1000 + 1, 250))
 axs[2, 0].set(ylabel='RT [ms]',
-              xlim=[0 - 2, n_trials + 1], ylim=[0, 1000+25])
+              xlim=[0 - 2, n_trials + 1], ylim=[0, 1000 + 25])
 cp.add_shades(axs[2, 0], n_blocks, n_trials)
 axs[2, 0].get_xaxis().set_visible(False)
 axs[2, 0].spines['bottom'].set_visible(False)
@@ -467,3 +466,40 @@ plt.tight_layout()
 # save figure
 plt.savefig(os.path.join(save_path, f'{sub_id}_'
                                     f'{rec_date}_avg_SNR_improvement.pdf'))
+
+# ----------------------------------------------------------------------------
+
+# @@@ PLOT BOOST ACROSS TRIALS @@@
+ind_occ = [65, 68, 69, 70, 72, 73, 74, 75, 80, 81, 82, 83, 87, 88]
+
+ch_avg_cnd1 = snrs_cnd1_1f1[:, ind_occ].mean(axis=1)
+ch_avg_cnd2 = snrs_cnd2_1f1[:, ind_occ].mean(axis=1)
+ch_avg_cnd3 = snrs_cnd3_1f1[:, ind_occ].mean(axis=1)
+ch_avg_cnd4 = snrs_cnd4_1f1[:, ind_occ].mean(axis=1)
+ch_avg_cnd1_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd1, (4, 8)), axis=1)
+ch_avg_cnd2_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd2, (4, 8)), axis=1)
+ch_avg_cnd3_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd3, (4, 8)), axis=1)
+ch_avg_cnd4_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd4, (4, 8)), axis=1)
+
+ch_avg_cnd2 = snrs_cnd2_1f2[:, ind_occ].mean(axis=1)
+ch_avg_cnd3 = snrs_cnd3_1f2[:, ind_occ].mean(axis=1)
+ch_avg_cnd1 = snrs_cnd1_1f2[:, ind_occ].mean(axis=1)
+ch_avg_cnd4 = snrs_cnd4_1f2[:, ind_occ].mean(axis=1)
+ch_avg_cnd1_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd1, (4, 8)), axis=1)
+ch_avg_cnd2_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd2, (4, 8)), axis=1)
+ch_avg_cnd3_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd3, (4, 8)), axis=1)
+ch_avg_cnd4_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd4, (4, 8)), axis=1)
+
+face_boost_1f1_blocked = ch_avg_cnd1_blocked_1f1 - ch_avg_cnd3_blocked_1f1
+face_boost_1f2_blocked = ch_avg_cnd2_blocked_1f2 - ch_avg_cnd4_blocked_1f2
+
+house_boost_1f1_blocked = ch_avg_cnd4_blocked_1f1 - ch_avg_cnd2_blocked_1f1
+house_boost_1f2_blocked = ch_avg_cnd3_blocked_1f2 - ch_avg_cnd1_blocked_1f2
+
+face_boost_occ_blocked = (face_boost_1f1_blocked + face_boost_1f2_blocked)/2
+house_boost_occ_blocked = (house_boost_1f1_blocked + house_boost_1f2_blocked)/2
+
+fig, ax = plt.subplots()
+ax.plot(face_boost_occ_blocked)
+ax.plot(house_boost_occ_blocked)
+
