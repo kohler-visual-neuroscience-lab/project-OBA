@@ -64,8 +64,8 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # eeg_file = '5004_20230303_030932_exp01_v02.mff'
 # beh_file = '5004_20230303_150912_exp01_v02.json'
 
-# eeg_file = '0001_20230308_103710_exp01_v02.mff'
-# beh_file = '0001_20230308_103626_exp01_v02.json'
+eeg_file = '0001_20230308_103710_exp01_v02.mff'
+beh_file = '0001_20230308_103626_exp01_v02.json'
 
 # eeg_file = '0011_20230315_025355_exp01_v02.mff'
 # beh_file = '0011_20230315_145311_exp01_v02.json'
@@ -73,8 +73,8 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # eeg_file = '0013_20230315_102521_exp01_v02.mff'
 # beh_file = '0013_20230315_102437_exp01_v02.json'
 
-eeg_file = '5005_20230317_013439_exp01_v02.mff'
-beh_file = '5005_20230317_123439_exp01_v02.json'
+# eeg_file = '5005_20230317_013439_exp01_v02.mff'
+# beh_file = '5005_20230317_123439_exp01_v02.json'
 
 # eeg_file = '0004_20230329_015110_exp01_v02.mff'
 # beh_file = '0004_20230329_125109_exp01_v02.json'
@@ -357,6 +357,35 @@ cp.add_snr_colorbar(fig, axes[1, 1], im)
 # save figure
 plt.savefig(os.path.join(save_path, f'{sub_id}_'
                                     f'{rec_date}_psd_snr_laterality.pdf'))
+
+# plot average PSDS and SNRS over occipital channels
+ind_occ = [65, 68, 69, 70, 72, 73, 74, 75, 80, 81, 82, 83, 87, 88]
+psds_mean_occ = psds_plot.mean(axis=0)
+psds_mean_occ = psds_mean_occ[ind_occ].mean(axis=0)[freq_range]
+psds_std_occ = psds_plot.std(axis=0)
+psds_std_occ = psds_std_occ[ind_occ].mean(axis=0)[freq_range]
+snr_mean_occ = snrs.mean(axis=0)
+snr_mean_occ = snr_mean_occ[ind_occ].mean(axis=0)[freq_range]
+snr_std_occ = snrs.std(axis=0)
+snr_std_occ = snr_std_occ[ind_occ].mean(axis=0)[freq_range]
+fig, axes = plt.subplots(2, 2, figsize=(10, 6), width_ratios=[3, 1])
+fig.suptitle(f'Subject ID: {sub_id} – PSD & SNR (occipital channels)')
+cp.prep4ai()
+# PSD spectrum
+axes[0, 0].plot(freqs[freq_range], psds_mean_occ, color='k')
+axes[0, 0].fill_between(freqs[freq_range], psds_mean_occ - psds_std_occ,
+                        psds_mean_occ + psds_std_occ,
+                        color='k', alpha=.2)
+axes[0, 0].set(ylabel='PSD [dB]', xlim=[fmin, fmax])
+cp.trim_axes(axes[0, 0])
+# SNR spectrum
+axes[1, 0].plot(freqs[freq_range], snr_mean_occ, color='k')
+axes[1, 0].fill_between(freqs[freq_range], snr_mean_occ - snr_std_occ,
+                        snr_mean_occ + snr_std_occ,
+                        color='k', alpha=.2)
+axes[1, 0].set(xlabel='Frequency [Hz]', ylabel='SNR',
+               xlim=[fmin, fmax], ylim=[-1.5, 10])
+cp.trim_axes(axes[1, 0])
 # ----------------------------------------------------------------------------
 
 # @@@ PLOT TOPOGRAPHY MAPS FOR EACH CONDITION AT EACH FREQUENCY @@@
@@ -496,10 +525,10 @@ face_boost_1f2_blocked = ch_avg_cnd2_blocked_1f2 - ch_avg_cnd4_blocked_1f2
 house_boost_1f1_blocked = ch_avg_cnd4_blocked_1f1 - ch_avg_cnd2_blocked_1f1
 house_boost_1f2_blocked = ch_avg_cnd3_blocked_1f2 - ch_avg_cnd1_blocked_1f2
 
-face_boost_occ_blocked = (face_boost_1f1_blocked + face_boost_1f2_blocked)/2
-house_boost_occ_blocked = (house_boost_1f1_blocked + house_boost_1f2_blocked)/2
+face_boost_occ_blocked = (face_boost_1f1_blocked + face_boost_1f2_blocked) / 2
+house_boost_occ_blocked = (
+                                  house_boost_1f1_blocked + house_boost_1f2_blocked) / 2
 
 fig, ax = plt.subplots()
 ax.plot(face_boost_occ_blocked)
 ax.plot(house_boost_occ_blocked)
-

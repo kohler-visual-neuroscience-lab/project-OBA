@@ -125,7 +125,7 @@ JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
 # images keep their positions (equal to 100 ms at 60 Hz)
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = .5
+REL_IMGPATH_SIGMA = .2
 REL_IMGPATH_STEP = .1
 
 REL_IMAGE_POS0_X = FIX_X
@@ -387,30 +387,65 @@ for itrial in range(N_TRIALS):
             change_times[cur_evnt_n] = round(ch_t * 1000)
             cur_evnt_n += 1
 
-        # if conditions satisfied tilt the image
-        if iframe in change_frames:
-            if tilt_dirs[cur_evnt_n - 1] == 'CW':
-                if tilt_images[cur_evnt_n - 1] == 1:
-                    rel_image3_1cw.pos = (path1_x[iframe], path1_y[iframe])
-                    rel_image2.draw()
-                    rel_image3_1cw.draw()
-                elif tilt_images[cur_evnt_n - 1] == 2:
-                    rel_image3_2cw.pos = (path2_x[iframe], path2_y[iframe])
-                    rel_image3_2cw.draw()
-                    rel_image1.draw()
+        # make sure the cued image stays on top
+        if cue_image == 1:
+            # if conditions satisfied tilt the image
+            if iframe in change_frames:
+                if tilt_dirs[cur_evnt_n - 1] == 'CW':
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1cw.pos = (
+                        path1_x[iframe], path1_y[iframe])
+                        rel_image2.draw()
+                        rel_image3_1cw.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2cw.pos = (
+                        path2_x[iframe], path2_y[iframe])
+                        rel_image3_2cw.draw()
+                        rel_image1.draw()
+                else:
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1ccw.pos = (
+                        path1_x[iframe], path1_y[iframe])
+                        rel_image2.draw()
+                        rel_image3_1ccw.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2ccw.pos = (
+                        path2_x[iframe], path2_y[iframe])
+                        rel_image3_2ccw.draw()
+                        rel_image1.draw()
+            # if not, show the unchanged versions
             else:
-                if tilt_images[cur_evnt_n - 1] == 1:
-                    rel_image3_1ccw.pos = (path1_x[iframe], path1_y[iframe])
-                    rel_image2.draw()
-                    rel_image3_1ccw.draw()
-                elif tilt_images[cur_evnt_n - 1] == 2:
-                    rel_image3_2ccw.pos = (path2_x[iframe], path2_y[iframe])
-                    rel_image3_2ccw.draw()
-                    rel_image1.draw()
-        # if not, show the unchanged versions
+                rel_image2.draw()
+                rel_image1.draw()
         else:
-            rel_image2.draw()
-            rel_image1.draw()
+            # if conditions satisfied tilt the image
+            if iframe in change_frames:
+                if tilt_dirs[cur_evnt_n - 1] == 'CW':
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1cw.pos = (
+                        path1_x[iframe], path1_y[iframe])
+                        rel_image3_1cw.draw()
+                        rel_image2.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2cw.pos = (
+                        path2_x[iframe], path2_y[iframe])
+                        rel_image1.draw()
+                        rel_image3_2cw.draw()
+                else:
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1ccw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        rel_image3_1ccw.draw()
+                        rel_image2.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2ccw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        rel_image1.draw()
+                        rel_image3_2ccw.draw()
+            # if not, show the unchanged versions
+            else:
+                rel_image1.draw()
+                rel_image2.draw()
 
         # draw irrelevant image conditionally
         if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):

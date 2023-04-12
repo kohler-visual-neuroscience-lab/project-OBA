@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from lib import cleanplot as cp
 
 """
-MoShams <MShamsCBR@gmail.com> April 05, 2023
+MoShams <MShamsCBR@gmail.com> April 10, 2023
 
 - Inspects the recorded behavioral and EEG data of a single session.
 - Generates two figures: behavioral analysis, SSVEP analysis
@@ -49,13 +49,13 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 
 # (N=1)
 
-eeg_file = '0004_20230403_013324_exp01_v03.mff'
-beh_file = '0004_20230403_123323_exp01_v03.json'
+eeg_file = '0004_20230410_115650_exp01_v04.mff'
+beh_file = '0004_20230410_105649_exp01_v04.json'
 
 
 # set the full path to the raw data
-eeg_path = os.path.join('..', 'data', 'exp01_v03', 'raw', eeg_file)
-beh_path = os.path.join('..', 'data',  'exp01_v03', 'raw', beh_file)
+eeg_path = os.path.join('..', 'data', 'exp01_v04', 'raw', eeg_file)
+beh_path = os.path.join('..', 'data',  'exp01_v04', 'raw', beh_file)
 eeg = mne.io.read_raw_egi(eeg_path, preload=True)
 beh_data = pd.read_json(beh_path)
 
@@ -63,7 +63,7 @@ beh_data = pd.read_json(beh_path)
 
 # /// SET UP SAVE PATH AND PARAMETERS ///
 
-save_path = os.path.join('..', 'result', 'exp01_v03')
+save_path = os.path.join('..', 'result', 'exp01_v04')
 # extract subject's ID
 sub_id = beh_file[:4]
 # extract recoding date
@@ -440,39 +440,3 @@ plt.tight_layout()
 # save figure
 plt.savefig(os.path.join(save_path, f'{sub_id}_'
                                     f'{rec_date}_avg_SNR_improvement.pdf'))
-
-# ----------------------------------------------------------------------------
-
-# @@@ PLOT BOOST ACROSS TRIALS @@@
-ind_occ = [65, 68, 69, 70, 72, 73, 74, 75, 80, 81, 82, 83, 87, 88]
-
-ch_avg_cnd1 = snrs_cnd1_1f1[:, ind_occ].mean(axis=1)
-ch_avg_cnd2 = snrs_cnd2_1f1[:, ind_occ].mean(axis=1)
-ch_avg_cnd3 = snrs_cnd3_1f1[:, ind_occ].mean(axis=1)
-ch_avg_cnd4 = snrs_cnd4_1f1[:, ind_occ].mean(axis=1)
-ch_avg_cnd1_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd1, (4, 8)), axis=1)
-ch_avg_cnd2_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd2, (4, 8)), axis=1)
-ch_avg_cnd3_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd3, (4, 8)), axis=1)
-ch_avg_cnd4_blocked_1f1 = np.mean(np.reshape(ch_avg_cnd4, (4, 8)), axis=1)
-
-ch_avg_cnd2 = snrs_cnd2_1f2[:, ind_occ].mean(axis=1)
-ch_avg_cnd3 = snrs_cnd3_1f2[:, ind_occ].mean(axis=1)
-ch_avg_cnd1 = snrs_cnd1_1f2[:, ind_occ].mean(axis=1)
-ch_avg_cnd4 = snrs_cnd4_1f2[:, ind_occ].mean(axis=1)
-ch_avg_cnd1_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd1, (4, 8)), axis=1)
-ch_avg_cnd2_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd2, (4, 8)), axis=1)
-ch_avg_cnd3_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd3, (4, 8)), axis=1)
-ch_avg_cnd4_blocked_1f2 = np.mean(np.reshape(ch_avg_cnd4, (4, 8)), axis=1)
-
-red_boost_1f1_blocked = ch_avg_cnd1_blocked_1f1 - ch_avg_cnd3_blocked_1f1
-red_boost_1f2_blocked = ch_avg_cnd2_blocked_1f2 - ch_avg_cnd4_blocked_1f2
-
-green_boost_1f1_blocked = ch_avg_cnd4_blocked_1f1 - ch_avg_cnd2_blocked_1f1
-green_boost_1f2_blocked = ch_avg_cnd3_blocked_1f2 - ch_avg_cnd1_blocked_1f2
-
-red_boost_occ_blocked = (red_boost_1f1_blocked + red_boost_1f2_blocked)/2
-green_boost_occ_blocked = (green_boost_1f1_blocked + green_boost_1f2_blocked)/2
-
-fig, ax = plt.subplots()
-ax.plot(red_boost_occ_blocked)
-ax.plot(green_boost_occ_blocked)
