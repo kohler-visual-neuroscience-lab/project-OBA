@@ -16,7 +16,7 @@ from PIL import Image
 save_path = os.path.join("image", "image_set_v03")
 
 # face or house categories
-cats = ['red', 'green']
+cats = ['red', 'blue']
 # examples
 exms = [1]
 

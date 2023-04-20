@@ -20,13 +20,13 @@ from egi_pynetstation.NetStation import NetStation
 
 # /// INSERT SESSION'S META DATA ///
 
-subID = "0012"
-N_BLOCKS = 4  # (4)
-N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
-screen_num = 1  # 0: ctrl room    1: test room
-full_screen = True  # (True/False)
-netstation = True  # (True/False) decide whether to connect with NetStation
-keyboard = "numpad"  # numpad/mac
+subID = "test"
+N_BLOCKS = 1  # (4)
+N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
+screen_num = 0  # 0: ctrl room    1: test room
+full_screen = False  # (True/False)
+netstation = False  # (True/False) decide whether to connect with NetStation
+keyboard = "mac"  # numpad/mac
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
@@ -108,7 +108,7 @@ else:
 # duration of changed-image [frames]
 TILT_DUR = int(REF_RATE / 5)  # equal to 200 ms at 60 Hz
 
-N_EXEMPLARS = 1  # number of exemplars from each object category (red/green)
+N_EXEMPLARS = 1  # number of exemplars from each object category (red/blue)
 pairs = sfc.gen_image_pairs(nexmp=N_EXEMPLARS, ntrials=N_TRIALS)
 
 # size [deg]
@@ -166,14 +166,14 @@ np.random.shuffle(cnd_array)
 
 for itrial in range(N_TRIALS):
     ired = 1
-    igreen = 1
+    iblue = 1
 
     # --------------------------------
     # set image properties and load
     image1_directory = os.path.join("image", "image_set_v03",
                                     f"red{ired}_tilt0.png")
     image2_directory = os.path.join("image", "image_set_v03",
-                                    f"green{igreen}_tilt0.png")
+                                    f"blue{iblue}_tilt0.png")
 
     # load image
     rel_image1 = visual.ImageStim(win,
@@ -217,9 +217,9 @@ for itrial in range(N_TRIALS):
     cnd = cnd_array[itrial - 1]
     # find out in which order the image appear
     if cnd == 1 or cnd == 3:
-        order = 1  # image1(red) - image2(green)
+        order = 1  # image1(red) - image2(blue)
     elif cnd == 2 or cnd == 4:
-        order = 2  # image2(green) - image1(red)
+        order = 2  # image2(blue) - image1(red)
     else:
         order = None
         print('Invalid condition number!')
@@ -253,7 +253,7 @@ for itrial in range(N_TRIALS):
         IRR_IMAGE1_nFRAMES = None
         IRR_IMAGE2_nFRAMES = None
         print("Invalid image order!")
-    irr_image2_pos_x = -irr_image1_pos_x  # green on the other side
+    irr_image2_pos_x = -irr_image1_pos_x  # blue on the other side
 
     # pick the tilting image for each event , independently of the cued image
     tilt_images = np.random.choice([1, 2], n_total_evnts)
@@ -321,9 +321,9 @@ for itrial in range(N_TRIALS):
     image3_directory1ccw = os.path.join("image", "image_set_v03",
                                         f"red{ired}_tilt{tilt_mag}_CCW.png")
     image3_directory2cw = os.path.join("image", "image_set_v03",
-                                       f"green{igreen}_tilt{tilt_mag}_CW.png")
+                                       f"blue{iblue}_tilt{tilt_mag}_CW.png")
     image3_directory2ccw = os.path.join("image", "image_set_v03",
-                                        f"green{igreen}_tilt{tilt_mag}_CCW.png")
+                                        f"blue{iblue}_tilt{tilt_mag}_CCW.png")
 
     rel_image3_1cw = visual.ImageStim(win,
                                       image=image3_directory1cw,
