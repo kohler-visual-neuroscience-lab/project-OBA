@@ -39,7 +39,7 @@ from egi_pynetstation.NetStation import NetStation
 
 # /// INSERT SESSION'S META DATA ///
 
-subID = "0004"
+subID = "0009"
 N_BLOCKS = 4  # (4)
 N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 1  # 0: ctrl room    1: test room

@@ -26,7 +26,7 @@ N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 0  # 0: ctrl room    1: test room
 full_screen = False  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
-keyboard = "mac"  # numpad/mac
+keyboard = "numpad"  # numpad/mac
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
