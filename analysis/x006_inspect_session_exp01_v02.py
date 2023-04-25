@@ -64,8 +64,8 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # eeg_file = '5004_20230303_030932_exp01_v02.mff'
 # beh_file = '5004_20230303_150912_exp01_v02.json'
 
-eeg_file = '0001_20230308_103710_exp01_v02.mff'
-beh_file = '0001_20230308_103626_exp01_v02.json'
+# eeg_file = '0001_20230308_103710_exp01_v02.mff'
+# beh_file = '0001_20230308_103626_exp01_v02.json'
 
 # eeg_file = '0011_20230315_025355_exp01_v02.mff'
 # beh_file = '0011_20230315_145311_exp01_v02.json'
@@ -78,6 +78,12 @@ beh_file = '0001_20230308_103626_exp01_v02.json'
 
 # eeg_file = '0004_20230329_015110_exp01_v02.mff'
 # beh_file = '0004_20230329_125109_exp01_v02.json'
+
+eeg_file = '0006_20230424_115918_exp01_v02.mff'
+beh_file = '0006_20230424_105916_exp01_v02.json'
+
+# eeg_file = '0009_20230424_124837_exp01_v02.mff'
+# beh_file = '0009_20230424_114835_exp01_v02.json'
 
 # set the full path to the raw data
 eeg_path = os.path.join('..', 'data', 'exp01_v02', 'raw', eeg_file)
@@ -113,7 +119,7 @@ eeg.info['line_freq'] = 60.
 montage = mne.channels.make_standard_montage('GSN-HydroCel-129')
 eeg.set_montage(montage, match_alias=True)
 easycap_montage = mne.channels.make_standard_montage('GSN-HydroCel-129')
-easycap_montage.plot()
+# easycap_montage.plot()
 # set common average reference
 eeg.set_eeg_reference('average', projection=False, verbose=False)
 # apply bandpass filter
@@ -177,10 +183,11 @@ snrs_1f1_avg = snrs_1f1.mean(axis=0)
 snrs_1f2_avg = snrs_1f2.mean(axis=0)
 
 # index trials/events in a certain condition
-i_cnd1 = beh_data.condition_num == 1
-i_cnd2 = beh_data.condition_num == 2
-i_cnd3 = beh_data.condition_num == 3
-i_cnd4 = beh_data.condition_num == 4
+easy_trials = beh_data['tilt_magnitude'] > 0
+i_cnd1 = (beh_data.condition_num == 1) & easy_trials
+i_cnd2 = (beh_data.condition_num == 2) & easy_trials
+i_cnd3 = (beh_data.condition_num == 3) & easy_trials
+i_cnd4 = (beh_data.condition_num == 4) & easy_trials
 # index trials/events in a certain condition at a certain frequency
 snrs_cnd1_1f1 = snrs[i_cnd1, :, i_bin_1f1]
 snrs_cnd2_1f1 = snrs[i_cnd2, :, i_bin_1f1]
@@ -311,8 +318,15 @@ axs[2, 1].set(xticks=range(0, 1000 + 1, 250),
               xlim=[0, 1000], ylim=[0, 30])
 cp.trim_axes(axs[2, 1])
 
-# leave this subplot empty
-axs[3, 1].axis('off')
+# Tilt angle histogram
+# axs[3, 1].axis('off')
+hist_bins = np.arange(0, 5, .5)
+axs[3, 1].hist(beh_data['tilt_magnitude']/10, facecolor='k', bins=hist_bins)
+axs[3, 1].set_xticks(range(0, 5 + 1, 1))
+axs[3, 1].set(xticks=range(0, 5 + 1, 1),
+              xlabel='Tilt angle [dva]', ylabel='Count',
+              xlim=[0, 5], ylim=[0, 55])
+cp.trim_axes(axs[3, 1])
 
 # save figure
 plt.savefig(os.path.join(save_path, f'{sub_id}_{rec_date}_behavior.pdf'))
