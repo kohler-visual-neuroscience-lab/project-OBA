@@ -24,7 +24,7 @@ subID = "test"
 N_BLOCKS = 1  # (4)
 N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 0  # 0: ctrl room    1: test room
-full_screen = False  # (True/False)
+full_screen = True  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
 keyboard = "mac"  # numpad/mac
 # ----------------------------------------------------------------------------
@@ -82,7 +82,7 @@ else:
 # /// CONFIGURE STIMULUS PARAMETERS AND INPUTS ///
 
 # initialize the display and the keyboard
-REF_RATE = 60
+REF_RATE = 120
 TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
