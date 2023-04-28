@@ -39,13 +39,13 @@ from egi_pynetstation.NetStation import NetStation
 
 # /// INSERT SESSION'S META DATA ///
 
-subID = "0009"
-N_BLOCKS = 4  # (4)
-N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
-screen_num = 1  # 0: ctrl room    1: test room
+subID = "test"
+N_BLOCKS = 1  # (4)
+N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
+screen_num = 0  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
-netstation = True  # (True/False) decide whether to connect with NetStation
-keyboard = "numpad"  # numpad/mac
+netstation = False  # (True/False) decide whether to connect with NetStation
+keyboard = "mac"  # numpad/mac
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
@@ -101,7 +101,7 @@ else:
 # /// CONFIGURE STIMULUS PARAMETERS AND INPUTS ///
 
 # initialize the display and the keyboard
-REF_RATE = 60
+REF_RATE = 120
 TRIAL_DUR = 10 * REF_RATE  # duration of a trial in [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 

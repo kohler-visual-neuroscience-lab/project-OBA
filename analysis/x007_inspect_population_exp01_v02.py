@@ -78,6 +78,10 @@ eeg_file.append('5005_20230317_013439_exp01_v02.mff')
 beh_file.append('5005_20230317_123439_exp01_v02.json')
 eeg_file.append('0004_20230329_015110_exp01_v02.mff')
 beh_file.append('0004_20230329_125109_exp01_v02.json')
+eeg_file.append('0006_20230424_115918_exp01_v02.mff')
+beh_file.append('0006_20230424_105916_exp01_v02.json')
+eeg_file.append('0009_20230424_124837_exp01_v02.mff')
+beh_file.append('0009_20230424_114835_exp01_v02.json')
 
 # ----------------------------------------------------------------------------
 # +++ TEST +++
@@ -198,14 +202,12 @@ for isub in range(np.size(beh_file)):
     snrs_1f2_avg = snrs_1f2.mean(axis=0)
 
     # index trials/events in a certain condition
-    # i_cnd1 = events[:, 2] == 1
-    # i_cnd2 = events[:, 2] == 2
-    # i_cnd3 = events[:, 2] == 3
-    # i_cnd4 = events[:, 2] == 4
-    i_cnd1 = beh['condition_num'] == 1
-    i_cnd2 = beh['condition_num'] == 2
-    i_cnd3 = beh['condition_num'] == 3
-    i_cnd4 = beh['condition_num'] == 4
+    # easy_trials = beh['tilt_magnitude'] < 20
+    perfect_trials = beh['instant_performance'] == 100
+    i_cnd1 = (beh.condition_num == 1) & perfect_trials
+    i_cnd2 = (beh.condition_num == 2) & perfect_trials
+    i_cnd3 = (beh.condition_num == 3) & perfect_trials
+    i_cnd4 = (beh.condition_num == 4) & perfect_trials
     # index trials/events in a certain condition at a certain frequency
     snrs_cnd1_1f1 = snrs[i_cnd1, :, i_bin_1f1]
     snrs_cnd2_1f1 = snrs[i_cnd2, :, i_bin_1f1]
@@ -338,10 +340,24 @@ print(f'p-value = {stat_face.pvalue}')
 print(f'House mean improv. = {df_pool.house_boost_occ.mean()}')
 print(f'p-value = {stat_house.pvalue}')
 
-fig, axs = plt.subplots(1, 2)
+# @ tilt angle vs. SNR improvement correlation
+fig, axs = plt.subplots(1, 2, figsize=(8, 4), sharey=True)
 axs[0].scatter(df_pool.tilt, df_pool.face_boost_occ)
 axs[1].scatter(df_pool.tilt, df_pool.house_boost_occ)
+axs[0].set(xlabel='Tilt angle [dva]', ylabel='Face boost [%]')
+axs[0].axhline(y=0, c="black", linewidth=1, zorder=0)
+axs[1].set(xlabel='Tilt angle [dva]', ylabel='House boost [%]')
+axs[1].axhline(y=0, c="black", linewidth=1, zorder=0)
+scipy.stats.kendalltau(df_pool.tilt, df_pool.face_boost_occ)
+scipy.stats.kendalltau(df_pool.tilt, df_pool.house_boost_occ)
 
-fig, axs = plt.subplots(1, 2)
+# @ reaction time vs. SNR improvement correlation
+fig, axs = plt.subplots(1, 2, figsize=(8, 4), sharey=True)
 axs[0].scatter(df_pool.rt, df_pool.face_boost_occ)
 axs[1].scatter(df_pool.rt, df_pool.house_boost_occ)
+axs[0].set(xlabel='Reaction time [ms]', ylabel='Face boost [%]')
+axs[0].axhline(y=0, c="black", linewidth=1, zorder=0)
+axs[1].set(xlabel='Reaction time [ms]', ylabel='House boost [%]')
+axs[1].axhline(y=0, c="black", linewidth=1, zorder=0)
+scipy.stats.kendalltau(df_pool.rt, df_pool.face_boost_occ)
+scipy.stats.kendalltau(df_pool.rt, df_pool.house_boost_occ)
