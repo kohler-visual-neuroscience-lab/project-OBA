@@ -16,6 +16,7 @@ from lib import stim_flow_control as sfc
 from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
 from egi_pynetstation.NetStation import NetStation
+
 # ----------------------------------------------------------------------------
 
 # /// INSERT SESSION'S META DATA ///
@@ -394,23 +395,23 @@ for itrial in range(N_TRIALS):
                 if tilt_dirs[cur_evnt_n - 1] == 'CW':
                     if tilt_images[cur_evnt_n - 1] == 1:
                         rel_image3_1cw.pos = (
-                        path1_x[iframe], path1_y[iframe])
+                            path1_x[iframe], path1_y[iframe])
                         rel_image2.draw()
                         rel_image3_1cw.draw()
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2cw.pos = (
-                        path2_x[iframe], path2_y[iframe])
+                            path2_x[iframe], path2_y[iframe])
                         rel_image3_2cw.draw()
                         rel_image1.draw()
                 else:
                     if tilt_images[cur_evnt_n - 1] == 1:
                         rel_image3_1ccw.pos = (
-                        path1_x[iframe], path1_y[iframe])
+                            path1_x[iframe], path1_y[iframe])
                         rel_image2.draw()
                         rel_image3_1ccw.draw()
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2ccw.pos = (
-                        path2_x[iframe], path2_y[iframe])
+                            path2_x[iframe], path2_y[iframe])
                         rel_image3_2ccw.draw()
                         rel_image1.draw()
             # if not, show the unchanged versions
@@ -423,12 +424,12 @@ for itrial in range(N_TRIALS):
                 if tilt_dirs[cur_evnt_n - 1] == 'CW':
                     if tilt_images[cur_evnt_n - 1] == 1:
                         rel_image3_1cw.pos = (
-                        path1_x[iframe], path1_y[iframe])
+                            path1_x[iframe], path1_y[iframe])
                         rel_image3_1cw.draw()
                         rel_image2.draw()
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2cw.pos = (
-                        path2_x[iframe], path2_y[iframe])
+                            path2_x[iframe], path2_y[iframe])
                         rel_image1.draw()
                         rel_image3_2cw.draw()
                 else:
@@ -517,8 +518,8 @@ for itrial in range(N_TRIALS):
     print(f"RunPerf:{run_perf:6.2f}%")
     # fill the remaining values in the data frame
     dfnew.loc[acc_trial - 1,
-              ['cummulative_performance',
-               'running_performance']] = [cum_perf, run_perf]
+    ['cummulative_performance',
+     'running_performance']] = [cum_perf, run_perf]
     # save the data frame
     dfnew.to_json(data_path)
 

@@ -35,13 +35,20 @@ from lib import stim_flow_control as sfc
 from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
 from egi_pynetstation.NetStation import NetStation
-# ----------------------------------------------------------------------------
 
+
+def pol2cart(rho, phi):
+    x_cart = rho * np.cos(phi)
+    y_cart = rho * np.sin(phi)
+    return x_cart, y_cart
+
+
+# ----------------------------------------------------------------------------
 # /// INSERT SESSION'S META DATA ///
 
 subID = "test"
 N_BLOCKS = 1  # (4)
-N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
+N_TRIALS = 50  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 0  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
@@ -113,7 +120,7 @@ sfc.test_refresh_rate(win, REF_RATE)
 # fixation cross
 FIX_SIZE = .7
 FIX_X = 0
-FIX_Y = 4
+FIX_Y = 0
 
 INSTRUCT_DUR = REF_RATE  # duration of the instruction period [frames]
 
@@ -131,28 +138,30 @@ N_EXEMPLARS = 8  # number of exemplars from each object category (face/house)
 pairs = sfc.gen_image_pairs(nexmp=N_EXEMPLARS, ntrials=N_TRIALS)
 
 # size [deg]
-size_factor = 7
-IMAGE1_SIZE = (size_factor, size_factor)
-IMAGE2_SIZE = (size_factor, size_factor)
-IMAGE3_SIZE = (size_factor, size_factor)
+size_factor = 2
+IMAGE1_SIZE = np.array([size_factor, size_factor])
+IMAGE2_SIZE = np.array([size_factor, size_factor])
+IMAGE3_SIZE = np.array([size_factor, size_factor])
 
 # opacity (1: opac | 0: transparent)
-IMAGE_OPACITY = .4
+IMAGE_OPACITY_IRR = .6
+IMAGE_OPACITY_REL_FRONT = .5
+IMAGE_OPACITY_REL_BACK = .6
 
 # jittering properties
 JITTER_REPETITION = int(REF_RATE / 10)  # number of frames where the relevant
 # images keep their positions (equal to 100 ms at 60 Hz)
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = .2
-REL_IMGPATH_STEP = .1
+REL_IMGPATH_SIGMA = .02
+REL_IMGPATH_STEP = .03
 
 REL_IMAGE_POS0_X = FIX_X
 REL_IMAGE_POS0_Y = FIX_Y
 
-IRR_IMAGE_X = 4
-IRR_IMAGE1_POS_Y = -2.5
-IRR_IMAGE2_POS_Y = -2.5
+IRR_IMAGE_RHO = 3.5
+IRR_IMAGE_THETA = np.array([-70, -35, 0, 35, 70]) * (2 * np.pi) / 360
+IRR_IMAGE_X, IRR_IMAGE_Y = pol2cart(IRR_IMAGE_RHO, IRR_IMAGE_THETA)
 
 freq1 = 7.5
 freq2 = 12
@@ -186,25 +195,6 @@ np.random.shuffle(cnd_array)
 for itrial in range(N_TRIALS):
     iface = pairs[itrial][0]
     ihouse = pairs[itrial][1]
-
-    # --------------------------------
-    # set image properties and load
-    image1_directory = os.path.join("image", "image_set_v02",
-                                    f"face{iface}_tilt0.png")
-    image2_directory = os.path.join("image", "image_set_v02",
-                                    f"house{ihouse}_tilt0.png")
-
-    # load image
-    rel_image1 = visual.ImageStim(win,
-                                  image=image1_directory,
-                                  size=IMAGE1_SIZE,
-                                  opacity=IMAGE_OPACITY)
-    rel_image2 = visual.ImageStim(win,
-                                  image=image2_directory,
-                                  size=IMAGE2_SIZE,
-                                  opacity=IMAGE_OPACITY)
-
-    # --------------------------------
 
     # /// set up the stimulus behavior in current trial
 
@@ -280,21 +270,95 @@ for itrial in range(N_TRIALS):
     tilt_dirs = np.random.choice(['CW', 'CCW'], n_total_evnts)
 
     # --------------------------------
+    # set image properties and load
+    image1_directory = os.path.join("image", "image_set_v02",
+                                    f"face{iface}_tilt0.png")
+    image2_directory = os.path.join("image", "image_set_v02",
+                                    f"house{ihouse}_tilt0.png")
+    # adjust transparrencies
+    if cue_image == 1:
+        IMAGE1_OPACITY_REL = IMAGE_OPACITY_REL_FRONT
+        IMAGE2_OPACITY_REL = IMAGE_OPACITY_REL_BACK
+    else:
+        IMAGE1_OPACITY_REL = IMAGE_OPACITY_REL_BACK
+        IMAGE2_OPACITY_REL = IMAGE_OPACITY_REL_FRONT
+
+    # load image
+    rel_image1 = visual.ImageStim(win,
+                                  image=image1_directory,
+                                  size=IMAGE1_SIZE*2,
+                                  opacity=IMAGE1_OPACITY_REL)
+    rel_image2 = visual.ImageStim(win,
+                                  image=image2_directory,
+                                  size=IMAGE2_SIZE*2,
+                                  opacity=IMAGE2_OPACITY_REL)
+
+    # --------------------------------
 
     # /// load irrelevant image
 
-    irr_image1 = visual.ImageStim(win,
-                                  image=image1_directory,
-                                  pos=(irr_image1_pos_x,
-                                       IRR_IMAGE1_POS_Y),
-                                  size=IMAGE1_SIZE,
-                                  opacity=IMAGE_OPACITY)
-    irr_image2 = visual.ImageStim(win,
-                                  image=image2_directory,
-                                  pos=(irr_image2_pos_x,
-                                       IRR_IMAGE2_POS_Y),
-                                  size=IMAGE2_SIZE,
-                                  opacity=IMAGE_OPACITY)
+    irr_image11 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   pos=(irr_image1_pos_x[0],
+                                        IRR_IMAGE_Y[0]),
+                                   size=IMAGE1_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+    irr_image12 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   pos=(irr_image1_pos_x[1],
+                                        IRR_IMAGE_Y[1]),
+                                   size=IMAGE1_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+    irr_image13 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   pos=(irr_image1_pos_x[2],
+                                        IRR_IMAGE_Y[2]),
+                                   size=IMAGE1_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+    irr_image14 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   pos=(irr_image1_pos_x[3],
+                                        IRR_IMAGE_Y[3]),
+                                   size=IMAGE1_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+    irr_image15 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   pos=(irr_image1_pos_x[4],
+                                        IRR_IMAGE_Y[4]),
+                                   size=IMAGE1_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+
+    irr_image21 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   pos=(irr_image2_pos_x[0],
+                                        IRR_IMAGE_Y[0]),
+                                   size=IMAGE2_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+    irr_image22 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   pos=(irr_image2_pos_x[1],
+                                        IRR_IMAGE_Y[1]),
+                                   size=IMAGE2_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+    irr_image23 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   pos=(irr_image2_pos_x[2],
+                                        IRR_IMAGE_Y[2]),
+                                   size=IMAGE2_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+    irr_image24 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   pos=(irr_image2_pos_x[3],
+                                        IRR_IMAGE_Y[3]),
+                                   size=IMAGE2_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+    irr_image25 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   pos=(irr_image2_pos_x[4],
+                                        IRR_IMAGE_Y[4]),
+                                   size=IMAGE2_SIZE,
+                                   opacity=IMAGE_OPACITY_IRR)
+
     # generate the brownian path
     path1_x = gen_path.brownian_2d(
         n_samples=REL_IMGPATH_N,
@@ -346,20 +410,20 @@ for itrial in range(N_TRIALS):
 
     rel_image3_1cw = visual.ImageStim(win,
                                       image=image3_directory1cw,
-                                      size=IMAGE3_SIZE,
-                                      opacity=IMAGE_OPACITY)
+                                      size=IMAGE3_SIZE*2,
+                                      opacity=IMAGE1_OPACITY_REL)
     rel_image3_1ccw = visual.ImageStim(win,
                                        image=image3_directory1ccw,
-                                       size=IMAGE3_SIZE,
-                                       opacity=IMAGE_OPACITY)
+                                       size=IMAGE3_SIZE*2,
+                                       opacity=IMAGE1_OPACITY_REL)
     rel_image3_2cw = visual.ImageStim(win,
                                       image=image3_directory2cw,
-                                      size=IMAGE3_SIZE,
-                                      opacity=IMAGE_OPACITY)
+                                      size=IMAGE3_SIZE*2,
+                                      opacity=IMAGE2_OPACITY_REL)
     rel_image3_2ccw = visual.ImageStim(win,
                                        image=image3_directory2ccw,
-                                       size=IMAGE3_SIZE,
-                                       opacity=IMAGE_OPACITY)
+                                       size=IMAGE3_SIZE*2,
+                                       opacity=IMAGE2_OPACITY_REL)
     # --------------------------------
 
     # /// run the stimulus
@@ -371,7 +435,7 @@ for itrial in range(N_TRIALS):
         win.flip()
 
     # cue period
-    cue_yoffset = random.choice(range(-5, 5))
+    cue_yoffset = 0
     for iframe_instruction in range(INSTRUCT_DUR):
         if cue_image == 1:
             rel_image1.pos = (0, cue_yoffset)
@@ -406,36 +470,79 @@ for itrial in range(N_TRIALS):
             change_times[cur_evnt_n] = round(ch_t * 1000)
             cur_evnt_n += 1
 
-        # if conditions satisfied tilt the image
-        if iframe in change_frames:
-            if tilt_dirs[cur_evnt_n - 1] == 'CW':
-                if tilt_images[cur_evnt_n - 1] == 1:
-                    rel_image3_1cw.pos = (path1_x[iframe], path1_y[iframe])
-                    rel_image2.draw()
-                    rel_image3_1cw.draw()
-                elif tilt_images[cur_evnt_n - 1] == 2:
-                    rel_image3_2cw.pos = (path2_x[iframe], path2_y[iframe])
-                    rel_image3_2cw.draw()
-                    rel_image1.draw()
+        # make sure the cued image stays on top
+        if cue_image == 1:
+            # if conditions satisfied tilt the image
+            if iframe in change_frames:
+                if tilt_dirs[cur_evnt_n - 1] == 'CW':
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1cw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        rel_image2.draw()
+                        rel_image3_1cw.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2cw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        rel_image3_2cw.draw()
+                        rel_image1.draw()
+                else:
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1ccw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        rel_image2.draw()
+                        rel_image3_1ccw.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2ccw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        rel_image3_2ccw.draw()
+                        rel_image1.draw()
+            # if not, show the unchanged versions
             else:
-                if tilt_images[cur_evnt_n - 1] == 1:
-                    rel_image3_1ccw.pos = (path1_x[iframe], path1_y[iframe])
-                    rel_image2.draw()
-                    rel_image3_1ccw.draw()
-                elif tilt_images[cur_evnt_n - 1] == 2:
-                    rel_image3_2ccw.pos = (path2_x[iframe], path2_y[iframe])
-                    rel_image3_2ccw.draw()
-                    rel_image1.draw()
-        # if not, show the unchanged versions
+                rel_image2.draw()
+                rel_image1.draw()
         else:
-            rel_image2.draw()
-            rel_image1.draw()
+            # if conditions satisfied tilt the image
+            if iframe in change_frames:
+                if tilt_dirs[cur_evnt_n - 1] == 'CW':
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1cw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        rel_image3_1cw.draw()
+                        rel_image2.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2cw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        rel_image1.draw()
+                        rel_image3_2cw.draw()
+                else:
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1ccw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        rel_image3_1ccw.draw()
+                        rel_image2.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2ccw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        rel_image1.draw()
+                        rel_image3_2ccw.draw()
+            # if not, show the unchanged versions
+            else:
+                rel_image1.draw()
+                rel_image2.draw()
 
         # draw irrelevant image conditionally
         if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-            irr_image1.draw()
+            irr_image11.draw()
+            irr_image12.draw()
+            irr_image13.draw()
+            irr_image14.draw()
+            irr_image15.draw()
         if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-            irr_image2.draw()
+            irr_image21.draw()
+            irr_image22.draw()
+            irr_image23.draw()
+            irr_image24.draw()
+            irr_image25.draw()
         sfc.draw_fixdot(win=win, size=FIX_SIZE,
                         pos=(FIX_X, FIX_Y),
                         cue=cue_image)
@@ -501,8 +608,8 @@ for itrial in range(N_TRIALS):
     print(f"RunPerf:{run_perf:6.2f}%")
     # fill the remaining values in the data frame
     dfnew.loc[acc_trial - 1,
-              ['cummulative_performance',
-               'running_performance']] = [cum_perf, run_perf]
+    ['cummulative_performance',
+     'running_performance']] = [cum_perf, run_perf]
     # save the data frame
     dfnew.to_json(data_path)
 
