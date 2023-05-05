@@ -1,22 +1,13 @@
 """
 ***** Object-based attention (OBA) project
-***** Experiment 01_v2
+***** Experiment 01_v5
 
     Mo Shams <MShamsCBR@gmail.com>
-    Jan 17, 2023
+    May 05, 2023
 
-Two superimposed images jitter and subject's task is to report a brief tilt
-in the one of the image. Simultaneously, a copy of each image appears on
-each side of the fixation cross and flicker at two different frequencies.
-The flickering image on the left side will flicker always at f1 Hz, and the
-one on the right side at f2 Hz.
 
-This is basically the same as version 1, but here we use eight different
-exemplars from each category (face/house). There will be 64 pairs, and each
-will appear twice within a 128-trial session.
 
-This is similar to version two, but here we use a new image set, which is
-more stereotypical
+This was a modified version of exp01_v2.py
 
 There are four conditions:
     CND1: FH(F); face left, house right, attend face
@@ -34,7 +25,7 @@ import gen_random_path as gen_path
 from lib import stim_flow_control as sfc
 from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
-from egi_pynetstation.NetStation import NetStation
+# from egi_pynetstation.NetStation import NetStation
 
 
 def pol2cart(rho, phi):
@@ -43,6 +34,9 @@ def pol2cart(rho, phi):
     return x_cart, y_cart
 
 
+# disable Panda's false warning message
+pd.options.mode.chained_assignment = None  # default='warn'
+
 # ----------------------------------------------------------------------------
 # /// INSERT SESSION'S META DATA ///
 
@@ -50,7 +44,7 @@ subID = "test"
 N_BLOCKS = 1  # (4)
 N_TRIALS = 50  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 0  # 0: ctrl room    1: test room
-full_screen = True  # (True/False)
+full_screen = False  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
 keyboard = "numpad"  # numpad/mac
 # ----------------------------------------------------------------------------
@@ -145,7 +139,7 @@ IMAGE3_SIZE = np.array([size_factor, size_factor])
 
 # opacity (1: opac | 0: transparent)
 IMAGE_OPACITY_IRR = .6
-IMAGE_OPACITY_REL_FRONT = .5
+IMAGE_OPACITY_REL_FRONT = .4
 IMAGE_OPACITY_REL_BACK = .6
 
 # jittering properties
@@ -286,11 +280,11 @@ for itrial in range(N_TRIALS):
     # load image
     rel_image1 = visual.ImageStim(win,
                                   image=image1_directory,
-                                  size=IMAGE1_SIZE*2,
+                                  size=IMAGE1_SIZE * 2,
                                   opacity=IMAGE1_OPACITY_REL)
     rel_image2 = visual.ImageStim(win,
                                   image=image2_directory,
-                                  size=IMAGE2_SIZE*2,
+                                  size=IMAGE2_SIZE * 2,
                                   opacity=IMAGE2_OPACITY_REL)
 
     # --------------------------------
@@ -410,19 +404,19 @@ for itrial in range(N_TRIALS):
 
     rel_image3_1cw = visual.ImageStim(win,
                                       image=image3_directory1cw,
-                                      size=IMAGE3_SIZE*2,
+                                      size=IMAGE3_SIZE * 2,
                                       opacity=IMAGE1_OPACITY_REL)
     rel_image3_1ccw = visual.ImageStim(win,
                                        image=image3_directory1ccw,
-                                       size=IMAGE3_SIZE*2,
+                                       size=IMAGE3_SIZE * 2,
                                        opacity=IMAGE1_OPACITY_REL)
     rel_image3_2cw = visual.ImageStim(win,
                                       image=image3_directory2cw,
-                                      size=IMAGE3_SIZE*2,
+                                      size=IMAGE3_SIZE * 2,
                                       opacity=IMAGE2_OPACITY_REL)
     rel_image3_2ccw = visual.ImageStim(win,
                                        image=image3_directory2ccw,
-                                       size=IMAGE3_SIZE*2,
+                                       size=IMAGE3_SIZE * 2,
                                        opacity=IMAGE2_OPACITY_REL)
     # --------------------------------
 
