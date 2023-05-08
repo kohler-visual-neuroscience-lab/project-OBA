@@ -47,7 +47,7 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 
 # /// SET UP SOURCE DATA PATH AND PARAMETERS ///
 
-# (N=1)
+# (N=7)
 
 # eeg_file = '0004_20230403_013324_exp01_v03.mff'
 # beh_file = '0004_20230403_123323_exp01_v03.json'
@@ -58,11 +58,17 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # eeg_file = '0013_20230414_115805_exp01_v03.mff'
 # beh_file = '0013_20230414_105803_exp01_v03.json'
 
-eeg_file = '1191_20230428_023515_exp01_v03.mff'
-beh_file = '1191_20230428_133513_exp01_v03.json'
+# eeg_file = '1191_20230428_023515_exp01_v03.mff'
+# beh_file = '1191_20230428_133513_exp01_v03.json'
 
 # eeg_file = '2002_20230428_014730_exp01_v03.mff'
 # beh_file = '2002_20230428_124727_exp01_v03.json'
+
+# eeg_file = '5005_20230501_113732_exp01_v03.mff'
+# beh_file = '5005_20230501_103729_exp01_v03.json'
+
+eeg_file = '0002_20230501_122537_exp01_v03.mff'
+beh_file = '0002_20230501_112535_exp01_v03.json'
 
 
 # set the full path to the raw data
@@ -361,47 +367,47 @@ fig.suptitle(f'Subject ID: {sub_id} – Topography map of each condition at '
 cp.prep4ai()
 
 # @@@ red135 boost pairs
-# Topography map of CND1, RG(R), 1f1:
+# Topography map of CND1, RB(R), 1f1:
 im, _ = mne.viz.plot_topomap(snrs_cnd1_1f1_avg, epochs.info, axes=axes[0, 0],
                              vlim=(vmin, vmax), show=False)
-axes[0, 0].set(title='CND1 RG(R) 1f1')
+axes[0, 0].set(title='CND1 RB(R) 1f1')
 cp.add_snr_colorbar(fig, axes[0, 0], im)
-# Topography map of CND3, RG(G), 1f1:
+# Topography map of CND3, RB(B), 1f1:
 im, _ = mne.viz.plot_topomap(snrs_cnd3_1f1_avg, epochs.info, axes=axes[0, 1],
                              vlim=(vmin, vmax), show=False)
-axes[0, 1].set(title='CND3 RG(G) 1f1')
+axes[0, 1].set(title='CND3 RB(B) 1f1')
 cp.add_snr_colorbar(fig, axes[0, 1], im)
 # Topography map of CND2, HF(R), 1f2:
 im, _ = mne.viz.plot_topomap(snrs_cnd2_1f2_avg, epochs.info, axes=axes[1, 0],
                              vlim=(vmin, vmax), show=False)
-axes[1, 0].set(title='CND2 GR(R) 1f2')
+axes[1, 0].set(title='CND2 BR(R) 1f2')
 cp.add_snr_colorbar(fig, axes[1, 0], im)
-# Topography map of CND4, GR(G), 1f2:
+# Topography map of CND4, BR(B), 1f2:
 im, _ = mne.viz.plot_topomap(snrs_cnd4_1f2_avg, epochs.info, axes=axes[1, 1],
                              vlim=(vmin, vmax), show=False)
-axes[1, 1].set(title='CND4 GR(G) 1f2')
+axes[1, 1].set(title='CND4 BR(B) 1f2')
 cp.add_snr_colorbar(fig, axes[1, 1], im)
 
 # @@@ blue45 boost pairs
-# Topography map of CND4, GR(G), 1f1:
+# Topography map of CND4, BR(B), 1f1:
 im, _ = mne.viz.plot_topomap(snrs_cnd4_1f1_avg, epochs.info, axes=axes[2, 0],
                              vlim=(vmin, vmax), show=False)
-axes[2, 0].set(title='CND4 GR(G) 1f1')
+axes[2, 0].set(title='CND4 BR(B) 1f1')
 cp.add_snr_colorbar(fig, axes[2, 0], im)
-# Topography map of CND2, GR(R), 1f1:
+# Topography map of CND2, BR(R), 1f1:
 im, _ = mne.viz.plot_topomap(snrs_cnd2_1f1_avg, epochs.info, axes=axes[2, 1],
                              vlim=(vmin, vmax), show=False)
-axes[2, 1].set(title='CND2 GR(R) 1f1')
+axes[2, 1].set(title='CND2 BR(R) 1f1')
 cp.add_snr_colorbar(fig, axes[2, 1], im)
-# Topography map of CND3, RG(G), 1f2:
+# Topography map of CND3, RB(B), 1f2:
 im, _ = mne.viz.plot_topomap(snrs_cnd3_1f2_avg, epochs.info, axes=axes[3, 0],
                              vlim=(vmin, vmax), show=False)
-axes[3, 0].set(title='CND3 RG(G) 1f2')
+axes[3, 0].set(title='CND3 RB(B) 1f2')
 cp.add_snr_colorbar(fig, axes[3, 0], im)
-# Topography map of CND1, RG(R), 1f2:
+# Topography map of CND1, RB(R), 1f2:
 im, _ = mne.viz.plot_topomap(snrs_cnd1_1f2_avg, epochs.info, axes=axes[3, 1],
                              vlim=(vmin, vmax), show=False)
-axes[3, 1].set(title='CND1 RG(R) 1f2')
+axes[3, 1].set(title='CND1 RB(R) 1f2')
 cp.add_snr_colorbar(fig, axes[3, 1], im)
 
 # @@@ ADD OBJECT BOOST MAPS
