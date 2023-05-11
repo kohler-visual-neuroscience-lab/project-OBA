@@ -11,7 +11,7 @@ def eval_resp(cue_image, change_image, tilt_times, resp_times):
     tilts. Then subjects loose one point if they:
         - miss a tilt (false negative)
         - respond to no apparent tilt (false positive)
-        - responsd earlier than 100 ms after tilt (anticipatory resp)
+        - responsd earlier than 200 ms after tilt (anticipatory resp)
         - respond later than 1000 ms after tilt (late resp)
     :param cue_image: the cued image (one or two)
     :param change_image: an array of changed/tilted image
@@ -42,7 +42,7 @@ def eval_resp(cue_image, change_image, tilt_times, resp_times):
     else:
         while iresp < n_resp:
             rt = resp_times[iresp] - valid_tilt_times[itilt]
-            if rt < 100:
+            if rt < 200:
                 if not lost_on_iresp[iresp]:
                     lost_pts += 1
                 lost_on_itilt[itilt] = True

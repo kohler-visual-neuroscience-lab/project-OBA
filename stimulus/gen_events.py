@@ -22,3 +22,16 @@ def gen_events(ref_rate):
         event_frames[ievent] = random.choice(range(2 * ref_rate)) + \
                               segment_times[segment_numbers[ievent] - 1]
     return event_frames
+
+
+def gen_events2(ref_rate):
+    segment_numbers = np.array([1, 2])
+    segment_times = [1 * ref_rate,
+                     4 * ref_rate]
+    n_events = np.random.choice(segment_numbers, p=[.3, .7])
+    np.random.shuffle(segment_numbers)
+    event_frames = np.full((n_events,), np.nan)
+    for ievent in range(n_events):
+        event_frames[ievent] = random.choice(range(2 * ref_rate)) + \
+                              segment_times[segment_numbers[ievent] - 1]
+    return event_frames
