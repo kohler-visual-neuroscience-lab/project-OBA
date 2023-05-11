@@ -272,6 +272,8 @@ for isub in range(np.size(beh_file)):
 
 fig, axs = plt.subplots(1, 3, figsize=(5, 4))
 fig.suptitle(f'Population Behavior (N={nsub})')
+cp.prep4ai()
+
 axs[0].bar(1, df_pool.cum_perf.mean(), color='grey')
 axs[0].plot(np.ones(nsub), df_pool.cum_perf, 'o', mec='black', mfc='none')
 axs[0].set(ylabel='Average Performance [%]', xticks=[])
@@ -296,6 +298,8 @@ plt.savefig(os.path.join(save_path, f'Pop_N{nsub}_Behavior.pdf'))
 # @ all channels
 fig, axs = plt.subplots(1, 2, figsize=(5, 4), sharey=True)
 fig.suptitle(f'Population SNR Improvement (N={nsub})')
+cp.prep4ai()
+
 axs[0].bar([1, 2], [df_pool.face_boost.mean(),
                     df_pool.house_boost.mean()], color='grey')
 # add individuals
