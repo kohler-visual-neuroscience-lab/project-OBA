@@ -48,7 +48,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 subID = "test"
 N_BLOCKS = 2  # (4)
 N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
-screen_num = 1  # 0: ctrl room    1: test room
+screen_num = 0  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
 keyboard = "numpad"  # numpad/mac
@@ -143,8 +143,8 @@ IMAGE2_SIZE = np.array([size_factor, size_factor])
 IMAGE3_SIZE = np.array([size_factor, size_factor])
 
 # opacity (1: opac | 0: transparent)
-IMAGE_OPACITY_REL_FRONT = .6
-IMAGE_OPACITY_REL_BACK = .4
+IMAGE_OPACITY_REL_FRONT = .5
+IMAGE_OPACITY_REL_BACK = .5
 
 # jittering properties
 JITTER_REPETITION = int(REF_RATE / 5)  # number of frames where the relevant
@@ -176,11 +176,9 @@ mouse = event.Mouse(win=win, visible=False)
 acc_trial = (iblock - 1) * N_TRIALS
 
 # create an equal number of trials per condition in current block
-n_trials_per_cnd = int(N_TRIALS / 4)
+n_trials_per_cnd = int(N_TRIALS / 2)
 cnd_array = np.hstack([np.ones(n_trials_per_cnd, dtype=int) * 1,
-                       np.ones(n_trials_per_cnd, dtype=int) * 2,
-                       np.ones(n_trials_per_cnd, dtype=int) * 3,
-                       np.ones(n_trials_per_cnd, dtype=int) * 4])
+                       np.ones(n_trials_per_cnd, dtype=int) * 2])
 np.random.shuffle(cnd_array)
 
 # ----------------------------------------------------------------------------
@@ -217,14 +215,21 @@ for itrial in range(N_TRIALS):
             change_frames = \
                 np.hstack((change_frames, [i + j + 1]))
 
-    # set current trial's condition
-    cnd = 1
+    # extract current trial's condition
+    cnd = cnd_array[itrial - 1]
     print(f"Cnd: {cnd}   #Events: {n_total_evnts}   ", end="")
 
     # randomly decide on gap duration
     gap_dur = random.choice(gap_dur_list)
 
-    cue_image = 1
+    # decide on the cue/target image
+    if cnd == 1:
+        cue_image = 1
+    elif cnd == 2:
+        cue_image = 2
+    else:
+        cue_image = None
+        print("Invalid condition number!")
 
     IRR_IMAGE1_nFRAMES = REF_RATE / freq1
     IRR_IMAGE2_nFRAMES = REF_RATE / freq2
@@ -328,6 +333,17 @@ for itrial in range(N_TRIALS):
     for igap in range(random.choice(gap_dur_list)):
         win.flip()
 
+    # cue period
+    cue_yoffset = 0
+    for iframe_instruction in range(INSTRUCT_DUR):
+        if cue_image == 1:
+            rel_image1.pos = (0, cue_yoffset)
+            rel_image1.draw()
+        else:
+            rel_image2.pos = (0, cue_yoffset)
+            rel_image2.draw()
+        win.flip()
+
     # run gap period
     for igap in range(random.choice(gap_dur_list)):
         sfc.draw_fixdot(win=win, size=FIX_SIZE,
@@ -353,44 +369,84 @@ for itrial in range(N_TRIALS):
             change_times[cur_evnt_n] = round(ch_t * 1000)
             cur_evnt_n += 1
 
-        # if conditions satisfied tilt the image
-        if iframe in change_frames:
-            if tilt_dirs[cur_evnt_n - 1] == 'CW':
-                if tilt_images[cur_evnt_n - 1] == 1:
-                    rel_image3_1cw.pos = (
-                        path1_x[iframe], path1_y[iframe])
-                    if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                        rel_image2.draw()
-                    if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                        rel_image3_1cw.draw()
-                elif tilt_images[cur_evnt_n - 1] == 2:
-                    rel_image3_2cw.pos = (
-                        path2_x[iframe], path2_y[iframe])
-                    if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                        rel_image3_2cw.draw()
-                    if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                        rel_image1.draw()
+        # make sure the cued image stays on top
+        if cue_image == 1:
+            # if conditions satisfied tilt the image
+            if iframe in change_frames:
+                if tilt_dirs[cur_evnt_n - 1] == 'CW':
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1cw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                            rel_image2.draw()
+                        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                            rel_image3_1cw.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2cw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                            rel_image3_2cw.draw()
+                        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                            rel_image1.draw()
+                else:
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1ccw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                            rel_image2.draw()
+                        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                            rel_image3_1ccw.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2ccw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                            rel_image2.draw()
+                        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                            rel_image3_1ccw.draw()
+            # if not, show the unchanged versions
             else:
-                if tilt_images[cur_evnt_n - 1] == 1:
-                    rel_image3_1ccw.pos = (
-                        path1_x[iframe], path1_y[iframe])
-                    if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                        rel_image2.draw()
-                    if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                        rel_image3_1ccw.draw()
-                elif tilt_images[cur_evnt_n - 1] == 2:
-                    rel_image3_2ccw.pos = (
-                        path2_x[iframe], path2_y[iframe])
-                    if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                        rel_image2.draw()
-                    if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                        rel_image3_1ccw.draw()
-        # if not, show the unchanged versions
+                if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                    rel_image2.draw()
+                if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                    rel_image1.draw()
         else:
-            if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                rel_image2.draw()
-            if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                rel_image1.draw()
+            if iframe in change_frames:
+                if tilt_dirs[cur_evnt_n - 1] == 'CW':
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1cw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                            rel_image1.draw()
+                        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                            rel_image3_2cw.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2cw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                            rel_image3_1cw.draw()
+                        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                            rel_image2.draw()
+                else:
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1ccw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                            rel_image1.draw()
+                        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                            rel_image3_2ccw.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2ccw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                            rel_image1.draw()
+                        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                            rel_image3_2ccw.draw()
+            # if not, show the unchanged versions
+            else:
+                if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+                    rel_image1.draw()
+                if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                    rel_image2.draw()
 
         sfc.draw_fixdot(win=win, size=FIX_SIZE,
                         pos=(FIX_X, FIX_Y),
