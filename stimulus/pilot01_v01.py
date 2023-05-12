@@ -5,7 +5,6 @@
     Mo Shams <MShamsCBR@gmail.com>
     May 07, 2023
 
-
 This was a modified version of exp01_v2.py
 
 Two large superimposed images appear while the subject fixates at the center
@@ -28,16 +27,7 @@ import gen_random_path as gen_path
 from lib import stim_flow_control as sfc
 from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
-
-
-# from egi_pynetstation.NetStation import NetStation
-
-
-# def pol2cart(rho, phi):
-#     x_cart = rho * np.cos(phi)
-#     y_cart = rho * np.sin(phi)
-#     return x_cart, y_cart
-
+from egi_pynetstation.NetStation import NetStation
 
 # disable Panda's false warning message
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -45,12 +35,12 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # ----------------------------------------------------------------------------
 # /// INSERT SESSION'S META DATA ///
 
-subID = "test"
-N_BLOCKS = 2  # (4)
+subID = "0004"
+N_BLOCKS = 2  # (2)
 N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
-screen_num = 0  # 0: ctrl room    1: test room
+screen_num = 1  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
-netstation = False  # (True/False) decide whether to connect with NetStation
+netstation = True  # (True/False) decide whether to connect with NetStation
 keyboard = "numpad"  # numpad/mac
 # ----------------------------------------------------------------------------
 
@@ -156,7 +146,6 @@ REL_IMGPATH_STEP = .0003
 
 REL_IMAGE_POS0_X = FIX_X
 REL_IMAGE_POS0_Y = FIX_Y
-
 
 freq1 = 7.5
 freq2 = 12
@@ -409,7 +398,8 @@ for itrial in range(N_TRIALS):
                     rel_image2.draw()
                 if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
                     rel_image1.draw()
-        else:
+
+        elif cue_image == 2:
             if iframe in change_frames:
                 if tilt_dirs[cur_evnt_n - 1] == 'CW':
                     if tilt_images[cur_evnt_n - 1] == 1:
@@ -481,7 +471,7 @@ for itrial in range(N_TRIALS):
                   'block_num': [iblock],
                   'condition_num': [cnd],
                   'cued_image': [cue_image],
-                  'image_order': [1],
+                  'image_order': [0],
                   'n_events': n_total_evnts,
                   'tilted_images': [tilt_images],
                   'tilt_directions': [tilt_dirs],
