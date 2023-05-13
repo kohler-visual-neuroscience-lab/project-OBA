@@ -335,14 +335,26 @@ clean_bar(axs[1])
 plt.tight_layout()
 plt.savefig(os.path.join(save_path, f'Pop_N{nsub}_SNR.pdf'))
 
-
 # stats
+stat_face = scipy.stats.wilcoxon(df_pool.face_boost)
+stat_house = scipy.stats.wilcoxon(df_pool.house_boost)
+stat_facehouse = scipy.stats.wilcoxon(df_pool.face_boost,
+                                      df_pool.house_boost)
+print(f'Face mean improv. = {df_pool.face_boost.median()}')
+print(f'p-value = {stat_face.pvalue}')
+print(f'House mean improv. = {df_pool.house_boost.median()}')
+print(f'p-value = {stat_house.pvalue}')
+print(f'p-value FaceHouse = {stat_facehouse.pvalue}')
+
 stat_face = scipy.stats.wilcoxon(df_pool.face_boost_occ)
 stat_house = scipy.stats.wilcoxon(df_pool.house_boost_occ)
-print(f'Face mean improv. = {df_pool.face_boost_occ.mean()}')
+stat_facehouse = scipy.stats.wilcoxon(df_pool.face_boost_occ,
+                                      df_pool.house_boost_occ)
+print(f'Face mean improv. = {df_pool.face_boost_occ.median()}')
 print(f'p-value = {stat_face.pvalue}')
-print(f'House mean improv. = {df_pool.house_boost_occ.mean()}')
+print(f'House mean improv. = {df_pool.house_boost_occ.median()}')
 print(f'p-value = {stat_house.pvalue}')
+print(f'p-value FaceHouse = {stat_facehouse.pvalue}')
 
 # @ tilt angle vs. SNR improvement correlation
 fig, axs = plt.subplots(1, 2, figsize=(8, 4), sharey=True)
