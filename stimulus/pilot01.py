@@ -35,13 +35,13 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # ----------------------------------------------------------------------------
 # /// INSERT SESSION'S META DATA ///
 
-subID = "0004"
-N_BLOCKS = 2  # (2)
-N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
+subID = "test"
+N_BLOCKS = 1  # (2)
+N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 1  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
-netstation = True  # (True/False) decide whether to connect with NetStation
-keyboard = "numpad"  # numpad/mac
+netstation = False  # (True/False) decide whether to connect with NetStation
+keyboard = "mac"  # numpad/mac
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
@@ -97,7 +97,7 @@ else:
 # /// CONFIGURE STIMULUS PARAMETERS AND INPUTS ///
 
 # initialize the display and the keyboard
-REF_RATE = 60
+REF_RATE = 120
 TRIAL_DUR = 7 * REF_RATE  # duration of a trial [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
