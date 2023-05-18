@@ -63,7 +63,7 @@ except:
     # create file name
     date = sfc.get_date()
     time = sfc.get_time()
-    file_name = f"{subID}_{date}_{time}_exp01_v02.json"
+    file_name = f"{subID}_{date}_{time}_exp01_pilot01.json"
     # create a dictionary of variables to be saved
     trial_dict = {'last_block_num': [iblock],
                   'file_name': [file_name]}
