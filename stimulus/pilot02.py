@@ -42,13 +42,13 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # ----------------------------------------------------------------------------
 # /// INSERT SESSION'S META DATA ///
 
-subID = "test"
-N_BLOCKS = 1  # (2)
-N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
-screen_num = 0  # 0: ctrl room    1: test room
+subID = "1191"
+N_BLOCKS = 3  # (2)
+N_TRIALS = 20  # (20) number of trials per block (must be a factor of FOUR)
+screen_num = 1  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
-netstation = False  # (True/False) decide whether to connect with NetStation
-keyboard = "mac"  # numpad/mac
+netstation = True  # (True/False) decide whether to connect with NetStation
+keyboard = "numpad"  # numpad/mac
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
@@ -70,7 +70,7 @@ except:
     # create file name
     date = sfc.get_date()
     time = sfc.get_time()
-    file_name = f"{subID}_{date}_{time}_exp01_pilot02.json"
+    file_name = f"{subID}_{date}_{time}_pilot02.json"
     # create a dictionary of variables to be saved
     trial_dict = {'last_block_num': [iblock],
                   'file_name': [file_name]}
@@ -104,7 +104,7 @@ else:
 # /// CONFIGURE STIMULUS PARAMETERS AND INPUTS ///
 
 # initialize the display and the keyboard
-REF_RATE = 120
+REF_RATE = 60
 TRIAL_DUR = 7 * REF_RATE  # duration of a trial [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
