@@ -16,6 +16,7 @@
 # ======================
 # ----- added by MoShams
 *.pdf
+*.json
 *.ai
 *.pyc
 data
