@@ -22,3 +22,5 @@ data
 result
 stimulus/image/*
 !stimulus/image/source
+/.Rhistory
+/stimulus/temp.json
