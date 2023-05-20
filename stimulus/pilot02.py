@@ -42,13 +42,13 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # ----------------------------------------------------------------------------
 # /// INSERT SESSION'S META DATA ///
 
-subID = "1191"
-N_BLOCKS = 3  # (2)
-N_TRIALS = 20  # (20) number of trials per block (must be a factor of FOUR)
-screen_num = 1  # 0: ctrl room    1: test room
-full_screen = True  # (True/False)
-netstation = True  # (True/False) decide whether to connect with NetStation
-keyboard = "numpad"  # numpad/mac
+subID = "test"
+N_BLOCKS = 1  # (2)
+N_TRIALS = 4  # (20) number of trials per block (must be a factor of FOUR)
+screen_num = 0  # 0: ctrl room    1: test room
+full_screen = False  # (True/False)
+netstation = False  # (True/False) decide whether to connect with NetStation
+keyboard = "mac"  # numpad/mac
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
@@ -104,7 +104,7 @@ else:
 # /// CONFIGURE STIMULUS PARAMETERS AND INPUTS ///
 
 # initialize the display and the keyboard
-REF_RATE = 60
+REF_RATE = 120
 TRIAL_DUR = 7 * REF_RATE  # duration of a trial [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
 
@@ -444,8 +444,8 @@ for itrial in range(N_TRIALS):
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2ccw.pos = (
                             path2_x[iframe], path2_y[iframe])
-                        rel_image2.draw()
-                        rel_image3_1ccw.draw()
+                        rel_image3_2ccw.draw()
+                        rel_image1.draw()
             # if not, show the unchanged versions
             else:
                 rel_image2.draw()
@@ -457,19 +457,19 @@ for itrial in range(N_TRIALS):
                     if tilt_images[cur_evnt_n - 1] == 1:
                         rel_image3_1cw.pos = (
                             path1_x[iframe], path1_y[iframe])
-                        rel_image1.draw()
-                        rel_image3_2cw.draw()
+                        rel_image3_1cw.draw()
+                        rel_image2.draw()
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2cw.pos = (
                             path2_x[iframe], path2_y[iframe])
-                        rel_image3_1cw.draw()
-                        rel_image2.draw()
+                        rel_image1.draw()
+                        rel_image3_2cw.draw()
                 else:
                     if tilt_images[cur_evnt_n - 1] == 1:
                         rel_image3_1ccw.pos = (
                             path1_x[iframe], path1_y[iframe])
-                        rel_image1.draw()
-                        rel_image3_2ccw.draw()
+                        rel_image3_1ccw.draw()
+                        rel_image2.draw()
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2ccw.pos = (
                             path2_x[iframe], path2_y[iframe])

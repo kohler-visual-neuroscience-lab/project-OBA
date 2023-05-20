@@ -39,7 +39,7 @@ subID = "test"
 N_BLOCKS = 1  # (2)
 N_TRIALS = 4  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 1  # 0: ctrl room    1: test room
-full_screen = True  # (True/False)
+full_screen = False  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
 keyboard = "mac"  # numpad/mac
 # ----------------------------------------------------------------------------
@@ -389,16 +389,15 @@ for itrial in range(N_TRIALS):
                         rel_image3_2ccw.pos = (
                             path2_x[iframe], path2_y[iframe])
                         if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                            rel_image2.draw()
+                            rel_image3_2cw.draw()
                         if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                            rel_image3_1ccw.draw()
+                            rel_image1.draw()
             # if not, show the unchanged versions
             else:
                 if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
                     rel_image2.draw()
                 if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
                     rel_image1.draw()
-
         elif cue_image == 2:
             if iframe in change_frames:
                 if tilt_dirs[cur_evnt_n - 1] == 'CW':
@@ -406,24 +405,24 @@ for itrial in range(N_TRIALS):
                         rel_image3_1cw.pos = (
                             path1_x[iframe], path1_y[iframe])
                         if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                            rel_image1.draw()
+                            rel_image3_1cw.draw()
                         if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                            rel_image3_2cw.draw()
+                            rel_image2.draw()
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2cw.pos = (
                             path2_x[iframe], path2_y[iframe])
                         if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                            rel_image3_1cw.draw()
+                            rel_image1.draw()
                         if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                            rel_image2.draw()
+                            rel_image3_2cw.draw()
                 else:
                     if tilt_images[cur_evnt_n - 1] == 1:
                         rel_image3_1ccw.pos = (
                             path1_x[iframe], path1_y[iframe])
                         if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
-                            rel_image1.draw()
+                            rel_image3_1ccw.draw()
                         if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
-                            rel_image3_2ccw.draw()
+                            rel_image2.draw()
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2ccw.pos = (
                             path2_x[iframe], path2_y[iframe])
@@ -511,7 +510,6 @@ for itrial in range(N_TRIALS):
     # gap period (0.5 sec)
     for igap in np.arange(REF_RATE/2):
         win.flip()
-
 # --------------------------------
 
 # /// STOP/PAUSE ECI
