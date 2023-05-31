@@ -47,7 +47,7 @@ def config_win(mon, fullscr, screen):
     else:
         win = visual.Window(monitor=mon,
                             units='deg',
-                            size=[700, 700],
+                            size=[1920, 700],
                             pos=[0, 0],
                             color=[0, 0, 0])
     win.mouseVisible = False
