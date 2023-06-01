@@ -5,14 +5,12 @@
     Mo Shams <MShamsCBR@gmail.com>
     June 01, 2023
 
-This is a modified version of pilot02.py
+This is a modified version of pilot01.py
 
 Two superimposed images (relevant) appear while the subject fixates at the
 center of the them. One of the two images is cued in the beginning of each
 trial and subject is prompted to detect a tilt (zero to two times in each
 trial) by pressing a key.
-At the same time, eight images (irrelevant) flicker at their
-corresponding frequencies (either 7.5Hz or 12Hz) around the central images.
 
 There are two conditions:
     CND1: attend Face
@@ -72,7 +70,7 @@ except:
     # create file name
     date = sfc.get_date()
     time = sfc.get_time()
-    file_name = f"{subID}_{date}_{time}_pilot02.json"
+    file_name = f"{subID}_{date}_{time}_exp01_oba_peripheral.json"
     # create a dictionary of variables to be saved
     trial_dict = {'last_block_num': [iblock],
                   'file_name': [file_name]}
@@ -394,10 +392,8 @@ for itrial in range(N_TRIALS):
     path2_x = np.repeat(path2_x, JITTER_REPETITION)
     path2_y = np.repeat(path2_y, JITTER_REPETITION)
 
-    # if acc_trial == 1:
-    if True:
-        # tilt_mag = 25
-        tilt_mag = 49
+    if acc_trial == 1:
+        tilt_mag = 25
         tilt_change = 0
     else:
         # calculate what titl angle (magnitude) to use
