@@ -1,16 +1,18 @@
 """
 ***** Object-based attention (OBA) project
-***** Pilot 01, version 01
+***** OBA Peripheral
 
     Mo Shams <MShamsCBR@gmail.com>
-    May 26, 2023
+    June 01, 2023
 
-This is same as pilot02.py
+This is a modified version of pilot02.py
 
-Two large superimposed images appear while the subject fixates at the center
-of the them. One of the two images is cued in the beginning of each trial
-and subject is prompted to detect a tilt (zero to two times in each trial)
-by pressing a key.
+Two superimposed images (relevant) appear while the subject fixates at the
+center of the them. One of the two images is cued in the beginning of each
+trial and subject is prompted to detect a tilt (zero to two times in each
+trial) by pressing a key.
+At the same time, eight images (irrelevant) flicker at their
+corresponding frequencies (either 7.5Hz or 12Hz) around the central images.
 
 There are two conditions:
     CND1: attend Face
@@ -43,10 +45,10 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # /// INSERT SESSION'S META DATA ///
 
 subID = "test"
-N_BLOCKS = 1  # (2)
-N_TRIALS = 48  # (20) number of trials per block (must be a factor of FOUR)
+N_BLOCKS = 2  # (2)
+N_TRIALS = 32  # (32) number of trials per block (must be a factor of TWO)
 screen_num = 0  # 0: ctrl room    1: test room
-full_screen = True  # (True/False)
+full_screen = False  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
 keyboard = "numpad"  # numpad/mac
 # ----------------------------------------------------------------------------
@@ -107,6 +109,7 @@ else:
 REF_RATE = 60
 TRIAL_DUR = 7 * REF_RATE  # duration of a trial [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
+N_CNDS = 2
 
 # configure the monitor and the stimulus window
 mon = sfc.config_mon_dell()
@@ -114,7 +117,7 @@ win = sfc.config_win(mon=mon, fullscr=full_screen, screen=screen_num)
 sfc.test_refresh_rate(win, REF_RATE)
 
 # fixation cross
-FIX_SIZE = .7
+FIX_SIZE = .5
 FIX_X = 0
 FIX_Y = 0
 
@@ -140,11 +143,10 @@ irr_image_size = np.array([size_factor, size_factor])
 
 # opacity (1: opac | 0: transparent)
 IMAGE_OPACITY_REL_FRONT = .5
-IMAGE_OPACITY_REL_BACK = .5
+IMAGE_OPACITY_REL_BACK = .7
 
 # jittering properties
-# JITTER_REPETITION = int(REF_RATE / 20)  # number of frames where the relevant
-JITTER_REPETITION = int(REF_RATE / 5)  # number of frames where the relevant
+JITTER_REPETITION = int(REF_RATE / 20)  # number of frames where the relevant
 # images keep their positions (50 ms; 20 Hz)
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
@@ -160,11 +162,11 @@ IRR_IMAGE_THETA_deg = np.delete(IRR_IMAGE_THETA_deg, -1)
 IRR_IMAGE_THETA = IRR_IMAGE_THETA_deg * (2 * np.pi) / 360
 IRR_IMAGE_X, IRR_IMAGE_Y = pol2cart(IRR_IMAGE_RHO, IRR_IMAGE_THETA)
 
-IRR_IMAGE_RHO2 = 6
+IRR_IMAGE_RHO2 = 5
 IRR_IMAGE_THETA_deg = np.linspace(0, 360, 9)
 IRR_IMAGE_THETA_deg = np.delete(IRR_IMAGE_THETA_deg, -1)
 IRR_IMAGE_THETA = IRR_IMAGE_THETA_deg * (2 * np.pi) / 360
-IRR_IMAGE_X2, IRR_IMAGE_Y2 = pol2cart(IRR_IMAGE_RHO, IRR_IMAGE_THETA)
+IRR_IMAGE_X2, IRR_IMAGE_Y2 = pol2cart(IRR_IMAGE_RHO2, IRR_IMAGE_THETA)
 
 # create two orders of appearance
 # (no neighbours from same category allowed)
@@ -196,7 +198,7 @@ mouse = event.Mouse(win=win, visible=False)
 acc_trial = (iblock - 1) * N_TRIALS
 
 # create an equal number of trials per condition in current block
-n_trials_per_cnd = int(N_TRIALS / 2)
+n_trials_per_cnd = int(N_TRIALS / N_CNDS)
 cnd_array = np.hstack([np.ones(n_trials_per_cnd, dtype=int) * 1,
                        np.ones(n_trials_per_cnd, dtype=int) * 2])
 np.random.shuffle(cnd_array)
@@ -265,16 +267,22 @@ for itrial in range(N_TRIALS):
                                     f"face{iface}_tilt0.png")
     image2_directory = os.path.join("image", "image_set_v02",
                                     f"house{ihouse}_tilt0.png")
-
+    # assign transparency
+    if cue_image == 1:
+        image1_trans = IMAGE_OPACITY_REL_FRONT
+        image2_trans = IMAGE_OPACITY_REL_BACK
+    else:
+        image2_trans = IMAGE_OPACITY_REL_FRONT
+        image1_trans = IMAGE_OPACITY_REL_BACK
     # load relevant images
     rel_image1 = visual.ImageStim(win,
                                   image=image1_directory,
                                   size=rel_image_size,
-                                  opacity=IMAGE_OPACITY_REL_FRONT)
+                                  opacity=image1_trans)
     rel_image2 = visual.ImageStim(win,
                                   image=image2_directory,
                                   size=rel_image_size,
-                                  opacity=IMAGE_OPACITY_REL_BACK)
+                                  opacity=image2_trans)
 
     # load irrelevant images (ring 1)
     irr_image11 = visual.ImageStim(win,
@@ -386,8 +394,10 @@ for itrial in range(N_TRIALS):
     path2_x = np.repeat(path2_x, JITTER_REPETITION)
     path2_y = np.repeat(path2_y, JITTER_REPETITION)
 
-    if acc_trial == 1:
-        tilt_mag = 25
+    # if acc_trial == 1:
+    if True:
+        # tilt_mag = 25
+        tilt_mag = 49
         tilt_change = 0
     else:
         # calculate what titl angle (magnitude) to use
@@ -413,19 +423,19 @@ for itrial in range(N_TRIALS):
     rel_image3_1cw = visual.ImageStim(win,
                                       image=image3_directory1cw,
                                       size=rel_image_size,
-                                      opacity=IMAGE_OPACITY_REL_FRONT)
+                                      opacity=image1_trans)
     rel_image3_1ccw = visual.ImageStim(win,
                                        image=image3_directory1ccw,
                                        size=rel_image_size,
-                                       opacity=IMAGE_OPACITY_REL_FRONT)
+                                       opacity=image1_trans)
     rel_image3_2cw = visual.ImageStim(win,
                                       image=image3_directory2cw,
                                       size=rel_image_size,
-                                      opacity=IMAGE_OPACITY_REL_BACK)
+                                      opacity=image2_trans)
     rel_image3_2ccw = visual.ImageStim(win,
                                        image=image3_directory2ccw,
                                        size=rel_image_size,
-                                       opacity=IMAGE_OPACITY_REL_BACK)
+                                       opacity=image2_trans)
     # --------------------------------
 
     # /// run the stimulus
@@ -496,8 +506,8 @@ for itrial in range(N_TRIALS):
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2ccw.pos = (
                             path2_x[iframe], path2_y[iframe])
-                        rel_image2.draw()
-                        rel_image3_1ccw.draw()
+                        rel_image3_2ccw.draw()
+                        rel_image1.draw()
             # if not, show the unchanged versions
             else:
                 rel_image2.draw()
@@ -509,19 +519,19 @@ for itrial in range(N_TRIALS):
                     if tilt_images[cur_evnt_n - 1] == 1:
                         rel_image3_1cw.pos = (
                             path1_x[iframe], path1_y[iframe])
-                        rel_image1.draw()
-                        rel_image3_2cw.draw()
+                        rel_image3_1cw.draw()
+                        rel_image2.draw()
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2cw.pos = (
                             path2_x[iframe], path2_y[iframe])
-                        rel_image3_1cw.draw()
-                        rel_image2.draw()
+                        rel_image1.draw()
+                        rel_image3_2cw.draw()
                 else:
                     if tilt_images[cur_evnt_n - 1] == 1:
                         rel_image3_1ccw.pos = (
                             path1_x[iframe], path1_y[iframe])
-                        rel_image1.draw()
-                        rel_image3_2ccw.draw()
+                        rel_image3_1ccw.draw()
+                        rel_image2.draw()
                     elif tilt_images[cur_evnt_n - 1] == 2:
                         rel_image3_2ccw.pos = (
                             path2_x[iframe], path2_y[iframe])
