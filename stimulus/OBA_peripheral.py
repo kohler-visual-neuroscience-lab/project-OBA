@@ -43,12 +43,12 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # ----------------------------------------------------------------------------
 # /// INSERT SESSION'S META DATA ///
 
-subID = "test"
+subID = "5007"
 N_BLOCKS = 2  # (2)
 N_TRIALS = 32  # (32) number of trials per block (must be a factor of TWO)
-screen_num = 0  # 0: ctrl room    1: test room
+screen_num = 1  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
-netstation = False  # (True/False) decide whether to connect with NetStation
+netstation = True  # (True/False) decide whether to connect with NetStation
 keyboard = "numpad"  # numpad/mac
 freq1 = 7.5
 freq2 = 12
@@ -73,7 +73,7 @@ except:
     # create file name
     date = sfc.get_date()
     time = sfc.get_time()
-    file_name = f"{subID}_{date}_{time}_exp01_oba_peripheral.json"
+    file_name = f"{subID}_{date}_{time}_exp01_oba_per.json"
     # create a dictionary of variables to be saved
     trial_dict = {'last_block_num': [iblock],
                   'file_name': [file_name]}
