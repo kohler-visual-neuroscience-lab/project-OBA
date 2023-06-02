@@ -31,7 +31,7 @@ def config_mon_macair():
 
 
 def config_mon_dell():
-    monitor = monitors.Monitor('prim_mon', width=60.45, distance=70)
+    monitor = monitors.Monitor('prim_mon', width=52, distance=70)
     monitor.setSizePix([1920, 1080])
     return monitor
 

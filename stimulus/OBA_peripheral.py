@@ -1,16 +1,18 @@
 """
 ***** Object-based attention (OBA) project
-***** OBA Peripheral
+***** Experiment 01: peripheral flickering objects
 
     Mo Shams <MShamsCBR@gmail.com>
     June 01, 2023
 
-This is a modified version of pilot01.py
+This is a modified version of pilot02.py
 
 Two superimposed images (relevant) appear while the subject fixates at the
 center of the them. One of the two images is cued in the beginning of each
 trial and subject is prompted to detect a tilt (zero to two times in each
 trial) by pressing a key.
+Simultaneously, a ring of eight copies of the same images (irrelevant)
+flicker at their corresponding frequencies (either 7.5Hz or 12Hz).
 
 There are two conditions:
     CND1: attend Face
@@ -20,11 +22,10 @@ There are two conditions:
 """
 import os
 import random
-import gen_events
 import numpy as np
 import pandas as pd
-import gen_random_path as gen_path
-from lib import stim_flow_control as sfc
+from lib import stim_flow_control as sfc, gen_events, \
+    gen_random_path as gen_path
 from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
 from egi_pynetstation.NetStation import NetStation
@@ -46,9 +47,11 @@ subID = "test"
 N_BLOCKS = 2  # (2)
 N_TRIALS = 32  # (32) number of trials per block (must be a factor of TWO)
 screen_num = 0  # 0: ctrl room    1: test room
-full_screen = False  # (True/False)
+full_screen = True  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
 keyboard = "numpad"  # numpad/mac
+freq1 = 7.5
+freq2 = 12
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
@@ -80,6 +83,8 @@ except:
 
 # set data directory
 data_path = os.path.join("..", "data", "raw", file_name)
+# set image root directory
+image_root = os.path.join("image", "image_set_exp01")
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE ECI CONNECTION ///
@@ -160,8 +165,8 @@ IRR_IMAGE_THETA_deg = np.delete(IRR_IMAGE_THETA_deg, -1)
 IRR_IMAGE_THETA = IRR_IMAGE_THETA_deg * (2 * np.pi) / 360
 IRR_IMAGE_X, IRR_IMAGE_Y = pol2cart(IRR_IMAGE_RHO, IRR_IMAGE_THETA)
 
-IRR_IMAGE_RHO2 = 5
-IRR_IMAGE_THETA_deg = np.linspace(0, 360, 9)
+IRR_IMAGE_RHO2 = 5.5
+IRR_IMAGE_THETA_deg = np.linspace(-22.5, 360-22.5, 9)
 IRR_IMAGE_THETA_deg = np.delete(IRR_IMAGE_THETA_deg, -1)
 IRR_IMAGE_THETA = IRR_IMAGE_THETA_deg * (2 * np.pi) / 360
 IRR_IMAGE_X2, IRR_IMAGE_Y2 = pol2cart(IRR_IMAGE_RHO2, IRR_IMAGE_THETA)
@@ -261,10 +266,8 @@ for itrial in range(N_TRIALS):
 
     # --------------------------------
     # set image properties and load
-    image1_directory = os.path.join("image", "image_set_v02",
-                                    f"face{iface}_tilt0.png")
-    image2_directory = os.path.join("image", "image_set_v02",
-                                    f"house{ihouse}_tilt0.png")
+    image1_directory = os.path.join(image_root, f"face{iface}_tilt0.png")
+    image2_directory = os.path.join(image_root, f"house{ihouse}_tilt0.png")
     # assign transparency
     if cue_image == 1:
         image1_trans = IMAGE_OPACITY_REL_FRONT
@@ -347,23 +350,42 @@ for itrial in range(N_TRIALS):
         irr_poss_x2 = order2_x2
         irr_poss_y2 = order2_y2
     # assign calculated postions to irrelevant images
-    irr_image11.pos = (irr_poss_x[0], irr_poss_y[0])
-    irr_image21.pos = (irr_poss_x[1], irr_poss_y[1])
-    irr_image12.pos = (irr_poss_x[2], irr_poss_y[2])
-    irr_image22.pos = (irr_poss_x[3], irr_poss_y[3])
-    irr_image13.pos = (irr_poss_x[4], irr_poss_y[4])
-    irr_image23.pos = (irr_poss_x[5], irr_poss_y[5])
-    irr_image14.pos = (irr_poss_x[6], irr_poss_y[6])
-    irr_image24.pos = (irr_poss_x[7], irr_poss_y[7])
+    all_locs = [[irr_poss_x[0], irr_poss_y[0]],
+                [irr_poss_x[1], irr_poss_y[1]],
+                [irr_poss_x[2], irr_poss_y[2]],
+                [irr_poss_x[3], irr_poss_y[3]],
+                [irr_poss_x[4], irr_poss_y[4]],
+                [irr_poss_x[5], irr_poss_y[5]],
+                [irr_poss_x[6], irr_poss_y[6]],
+                [irr_poss_x[7], irr_poss_y[7]],
+                [irr_poss_x2[0], irr_poss_y2[0]],
+                [irr_poss_x2[1], irr_poss_y2[1]],
+                [irr_poss_x2[2], irr_poss_y2[2]],
+                [irr_poss_x2[3], irr_poss_y2[3]],
+                [irr_poss_x2[4], irr_poss_y2[4]],
+                [irr_poss_x2[5], irr_poss_y2[5]],
+                [irr_poss_x2[6], irr_poss_y2[6]],
+                [irr_poss_x2[7], irr_poss_y2[7]]]
 
-    irr_image31.pos = (irr_poss_x2[0], irr_poss_y2[0])
-    irr_image41.pos = (irr_poss_x2[1], irr_poss_y2[1])
-    irr_image32.pos = (irr_poss_x2[2], irr_poss_y2[2])
-    irr_image42.pos = (irr_poss_x2[3], irr_poss_y2[3])
-    irr_image33.pos = (irr_poss_x2[4], irr_poss_y2[4])
-    irr_image43.pos = (irr_poss_x2[5], irr_poss_y2[5])
-    irr_image34.pos = (irr_poss_x2[6], irr_poss_y2[6])
-    irr_image44.pos = (irr_poss_x2[7], irr_poss_y2[7])
+    # np.random.shuffle(all_locs)
+
+    irr_image11.pos = all_locs[0]
+    irr_image21.pos = all_locs[1]
+    irr_image12.pos = all_locs[2]
+    irr_image22.pos = all_locs[3]
+    irr_image13.pos = all_locs[4]
+    irr_image23.pos = all_locs[5]
+    irr_image14.pos = all_locs[6]
+    irr_image24.pos = all_locs[7]
+
+    irr_image31.pos = all_locs[8]
+    irr_image41.pos = all_locs[9]
+    irr_image32.pos = all_locs[10]
+    irr_image42.pos = all_locs[11]
+    irr_image33.pos = all_locs[12]
+    irr_image43.pos = all_locs[13]
+    irr_image34.pos = all_locs[14]
+    irr_image44.pos = all_locs[15]
 
     # --------------------------------
 
@@ -393,27 +415,27 @@ for itrial in range(N_TRIALS):
     path2_y = np.repeat(path2_y, JITTER_REPETITION)
 
     if acc_trial == 1:
-        tilt_mag = 25
+        tilt_mag = 30
         tilt_change = 0
     else:
         # calculate what titl angle (magnitude) to use
         tilt_change = sfc.cal_next_tilt(goal_perf=80, run_perf=prev_run_perf)
         tilt_mag = int(prev_tilt_mag + tilt_change)
         # take care of saturated scenarios
-        if tilt_mag > 49:
-            tilt_mag = 49
+        if tilt_mag > 99:
+            tilt_mag = 99
         elif tilt_mag < 1:
             tilt_mag = 1
     print(f"TiltAng: {(tilt_mag / 10):3.1f}deg   ", end="")
 
     # load the changed image
-    image3_directory1cw = os.path.join("image", "image_set_v02",
+    image3_directory1cw = os.path.join(image_root,
                                        f"face{iface}_tilt{tilt_mag}_CW.png")
-    image3_directory1ccw = os.path.join("image", "image_set_v02",
+    image3_directory1ccw = os.path.join(image_root,
                                         f"face{iface}_tilt{tilt_mag}_CCW.png")
-    image3_directory2cw = os.path.join("image", "image_set_v02",
+    image3_directory2cw = os.path.join(image_root,
                                        f"house{ihouse}_tilt{tilt_mag}_CW.png")
-    image3_directory2ccw = os.path.join("image", "image_set_v02",
+    image3_directory2ccw = os.path.join(image_root,
                                         f"house{ihouse}_tilt{tilt_mag}_CCW.png")
 
     rel_image3_1cw = visual.ImageStim(win,
@@ -593,6 +615,7 @@ for itrial in range(N_TRIALS):
     trial_dict = {'trial_num': [acc_trial],
                   'block_num': [iblock],
                   'condition_num': [cnd],
+                  'Frequency_tags': [[freq1, freq2]],
                   'cued_image': [cue_image],
                   'image_order': [order],
                   'n_events': n_total_evnts,

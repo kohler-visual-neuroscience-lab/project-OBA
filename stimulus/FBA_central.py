@@ -1,6 +1,6 @@
 """
 ***** Object-based attention (OBA) project
-***** Experiment 01: central flickering objects
+***** Experiment 01: central flickering features
 
     Mo Shams <MShamsCBR@gmail.com>
     June 01, 2023
@@ -13,8 +13,8 @@ beginning of each trial and subject is prompted to detect a tilt (zero to
 two times in each trial) by pressing a key.
 
 There are two conditions:
-    CND1: attend face
-    CND2: attend house
+    CND1: attend blue
+    CND2: attend red
 
 
 """
@@ -126,9 +126,6 @@ else:
 # duration of changed-image [frames]
 TILT_DUR = int(REF_RATE / 2)  # equal to 500 ms
 
-N_EXEMPLARS = 8  # number of exemplars from each object category (face/house)
-pairs = sfc.gen_image_pairs(nexmp=N_EXEMPLARS, ntrials=N_TRIALS)
-
 # size [deg]
 size_factor = 5
 IMAGE1_SIZE = np.array([size_factor, size_factor])
@@ -136,8 +133,8 @@ IMAGE2_SIZE = np.array([size_factor, size_factor])
 IMAGE3_SIZE = np.array([size_factor, size_factor])
 
 # opacity (1: opac | 0: transparent)
-image1_trans = .5  # image1 (face) is always on top
-image2_trans = .6  # image2 (house) is always behind
+image1_trans = .5  # image1 (blue) is always on top
+image2_trans = .6  # image2 (red) is always behind
 
 # jittering properties
 JITTER_REPETITION = int(REF_RATE / 5)  # number of frames where the relevant
@@ -175,8 +172,8 @@ np.random.shuffle(cnd_array)
 # /// TRIAL BEGINS ///
 
 for itrial in range(N_TRIALS):
-    iface = pairs[itrial][0]
-    ihouse = pairs[itrial][1]
+    iblue = 1
+    ired = 1
 
     # /// set up the stimulus behavior in current trial
 
@@ -230,8 +227,8 @@ for itrial in range(N_TRIALS):
 
     # --------------------------------
     # set image properties and load
-    image1_directory = os.path.join(image_root, f"face{iface}_tilt0.png")
-    image2_directory = os.path.join(image_root, f"house{ihouse}_tilt0.png")
+    image1_directory = os.path.join(image_root, f"blue{iblue}_tilt0.png")
+    image2_directory = os.path.join(image_root, f"red{ired}_tilt0.png")
     # load image
     rel_image1 = visual.ImageStim(win,
                                   image=image1_directory,
@@ -285,13 +282,13 @@ for itrial in range(N_TRIALS):
 
     # load the changed image
     image3_directory1cw = os.path.join(image_root,
-                                       f"face{iface}_tilt{tilt_mag}_CW.png")
+                                       f"blue{iblue}_tilt{tilt_mag}_CW.png")
     image3_directory1ccw = os.path.join(image_root,
-                                        f"face{iface}_tilt{tilt_mag}_CCW.png")
+                                        f"blue{iblue}_tilt{tilt_mag}_CCW.png")
     image3_directory2cw = os.path.join(image_root,
-                                       f"house{ihouse}_tilt{tilt_mag}_CW.png")
+                                       f"red{ired}_tilt{tilt_mag}_CW.png")
     image3_directory2ccw = os.path.join(image_root,
-                                        f"house{ihouse}_tilt{tilt_mag}_CCW.png")
+                                        f"red{ired}_tilt{tilt_mag}_CCW.png")
 
     rel_image3_1cw = visual.ImageStim(win,
                                       image=image3_directory1cw,
@@ -343,12 +340,12 @@ for itrial in range(N_TRIALS):
         # send a trigger to indicate beginning of each trial
         ns.send_event(event_type=f"CND{cnd}",
                       label=f"CND{cnd}")
-
     for iframe in range(TRIAL_DUR):
         pressed_key = event.getKeys(keyList=list(command_keys.values()))
         # set the position of each task-relevant image
         rel_image1.pos = (path1_x[iframe], path1_y[iframe])
         rel_image2.pos = (path2_x[iframe], path2_y[iframe])
+
         # get the time of change
         if iframe in change_start_frames:
             ch_t = timer.getTime()

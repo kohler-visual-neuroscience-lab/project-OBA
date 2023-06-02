@@ -23,3 +23,5 @@ data
 result
 stimulus/image/*
 !stimulus/image/source
+!stimulus/image/gen_tilted_features.py
+!stimulus/image/gen_tilted_objects.py

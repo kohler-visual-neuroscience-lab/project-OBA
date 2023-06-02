@@ -1,20 +1,22 @@
 """
 ***** Object-based attention (OBA) project
-***** Experiment 01: central flickering objects
+***** Experiment 01: peripheral flickering features
 
     Mo Shams <MShamsCBR@gmail.com>
     June 01, 2023
 
-This is a modified version of pilot01.py
+This is a modified version of pilot02.py
 
-Two superimposed images flicker at the center (7.5Hz and 12Hz) while the
-subject fixates at the center. One of the two images is cued in the
-beginning of each trial and subject is prompted to detect a tilt (zero to
-two times in each trial) by pressing a key.
+Two superimposed images (relevant) appear while the subject fixates at the
+center of the them. One of the two images is cued in the beginning of each
+trial and subject is prompted to detect a tilt (zero to two times in each
+trial) by pressing a key.
+Simultaneously, a ring of eight copies of the same images (irrelevant)
+flicker at their corresponding frequencies (either 7.5Hz or 12Hz).
 
 There are two conditions:
-    CND1: attend face
-    CND2: attend house
+    CND1: attend blue
+    CND2: attend red
 
 
 """
@@ -28,6 +30,13 @@ from psychopy import event, visual, core
 from lib.evaluate_responses import eval_resp
 from egi_pynetstation.NetStation import NetStation
 
+
+def pol2cart(rho, phi):
+    x_cart = rho * np.cos(phi)
+    y_cart = rho * np.sin(phi)
+    return x_cart, y_cart
+
+
 # disable Panda's false warning message
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -36,9 +45,9 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 subID = "test"
 N_BLOCKS = 2  # (2)
-N_TRIALS = 10  # (32) number of trials per block (must be a factor of FOUR)
+N_TRIALS = 32  # (32) number of trials per block (must be a factor of TWO)
 screen_num = 0  # 0: ctrl room    1: test room
-full_screen = True  # (True/False)
+full_screen = False  # (True/False)
 netstation = False  # (True/False) decide whether to connect with NetStation
 keyboard = "numpad"  # numpad/mac
 freq1 = 7.5
@@ -64,7 +73,7 @@ except:
     # create file name
     date = sfc.get_date()
     time = sfc.get_time()
-    file_name = f"{subID}_{date}_{time}_exp01_oba_central.json"
+    file_name = f"{subID}_{date}_{time}_exp01_oba_peripheral.json"
     # create a dictionary of variables to be saved
     trial_dict = {'last_block_num': [iblock],
                   'file_name': [file_name]}
@@ -103,6 +112,7 @@ else:
 REF_RATE = 60
 TRIAL_DUR = 7 * REF_RATE  # duration of a trial [frames]
 ITI_DUR = 2 * REF_RATE  # inter-trial interval [frames]
+N_CNDS = 2
 
 # configure the monitor and the stimulus window
 mon = sfc.config_mon_dell()
@@ -124,31 +134,54 @@ else:
     raise NameError(f"Keyboard name '{keyboard}' not recognized.")
 
 # duration of changed-image [frames]
-TILT_DUR = int(REF_RATE / 2)  # equal to 500 ms
-
-N_EXEMPLARS = 8  # number of exemplars from each object category (face/house)
-pairs = sfc.gen_image_pairs(nexmp=N_EXEMPLARS, ntrials=N_TRIALS)
+TILT_DUR = int(REF_RATE / 4)  # equal to 250 ms
 
 # size [deg]
-size_factor = 5
-IMAGE1_SIZE = np.array([size_factor, size_factor])
-IMAGE2_SIZE = np.array([size_factor, size_factor])
-IMAGE3_SIZE = np.array([size_factor, size_factor])
+size_factor = 2.2
+rel_image_size = np.array([size_factor, size_factor])
+irr_image_size = np.array([size_factor, size_factor])
 
 # opacity (1: opac | 0: transparent)
-image1_trans = .5  # image1 (face) is always on top
-image2_trans = .6  # image2 (house) is always behind
+IMAGE_OPACITY_REL_FRONT = .5
+IMAGE_OPACITY_REL_BACK = .7
 
 # jittering properties
-JITTER_REPETITION = int(REF_RATE / 5)  # number of frames where the relevant
-# images keep their positions (equal to 50 ms)
+JITTER_REPETITION = int(REF_RATE / 20)  # number of frames where the relevant
+# images keep their positions (50 ms; 20 Hz)
 
 REL_IMGPATH_N = TRIAL_DUR // JITTER_REPETITION + 1
-REL_IMGPATH_SIGMA = .0002
-REL_IMGPATH_STEP = .0003
+REL_IMGPATH_SIGMA = .01
+REL_IMGPATH_STEP = .02
 
 REL_IMAGE_POS0_X = FIX_X
 REL_IMAGE_POS0_Y = FIX_Y
+
+IRR_IMAGE_RHO = 3
+IRR_IMAGE_THETA_deg = np.linspace(22.5, 360 + 22.5, 9)
+IRR_IMAGE_THETA_deg = np.delete(IRR_IMAGE_THETA_deg, -1)
+IRR_IMAGE_THETA = IRR_IMAGE_THETA_deg * (2 * np.pi) / 360
+IRR_IMAGE_X, IRR_IMAGE_Y = pol2cart(IRR_IMAGE_RHO, IRR_IMAGE_THETA)
+
+IRR_IMAGE_RHO2 = 5.5
+IRR_IMAGE_THETA_deg = np.linspace(-22.5, 360-22.5, 9)
+IRR_IMAGE_THETA_deg = np.delete(IRR_IMAGE_THETA_deg, -1)
+IRR_IMAGE_THETA = IRR_IMAGE_THETA_deg * (2 * np.pi) / 360
+IRR_IMAGE_X2, IRR_IMAGE_Y2 = pol2cart(IRR_IMAGE_RHO2, IRR_IMAGE_THETA)
+
+# create two orders of appearance
+# (no neighbours from same category allowed)
+order1_x = IRR_IMAGE_X
+order1_y = IRR_IMAGE_Y
+order2_x = np.roll(IRR_IMAGE_X, 1)
+order2_y = np.roll(IRR_IMAGE_Y, 1)
+
+order1_x2 = IRR_IMAGE_X2
+order1_y2 = IRR_IMAGE_Y2
+order2_x2 = np.roll(IRR_IMAGE_X2, 1)
+order2_y2 = np.roll(IRR_IMAGE_Y2, 1)
+
+freq1 = 7.5
+freq2 = 12
 
 # potential gap durations (0.5 to 1 sec)
 gap_dur_list = range(int(REF_RATE / 2), REF_RATE + 1, 1)
@@ -165,7 +198,7 @@ mouse = event.Mouse(win=win, visible=False)
 acc_trial = (iblock - 1) * N_TRIALS
 
 # create an equal number of trials per condition in current block
-n_trials_per_cnd = int(N_TRIALS / 2)
+n_trials_per_cnd = int(N_TRIALS / N_CNDS)
 cnd_array = np.hstack([np.ones(n_trials_per_cnd, dtype=int) * 1,
                        np.ones(n_trials_per_cnd, dtype=int) * 2])
 np.random.shuffle(cnd_array)
@@ -175,8 +208,8 @@ np.random.shuffle(cnd_array)
 # /// TRIAL BEGINS ///
 
 for itrial in range(N_TRIALS):
-    iface = pairs[itrial][0]
-    ihouse = pairs[itrial][1]
+    iblue = 1
+    ired = 1
 
     # /// set up the stimulus behavior in current trial
 
@@ -230,17 +263,126 @@ for itrial in range(N_TRIALS):
 
     # --------------------------------
     # set image properties and load
-    image1_directory = os.path.join(image_root, f"face{iface}_tilt0.png")
-    image2_directory = os.path.join(image_root, f"house{ihouse}_tilt0.png")
-    # load image
+    image1_directory = os.path.join(image_root, f"blue{iblue}_tilt0.png")
+    image2_directory = os.path.join(image_root, f"red{ired}_tilt0.png")
+    # assign transparency
+    if cue_image == 1:
+        image1_trans = IMAGE_OPACITY_REL_FRONT
+        image2_trans = IMAGE_OPACITY_REL_BACK
+    else:
+        image2_trans = IMAGE_OPACITY_REL_FRONT
+        image1_trans = IMAGE_OPACITY_REL_BACK
+    # load relevant images
     rel_image1 = visual.ImageStim(win,
                                   image=image1_directory,
-                                  size=IMAGE1_SIZE,
+                                  size=rel_image_size,
                                   opacity=image1_trans)
     rel_image2 = visual.ImageStim(win,
                                   image=image2_directory,
-                                  size=IMAGE2_SIZE,
+                                  size=rel_image_size,
                                   opacity=image2_trans)
+
+    # load irrelevant images (ring 1)
+    irr_image11 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   size=irr_image_size)
+    irr_image12 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   size=irr_image_size)
+    irr_image13 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   size=irr_image_size)
+    irr_image14 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   size=irr_image_size)
+    irr_image21 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   size=irr_image_size)
+    irr_image22 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   size=irr_image_size)
+    irr_image23 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   size=irr_image_size)
+    irr_image24 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   size=irr_image_size)
+
+    # load irrelevant images (ring 2)
+    irr_image31 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   size=irr_image_size)
+    irr_image32 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   size=irr_image_size)
+    irr_image33 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   size=irr_image_size)
+    irr_image34 = visual.ImageStim(win,
+                                   image=image1_directory,
+                                   size=irr_image_size)
+    irr_image41 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   size=irr_image_size)
+    irr_image42 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   size=irr_image_size)
+    irr_image43 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   size=irr_image_size)
+    irr_image44 = visual.ImageStim(win,
+                                   image=image2_directory,
+                                   size=irr_image_size)
+
+    # decide on the order of appearance
+    order = np.random.choice([1, 2])
+    if order == 1:
+        irr_poss_x = order1_x
+        irr_poss_y = order1_y
+        irr_poss_x2 = order1_x2
+        irr_poss_y2 = order1_y2
+    else:
+        irr_poss_x = order2_x
+        irr_poss_y = order2_y
+        irr_poss_x2 = order2_x2
+        irr_poss_y2 = order2_y2
+    # assign calculated postions to irrelevant images
+    all_locs = [[irr_poss_x[0], irr_poss_y[0]],
+                [irr_poss_x[1], irr_poss_y[1]],
+                [irr_poss_x[2], irr_poss_y[2]],
+                [irr_poss_x[3], irr_poss_y[3]],
+                [irr_poss_x[4], irr_poss_y[4]],
+                [irr_poss_x[5], irr_poss_y[5]],
+                [irr_poss_x[6], irr_poss_y[6]],
+                [irr_poss_x[7], irr_poss_y[7]],
+                [irr_poss_x2[0], irr_poss_y2[0]],
+                [irr_poss_x2[1], irr_poss_y2[1]],
+                [irr_poss_x2[2], irr_poss_y2[2]],
+                [irr_poss_x2[3], irr_poss_y2[3]],
+                [irr_poss_x2[4], irr_poss_y2[4]],
+                [irr_poss_x2[5], irr_poss_y2[5]],
+                [irr_poss_x2[6], irr_poss_y2[6]],
+                [irr_poss_x2[7], irr_poss_y2[7]]]
+
+    # np.random.shuffle(all_locs)
+
+    irr_image11.pos = all_locs[0]
+    irr_image21.pos = all_locs[1]
+    irr_image12.pos = all_locs[2]
+    irr_image22.pos = all_locs[3]
+    irr_image13.pos = all_locs[4]
+    irr_image23.pos = all_locs[5]
+    irr_image14.pos = all_locs[6]
+    irr_image24.pos = all_locs[7]
+
+    irr_image31.pos = all_locs[8]
+    irr_image41.pos = all_locs[9]
+    irr_image32.pos = all_locs[10]
+    irr_image42.pos = all_locs[11]
+    irr_image33.pos = all_locs[12]
+    irr_image43.pos = all_locs[13]
+    irr_image34.pos = all_locs[14]
+    irr_image44.pos = all_locs[15]
 
     # --------------------------------
 
@@ -285,29 +427,29 @@ for itrial in range(N_TRIALS):
 
     # load the changed image
     image3_directory1cw = os.path.join(image_root,
-                                       f"face{iface}_tilt{tilt_mag}_CW.png")
+                                       f"blue{iblue}_tilt{tilt_mag}_CW.png")
     image3_directory1ccw = os.path.join(image_root,
-                                        f"face{iface}_tilt{tilt_mag}_CCW.png")
+                                        f"blue{iblue}_tilt{tilt_mag}_CCW.png")
     image3_directory2cw = os.path.join(image_root,
-                                       f"house{ihouse}_tilt{tilt_mag}_CW.png")
+                                       f"red{ired}_tilt{tilt_mag}_CW.png")
     image3_directory2ccw = os.path.join(image_root,
-                                        f"house{ihouse}_tilt{tilt_mag}_CCW.png")
+                                        f"red{ired}_tilt{tilt_mag}_CCW.png")
 
     rel_image3_1cw = visual.ImageStim(win,
                                       image=image3_directory1cw,
-                                      size=IMAGE3_SIZE,
+                                      size=rel_image_size,
                                       opacity=image1_trans)
     rel_image3_1ccw = visual.ImageStim(win,
                                        image=image3_directory1ccw,
-                                       size=IMAGE3_SIZE,
+                                       size=rel_image_size,
                                        opacity=image1_trans)
     rel_image3_2cw = visual.ImageStim(win,
                                       image=image3_directory2cw,
-                                      size=IMAGE3_SIZE,
+                                      size=rel_image_size,
                                       opacity=image2_trans)
     rel_image3_2ccw = visual.ImageStim(win,
                                        image=image3_directory2ccw,
-                                       size=IMAGE3_SIZE,
+                                       size=rel_image_size,
                                        opacity=image2_trans)
     # --------------------------------
 
@@ -343,56 +485,100 @@ for itrial in range(N_TRIALS):
         # send a trigger to indicate beginning of each trial
         ns.send_event(event_type=f"CND{cnd}",
                       label=f"CND{cnd}")
-
     for iframe in range(TRIAL_DUR):
         pressed_key = event.getKeys(keyList=list(command_keys.values()))
         # set the position of each task-relevant image
         rel_image1.pos = (path1_x[iframe], path1_y[iframe])
         rel_image2.pos = (path2_x[iframe], path2_y[iframe])
+
         # get the time of change
         if iframe in change_start_frames:
             ch_t = timer.getTime()
             change_times[cur_evnt_n] = round(ch_t * 1000)
             cur_evnt_n += 1
 
-        # if conditions satisfied tilt the image
-        if iframe in change_frames:
-            if tilt_dirs[cur_evnt_n - 1] == 'CW':
-                if tilt_images[cur_evnt_n - 1] == 1:
-                    rel_image3_1cw.pos = (
-                        path1_x[iframe], path1_y[iframe])
-                    if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+        # make sure the cued image stays on top
+        if cue_image == 1:
+            # if conditions satisfied tilt the image
+            if iframe in change_frames:
+                if tilt_dirs[cur_evnt_n - 1] == 'CW':
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1cw.pos = (
+                            path1_x[iframe], path1_y[iframe])
                         rel_image2.draw()
-                    if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
                         rel_image3_1cw.draw()
-                elif tilt_images[cur_evnt_n - 1] == 2:
-                    rel_image3_2cw.pos = (
-                        path2_x[iframe], path2_y[iframe])
-                    if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2cw.pos = (
+                            path2_x[iframe], path2_y[iframe])
                         rel_image3_2cw.draw()
-                    if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
                         rel_image1.draw()
-            else:
-                if tilt_images[cur_evnt_n - 1] == 1:
-                    rel_image3_1ccw.pos = (
-                        path1_x[iframe], path1_y[iframe])
-                    if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                else:
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1ccw.pos = (
+                            path1_x[iframe], path1_y[iframe])
                         rel_image2.draw()
-                    if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
                         rel_image3_1ccw.draw()
-                elif tilt_images[cur_evnt_n - 1] == 2:
-                    rel_image3_2ccw.pos = (
-                        path2_x[iframe], path2_y[iframe])
-                    if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2ccw.pos = (
+                            path2_x[iframe], path2_y[iframe])
                         rel_image3_2ccw.draw()
-                    if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
                         rel_image1.draw()
-        # if not, show the unchanged versions
-        else:
-            if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+            # if not, show the unchanged versions
+            else:
                 rel_image2.draw()
-            if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
                 rel_image1.draw()
+
+        elif cue_image == 2:
+            if iframe in change_frames:
+                if tilt_dirs[cur_evnt_n - 1] == 'CW':
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1cw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        rel_image3_1cw.draw()
+                        rel_image2.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2cw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        rel_image1.draw()
+                        rel_image3_2cw.draw()
+                else:
+                    if tilt_images[cur_evnt_n - 1] == 1:
+                        rel_image3_1ccw.pos = (
+                            path1_x[iframe], path1_y[iframe])
+                        rel_image3_1ccw.draw()
+                        rel_image2.draw()
+                    elif tilt_images[cur_evnt_n - 1] == 2:
+                        rel_image3_2ccw.pos = (
+                            path2_x[iframe], path2_y[iframe])
+                        rel_image1.draw()
+                        rel_image3_2ccw.draw()
+            # if not, show the unchanged versions
+            else:
+                rel_image1.draw()
+                rel_image2.draw()
+
+        # draw irrelevant image conditionally
+        if sfc.decide_on_show(iframe, IRR_IMAGE1_nFRAMES):
+            irr_image11.draw()
+            irr_image12.draw()
+            irr_image13.draw()
+            irr_image14.draw()
+
+            irr_image31.draw()
+            irr_image32.draw()
+            irr_image33.draw()
+            irr_image34.draw()
+
+        if sfc.decide_on_show(iframe, IRR_IMAGE2_nFRAMES):
+            irr_image21.draw()
+            irr_image22.draw()
+            irr_image23.draw()
+            irr_image24.draw()
+
+            irr_image41.draw()
+            irr_image42.draw()
+            irr_image43.draw()
+            irr_image44.draw()
 
         sfc.draw_fixdot(win=win, size=FIX_SIZE,
                         pos=(FIX_X, FIX_Y),
@@ -428,6 +614,7 @@ for itrial in range(N_TRIALS):
                   'condition_num': [cnd],
                   'Frequency_tags': [[freq1, freq2]],
                   'cued_image': [cue_image],
+                  'image_order': [order],
                   'n_events': n_total_evnts,
                   'tilted_images': [tilt_images],
                   'tilt_directions': [tilt_dirs],
@@ -459,18 +646,18 @@ for itrial in range(N_TRIALS):
     print(f"RunPerf:{run_perf:6.2f}%")
     # fill the remaining values in the data frame
     dfnew.loc[acc_trial - 1,
-              ['cummulative_performance',
-               'running_performance']] = [cum_perf, run_perf]
+    ['cummulative_performance',
+     'running_performance']] = [cum_perf, run_perf]
     # save the data frame
     dfnew.to_json(data_path)
 
     # gap period (0.5 sec)
-    for igap in np.arange(REF_RATE/2):
+    for igap in np.arange(REF_RATE / 2):
         win.flip()
 
-# --------------------------------
+# -----------------------------------------------------------------------------
 
-# /// STOP/PAUSE ECI
+# /// STOP/PAUSE ECI ///
 
 if iblock == N_BLOCKS:
     # remove the temorary file
