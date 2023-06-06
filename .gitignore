@@ -16,11 +16,12 @@
 # ======================
 # ----- added by MoShams
 *.pdf
+*.json
 *.ai
 *.pyc
 data
 result
 stimulus/image/*
 !stimulus/image/source
-/.Rhistory
-/stimulus/temp.json
+!stimulus/image/gen_tilted_features.py
+!stimulus/image/gen_tilted_objects.py

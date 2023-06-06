@@ -1,5 +1,5 @@
 import numpy as np
-from evaluate_responses import eval_resp
+from lib.evaluate_responses import eval_resp
 
 n_tests = 14
 perf_arr = []
