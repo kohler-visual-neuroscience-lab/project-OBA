@@ -267,7 +267,7 @@ for itrial in range(N_TRIALS):
     path2_y = np.repeat(path2_y, JITTER_REPETITION)
 
     if acc_trial == 1:
-        tilt_mag = 30
+        tilt_mag = 50
         tilt_change = 0
     else:
         # calculate what titl angle (magnitude) to use
