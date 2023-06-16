@@ -34,7 +34,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # ----------------------------------------------------------------------------
 # /// INSERT SESSION'S META DATA ///
 
-subID = "5011"
+subID = "5012"
 N_BLOCKS = 2  # (2)
 N_TRIALS = 32  # (32) number of trials per block (must be a factor of FOUR)
 screen_num = 1  # 0: ctrl room    1: test room
