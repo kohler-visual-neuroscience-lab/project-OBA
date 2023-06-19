@@ -43,15 +43,15 @@ pd.options.mode.chained_assignment = None  # default='warn'
 # ----------------------------------------------------------------------------
 # /// INSERT SESSION'S META DATA ///
 
-subID = "5012"
+subID = "5015"
 N_BLOCKS = 2  # (2)
 N_TRIALS = 32  # (32) number of trials per block (must be a factor of TWO)
 screen_num = 1  # 0: ctrl room    1: test room
 full_screen = True  # (True/False)
 netstation = True  # (True/False) decide whether to connect with NetStation
 keyboard = "numpad"  # numpad/mac
-freq1 = 12
-freq2 = 7.5
+freq1 = 7.5
+freq2 = 12
 # ----------------------------------------------------------------------------
 
 # /// CONFIGURE LOAD/SAVE FILES & DIRECTORIES ///
