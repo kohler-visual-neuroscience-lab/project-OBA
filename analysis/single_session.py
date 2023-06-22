@@ -50,7 +50,7 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # /// SET-UP DATA AND RESULT PATHS ///
 
 subject_id = 5007
-task_name = 'fba_per'
+task_name = 'oba_per'
 data_folder = os.path.join('..', 'data', 'cycle02')
 result_folder = os.path.join('..', 'result', 'cycle02')
 
@@ -81,7 +81,7 @@ n_trials = beh_data.shape[0]
 
 # extract number of blocks
 n_blocks = beh_data['block_num'].max()
-n_trials_per_block = int(n_trials/n_blocks)
+n_trials_per_block = int(n_trials / n_blocks)
 
 # convert tilt magnitudes to degrees
 tilt_angle = (beh_data['tilt_magnitude'].values + 1) / 10
@@ -158,59 +158,22 @@ psds_plot = 10 * np.log10(psds)
 psds_mean = psds_plot.mean(axis=(0, 1))[freq_range]
 psds_std = psds_plot.std(axis=(0, 1))[freq_range]
 
-# average SNR across all trials and all channels within the desired freq range
-# snr_mean/std: [103 freq. bins]
-snr_mean = snrs.mean(axis=(0, 1))[freq_range]
-snr_std = snrs.std(axis=(0, 1))[freq_range]
-
 # /// prepare data for topography maps
 # find the closest frequency bin to stimulation frequency
 stim_freq1 = 7.5
 i_bin_1f1 = np.argmin(abs(freqs - stim_freq1 * 1))
 stim_freq2 = 12
 i_bin_1f2 = np.argmin(abs(freqs - stim_freq2 * 1))
-# index first harmonic of each stimulus frequency in snr array and average
-# across events/trials
-# topo_1fX: [129 channels]
-topo_1f1 = snrs.mean(axis=0)[:, i_bin_1f1]
-topo_1f2 = snrs.mean(axis=0)[:, i_bin_1f2]
 
 # index trials/events in a certain condition
-i_cnd1 = beh_data['condition_num'] == 1
-i_cnd2 = beh_data['condition_num'] == 2
+i_cnd1 = beh_data.index[beh_data['condition_num'] == 1]
+i_cnd2 = beh_data.index[beh_data['condition_num'] == 2]
 
-# index trials/events in a certain condition at a certain frequency
-# topo_cndX_1fX:  [129 channels]
-topo_cnd1_1f1 = snrs[i_cnd1, :, i_bin_1f1].mean(axis=0)
-topo_cnd2_1f1 = snrs[i_cnd2, :, i_bin_1f1].mean(axis=0)
-topo_cnd1_1f2 = snrs[i_cnd1, :, i_bin_1f2].mean(axis=0)
-topo_cnd2_1f2 = snrs[i_cnd2, :, i_bin_1f2].mean(axis=0)
-
-# for each image at each frequency, subtract unattended map from attended
-# map to obrtain "freq boost" topography map
-topo_boost_1f1 = topo_cnd1_1f1 - topo_cnd2_1f1
-topo_boost_1f2 = topo_cnd2_1f2 - topo_cnd1_1f2
-
-# average across all channels
-boost_1f1_allCh = topo_boost_1f1.mean()
-boost_1f2_allCh = topo_boost_1f2.mean()
-
-# average across occipital channels
+# indicate occipital channels
 occCh = ['E66', 'E69', 'E70', 'E71', 'E73', 'E74', 'E75',
          'E76', 'E81', 'E82', 'E83', 'E84', 'E88', 'E89']
 ind_occCh = np.nonzero(np.isin(epochs.info.ch_names, occCh))[0]
-boost_1f1_occCh = topo_boost_1f1[ind_occCh].mean()
-boost_1f2_occCh = topo_boost_1f2[ind_occCh].mean()
 
-# extract the strongest channel
-ind_bestCh_1f1 = np.argmax(topo_1f1)
-ind_bestCh_1f2 = np.argmax(topo_1f2)
-boost_1f1_bestCh = topo_boost_1f1[ind_bestCh_1f1]
-boost_1f2_bestCh = topo_boost_1f2[ind_bestCh_1f2]
-
-# average SNR for each condition acroos occipital channels
-snr_cnd1 = snrs[np.ix_(i_cnd1, ind_occCh, freq_range)].mean(axis=(0, 1))
-snr_cnd2 = snrs[np.ix_(i_cnd2, ind_occCh, freq_range)].mean(axis=(0, 1))
 # ----------------------------------------------------------------------------
 
 # +++ TEST +++
@@ -312,25 +275,19 @@ fig.suptitle(f'SNR and Topo-map (Subject:{sub_id})')
 cp.prep4ai()
 
 # -------------------------
-# # PSD spectrum
-#
-# axes[0, 0].plot(freqs[freq_range], psds_mean, color='k')
-# axes[0, 0].fill_between(
-#     freqs[freq_range], psds_mean - psds_std, psds_mean + psds_std,
-#     color='k', alpha=.2)
-# axes[0, 0].set(ylabel='PSD [dB]', xlim=[fmin, fmax])
-# cp.trim_axes(axes[0, 0])
-
-# -------------------------
 # SNR spectrum (avg. across all channels)
 
 fmin_show = 5
 fmax_show = 15
 fstep = 1
 
-axes[0, 0].plot(freqs[freq_range], snr_mean, color='k')
+spec_mean = snrs.mean(axis=(0, 1))[freq_range]
+spec_std = snrs.std(axis=(0, 1))[freq_range]
+
+axes[0, 0].plot(freqs[freq_range], spec_mean, color='k')
 axes[0, 0].fill_between(
-    freqs[freq_range], snr_mean - snr_std, snr_mean + snr_std,
+    freqs[freq_range],
+    spec_mean - spec_std, spec_mean + spec_std,
     color='k', alpha=.2)
 axes[0, 0].set(ylabel='SNR',
                xticks=np.arange(fmin_show, fmax_show + fstep, fstep),
@@ -340,9 +297,14 @@ cp.trim_axes(axes[0, 0])
 # -------------------------
 # SNR spectrum (avg. across occipital channels)
 
-axes[1, 0].plot(freqs[freq_range], snr_cnd1, color='darkcyan',
+spec_cnd1 = snrs[np.ix_(i_cnd1, range(snrs.shape[1]), freq_range)].mean(
+    axis=(0, 1))
+spec_cnd2 = snrs[np.ix_(i_cnd2, range(snrs.shape[1]), freq_range)].mean(
+    axis=(0, 1))
+
+axes[1, 0].plot(freqs[freq_range], spec_cnd1, color='darkcyan',
                 label='cnd1-occCh')
-axes[1, 0].plot(freqs[freq_range], snr_cnd2, color='darkorchid',
+axes[1, 0].plot(freqs[freq_range], spec_cnd2, color='darkorchid',
                 label='cnd2-occCh')
 axes[1, 0].set(xlabel='Frequency [Hz]', ylabel='SNR',
                xticks=np.arange(fmin_show, fmax_show + fstep, fstep),
@@ -353,6 +315,9 @@ cp.trim_axes(axes[1, 0])
 
 # -------------------------
 # topography maps
+
+topo_1f1 = snrs[:, :, i_bin_1f1].mean(axis=0)
+topo_1f2 = snrs[:, :, i_bin_1f2].mean(axis=0)
 
 vmin = 1
 vmax = np.max([topo_1f1, topo_1f2])
@@ -381,7 +346,10 @@ fig.suptitle(f'Topography map at each condition and '
 cp.prep4ai()
 
 # -------------------------
-# @@@ face boost pairs
+# @@@ f1 boost pairs
+
+topo_cnd1_1f1 = snrs[i_cnd1, :, i_bin_1f1].mean(axis=0)
+topo_cnd2_1f1 = snrs[i_cnd2, :, i_bin_1f1].mean(axis=0)
 
 # Topography map of CND1 1f1:
 im, _ = mne.viz.plot_topomap(topo_cnd1_1f1, epochs.info, axes=axes[0, 0],
@@ -395,7 +363,10 @@ axes[0, 1].set(title='CND2 f1')
 cp.add_snr_colorbar(fig, axes[0, 1], im)
 
 # -------------------------
-# @@@ house boost pairs
+# @@@ f2 boost pairs
+
+topo_cnd1_1f2 = snrs[i_cnd1, :, i_bin_1f2].mean(axis=0)
+topo_cnd2_1f2 = snrs[i_cnd2, :, i_bin_1f2].mean(axis=0)
 
 # Topography map of CND2 1f2:
 im, _ = mne.viz.plot_topomap(topo_cnd2_1f2, epochs.info, axes=axes[1, 0],
@@ -410,6 +381,9 @@ cp.add_snr_colorbar(fig, axes[1, 1], im)
 
 # -------------------------
 # @@@ ADD OBJECT BOOST MAPS
+
+topo_boost_1f1 = topo_cnd1_1f1 - topo_cnd2_1f1
+topo_boost_1f2 = topo_cnd2_1f2 - topo_cnd1_1f2
 
 # set up the min and max of the color map (insert 'None' to pass)
 vmin_diff = -vmax
@@ -434,23 +408,60 @@ plt.savefig(os.path.join(result_folder,
 
 fig, axs = plt.subplots(1, 3, figsize=(5, 4), sharey=True)
 
+# ---------------------------------
 # all channels
+trials_cnd1_1f1 = snrs[i_cnd1, :, i_bin_1f1].mean(axis=1)
+trials_cnd2_1f1 = snrs[i_cnd2, :, i_bin_1f1].mean(axis=1)
+trials_cnd1_1f2 = snrs[i_cnd1, :, i_bin_1f2].mean(axis=1)
+trials_cnd2_1f2 = snrs[i_cnd2, :, i_bin_1f2].mean(axis=1)
+
+trials_boost_1f1 = trials_cnd1_1f1 - trials_cnd2_1f1
+trials_boost_1f2 = trials_cnd2_1f2 - trials_cnd1_1f2
+
 fig.suptitle(f'Avg. SNR boost (Subject:{sub_id})')
-axs[0].bar([1, 2], [boost_1f1_allCh, boost_1f2_allCh], color='grey')
+axs[0].bar([1, 2], [trials_boost_1f1.mean(), trials_boost_1f2.mean()],
+           color='silver')
 axs[0].set(title='All channels', xticks=[1, 2],
            xticklabels=f_label, ylabel='SNR improvement')
+
+axs[0].errorbar([1, 2],
+                [trials_boost_1f1.mean(), trials_boost_1f2.mean()],
+                yerr=[trials_boost_1f1.std() / (n_trials ** .5),
+                      trials_boost_1f2.std() / (n_trials ** .5)],
+                color='black', fmt='none')
+
 cp.trim_axes(axs[0])
 cp.prep4ai()
-
+# ---------------------------------
 # occipital channels
-axs[1].bar([1, 2], [boost_1f1_occCh, boost_1f2_occCh], color='grey')
+trials_cnd1_1f1 = snrs[np.ix_(i_cnd1, ind_occCh, [i_bin_1f1])].mean(axis=1)
+trials_cnd2_1f1 = snrs[np.ix_(i_cnd2, ind_occCh, [i_bin_1f1])].mean(axis=1)
+trials_cnd1_1f2 = snrs[np.ix_(i_cnd1, ind_occCh, [i_bin_1f2])].mean(axis=1)
+trials_cnd2_1f2 = snrs[np.ix_(i_cnd2, ind_occCh, [i_bin_1f2])].mean(axis=1)
+
+trials_boost_1f1 = trials_cnd1_1f1 - trials_cnd2_1f1
+trials_boost_1f2 = trials_cnd2_1f2 - trials_cnd1_1f2
+
+axs[1].bar([1, 2], [trials_boost_1f1.mean(), trials_boost_1f2.mean()],
+           color='silver')
 axs[1].set(title='Occipital channels', xticks=[1, 2],
            xticklabels=f_label)
+
+axs[1].errorbar([1, 2],
+                [trials_boost_1f1.mean(), trials_boost_1f2.mean()],
+                yerr=[trials_boost_1f1.std() / (n_trials ** .5),
+                      trials_boost_1f2.std() / (n_trials ** .5)],
+                color='black', fmt='none')
+
 cp.trim_axes(axs[1])
 cp.prep4ai()
-
+# ---------------------------------
 # best channel
-axs[2].bar([1, 2], [boost_1f1_bestCh, boost_1f2_bestCh], color='grey')
+ind_bestCh_1f1 = np.argmax(topo_1f1[ind_occCh])
+ind_bestCh_1f2 = np.argmax(topo_1f2[ind_occCh])
+
+axs[2].bar([1, 2], [trials_boost_1f1[ind_bestCh_1f1][0],
+                    trials_boost_1f2[ind_bestCh_1f2]][0], color='silver')
 axs[2].set(title='Best channel', xticks=[1, 2],
            xticklabels=f_label)
 cp.trim_axes(axs[2])
