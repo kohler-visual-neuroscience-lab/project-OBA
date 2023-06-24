@@ -49,7 +49,7 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 
 task_names = ['oba_per', 'oba_cnt', 'fba_per', 'fba_cnt']
 subject_ids = [5007, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015]
-task_number = 0
+task_number = 3
 
 output_file_names = ['data_sum_oba_p.json', 'data_sum_oba_c.json',
                      'data_sum_fba_p.json', 'data_sum_fba_c.json']
@@ -60,7 +60,7 @@ df_pool = []
 
 for isub, subject_id in enumerate(subject_ids):
 
-    print(f'Analysing Subject {subject_id} - Task {task_name}...\n')
+    print(f'\n>>> Analysing Subject {subject_id} - Task {task_name} ...\n')
 
     data_folder = os.path.join('..', 'data', 'cycle02')
     result_folder = os.path.join('..', 'result', 'cycle02')
@@ -232,8 +232,8 @@ for isub, subject_id in enumerate(subject_ids):
     topo_cnd1_1f2 = snrs[i_cnd1, :, i_bin_1f2].mean(axis=0)
     topo_cnd2_1f2 = snrs[i_cnd2, :, i_bin_1f2].mean(axis=0)
 
-    topo_boost_1f1 = topo_cnd1_1f1 - topo_cnd2_1f1
-    topo_boost_1f2 = topo_cnd2_1f2 - topo_cnd1_1f2
+    topo_boost_1f1 = (topo_cnd1_1f1 - topo_cnd2_1f1) / topo_cnd2_1f1 * 100
+    topo_boost_1f2 = (topo_cnd2_1f2 - topo_cnd1_1f2) / topo_cnd1_1f2 * 100
 
     # -------------------------
     # average boosts
@@ -280,6 +280,8 @@ for isub, subject_id in enumerate(subject_ids):
     dfnew = pd.DataFrame(sub_dict)
     if isub == 0:
         df_pool = dfnew
+        # if task_number == 0:
+        #     epochs.save(os.path.join(data_folder, 'epochs-epo.fif'))
     else:
         df_pool = pd.concat([df_pool, dfnew], ignore_index=True)
     df_pool.to_json(os.path.join(data_folder, output_file_name))
