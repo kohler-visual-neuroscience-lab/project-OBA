@@ -1,5 +1,5 @@
 """
-Mohammad Shams <MoShamsCBR@gmail.com>
+Mohammad Shams <MShamsCBR@gmail.com>
 June 22, 2023
 
 In each of the four tasks, go through all the subjects, extract their
