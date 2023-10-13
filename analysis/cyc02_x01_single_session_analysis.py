@@ -1,5 +1,5 @@
 """
-Mohammad Shams <MoShamsCBR@gmail.com>
+Mohammad Shams <MShamsCBR@gmail.com>
 June 19, 2023
 
 Generate all the figures for each individual subject (URPP Students)
@@ -50,7 +50,7 @@ def snr_spectrum(psd, noise_n_neighbor_freqs=3, noise_skip_neighbor_freqs=1):
 # /// SET-UP DATA AND RESULT PATHS ///
 
 # subject_ids = [5007, 5008, 5009, 5010, 5011, 5012, 5013, 5014, 5015]
-subject_ids = [5007]
+subject_ids = [5010]
 # task_names = ['oba_per', 'oba_cnt', 'fba_per', 'fba_cnt']
 task_names = ['oba_per']
 
