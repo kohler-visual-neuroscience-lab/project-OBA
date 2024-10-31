@@ -20,7 +20,8 @@ patch_inner_radius = 100  # pixels
 patch_outer_radius = 300  # pixels
 dot_radius = 3  # pixels
 ndots_perColor = 300
-colors = [[0, 60, 255, 255], [170, 0, 0, 255]]
+# colors = [[0, 60, 255, 255], [170, 0, 0, 255]]
+colors = [[0, 153, 255, 255], [255, 50, 50, 255]]
 
 image_size = 2 * patch_outer_radius + 100  # pixels
 
