@@ -26,3 +26,10 @@ stimulus/image/*
 !stimulus/image/gen_tilted_features.py
 !stimulus/image/gen_tilted_objects.py
 /.Rhistory
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/project-OBA.iml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml
