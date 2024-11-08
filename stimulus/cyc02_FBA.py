@@ -11,8 +11,8 @@ One of the two colors is cued in the beginning of each trial and subject is
 prompted to detect a tilt (zero to two times in each trial) by pressing a key.
 
 There are two conditions:
-    CND1: attend blue
-    CND2: attend red
+    CND1: attend blue patch
+    CND2: attend red patch
 
 """
 import os
